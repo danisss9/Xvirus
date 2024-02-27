@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="XvirusAI.consumption.cs" />
+    <Compile Remove="XvirusAI.training.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="XvirusAI.consumption.cs">
+      <DependentUpon>XvirusAI.mbconfig</DependentUpon>
+    </None>
+    <None Include="XvirusAI.training.cs">
+      <DependentUpon>XvirusAI.mbconfig</DependentUpon>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ML" Version="1.7.1" />
+    <PackageReference Include="Microsoft.ML.FastTree" Version="1.7.1" />
+    <PackageReference Include="PeNet" Version="1.6.1" />
+  </ItemGroup>
+
+</Project>

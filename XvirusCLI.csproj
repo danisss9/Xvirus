@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<PackageId>XvirusCLI</PackageId>
+		<AssemblyName>XvirusCLI</AssemblyName>
+		<Version>4.2.0.0</Version>
+		<Authors>Xvirus</Authors>
+		<Company>Xvirus</Company>
+		<Product>XvirusCLI</Product>
+		<OutputType>Exe</OutputType>
+		<StartupObject>XvirusCLI.XvirusCLI</StartupObject>
+		<Platforms>AnyCPU;x64</Platforms>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="XescSDK\**" />
+	  <EmbeddedResource Remove="XescSDK\**" />
+	  <None Remove="XescSDK\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="XescSDK\CSharpSDK\CSharpSDK.csproj" />
+	</ItemGroup>
+
+</Project>
