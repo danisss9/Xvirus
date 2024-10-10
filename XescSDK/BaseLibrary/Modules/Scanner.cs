@@ -32,9 +32,9 @@ namespace XescSDK
             string? hash = null;
             using (var md5 = MD5.Create())
             {
-                using var stream = File.OpenRead(filePath);
+                using var stream = Utils.ReadFile(filePath);
                 var checksum = md5.ComputeHash(stream);
-                hash = BitConverter.ToString(checksum).Replace("-", string.Empty).ToUpper();
+                hash = BitConverter.ToString(checksum).Replace("-", string.Empty, StringComparison.Ordinal).ToUpperInvariant();
             }
 
             if (hash == null)
@@ -69,8 +69,8 @@ namespace XescSDK
                     using var reader = new BinaryReader(stream);
                     try
                     {
-                        var bytes = new string(reader.ReadChars(2));
-                        isExecutable = bytes == "MZ";
+                        var bytes = reader.ReadChars(2);
+                        isExecutable = bytes[0] == 'M' && bytes[1] == 'Z';
                     }
                     catch (ArgumentException) { }
                 }
@@ -79,7 +79,7 @@ namespace XescSDK
                 {
                     if (isExecutable)
                     {
-                        using var stream = File.OpenRead(filePath);
+                        using var stream = Utils.ReadFile(filePath);
                         var match = database.heurListPatterns.Search(stream).FirstOrDefault();
                         if (match.Key != null)
                         {
@@ -87,9 +87,9 @@ namespace XescSDK
                             return new ScanResult(1, name);
                         }
                     }
-                    else
+                    else if(fileInfo.Length <= 52428800) // 50MBs
                     {
-                        using var stream = File.OpenRead(filePath);
+                        using var stream = Utils.ReadFile(filePath);
                         var match = database.heurScriptListPatterns.Search(stream).FirstOrDefault();
                         if (match.Key != null)
                         {

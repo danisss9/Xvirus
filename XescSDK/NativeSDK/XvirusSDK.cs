@@ -132,7 +132,7 @@ namespace XescSDK
             if (Scanner == null)
                 LoadAux();
 
-            var result = Scanner!.ScanFile(filePath);
+            var result = Scanner!.ScanFile(filePath, out var _);
 
             if (result.MalwareScore == -1)
                 throw new Exception(result.Name);

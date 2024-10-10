@@ -35,5 +35,10 @@ namespace XescSDK
         {
             return "4.2.0.0";
         }
+    
+        public static FileStream ReadFile(string filePath)
+        {
+            return new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 16777216); // 16MBs
+        }
     }
 }
