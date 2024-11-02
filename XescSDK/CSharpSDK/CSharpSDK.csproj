@@ -5,7 +5,7 @@
 	  <Nullable>enable</Nullable>
 	  <PackageId>XvirusSDK</PackageId>
 	  <AssemblyName>XvirusSDK</AssemblyName>
-	  <Version>4.2.1.0</Version>
+	  <Version>4.2.2.0</Version>
 	  <Authors>Xvirus</Authors>
 	  <Company>Xvirus</Company>
 	  <Product>XvirusSDK</Product>

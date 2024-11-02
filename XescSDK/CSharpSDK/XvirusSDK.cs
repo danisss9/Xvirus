@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Text.Json;
-using System.Threading.Tasks;
 using XescSDK.Model;
 
 namespace XescSDK
@@ -37,15 +34,7 @@ namespace XescSDK
             if (Scanner == null)
                 Load();
 
-            return Scanner!.ScanFile(filePath, out var _);
-        }
-
-        public static ScanResult Scan(string filePath, out string md5)
-        {
-            if (Scanner == null)
-                Load();
-
-            return Scanner!.ScanFile(filePath, out md5);
+            return Scanner!.ScanFile(filePath);
         }
 
         public static string ScanString(string filePath)
@@ -53,24 +42,19 @@ namespace XescSDK
             return JsonSerializer.Serialize(Scan(filePath));
         }
 
+        public static IEnumerable<ScanResult> ScanFolder(string folderPath)
+        {
+            if (Scanner == null)
+                Load();
+
+            return Scanner!.ScanFolder(folderPath);
+        }
+
         public static string ScanFolderString(string folderPath)
         {
-            var filePaths = Directory.GetFiles(folderPath, "*", new EnumerationOptions() { RecurseSubdirectories = true,AttributesToSkip = 0 } );
-            var scanResults = new List<string>();
-
-            foreach (var filePath in filePaths)
-            {
-                var sc = Scan(filePath, out var md5);
-                var x = filePath + ": " + JsonSerializer.Serialize(sc.Name + "-" + md5);
-                scanResults.Add(x);
-                if(sc.IsMalware)
-                    Console.WriteLine(x);
-            }
-
-            return string.Join("\n", scanResults);
-          }
+            return "[\n" + string.Join(",\n", ScanFolder(folderPath)) + "\n]";
+        }
         
-
         public static string CheckUpdates(bool checkSDKUpdates = false, bool loadDBAfterUpdate = false)
         {
             var settings = Settings.Load();

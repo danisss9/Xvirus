@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using BaseLibrary.Serializers;
@@ -49,12 +50,13 @@ namespace XescSDK
                     Sucess = true,
                     IsMalware = result.IsMalware,
                     MalwareScore = result.MalwareScore,
-                    Name = Marshal.StringToHGlobalUni(result.Name)
+                    Name = Marshal.StringToHGlobalUni(result.Name),
+                    Path = Marshal.StringToHGlobalUni(result.Path)
                 };
             }
             catch (Exception e)
             {
-                return new ScanResult() { Sucess = false, Error = Marshal.StringToHGlobalUni(e.Message) };
+                return new ScanResult() { Sucess = false, Error = Marshal.StringToHGlobalUni(e.Message), Path = filePath };
             }
         }
 
@@ -65,6 +67,63 @@ namespace XescSDK
             {
                 var filePathAux = Marshal.PtrToStringUni(filePath);
                 var result = JsonSerializer.Serialize(ScanAux(filePathAux), options: new JsonSerializerOptions() { TypeInfoResolver = ScanResultGenerationContext.Default });
+                return new ActionResult() { Sucess = true, Result = Marshal.StringToHGlobalUni(result) };
+            }
+            catch (Exception e)
+            {
+                return new ActionResult() { Sucess = false, Error = Marshal.StringToHGlobalUni(e.Message) };
+            }
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "scanFolder")]
+        public static IntPtr ScanFolder(IntPtr folderPath)
+        {
+            try
+            {
+                var folderPathAux = Marshal.PtrToStringUni(folderPath);
+                var results = ScanFolderAux(folderPathAux!);
+
+                var structSize = Marshal.SizeOf<ScanResult>();
+                var unmanagedArray = Marshal.AllocHGlobal(results.Length * structSize);
+
+                for (int i = 0; i < results.Length; i++)
+                {
+                    var result = results[i];
+                    var item = result.MalwareScore == -1
+                        ? new ScanResult()
+                        {
+                            Sucess = false,
+                            Error = Marshal.StringToHGlobalUni(result.Name),
+                            Path = Marshal.StringToHGlobalUni(result.Path)
+                        }
+                        : new ScanResult()
+                        {
+                            Sucess = true,
+                            IsMalware = result.IsMalware,
+                            MalwareScore = result.MalwareScore,
+                            Name = Marshal.StringToHGlobalUni(result.Name),
+                            Path = Marshal.StringToHGlobalUni(result.Path)
+                        };
+
+                    var structPtr = new IntPtr(unmanagedArray.ToInt64() + i * structSize);
+                    Marshal.StructureToPtr(result, structPtr, false);
+                }
+
+                return unmanagedArray;
+            }
+            catch (Exception)
+            {
+                return IntPtr.Zero;
+            }
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "scanFolderAsString")]
+        public static ActionResult ScanFolderAsString(IntPtr folderPath)
+        {
+            try
+            {
+                var folderPathAux = Marshal.PtrToStringUni(folderPath);
+                var result = JsonSerializer.Serialize(ScanFolderAux(folderPathAux), options: new JsonSerializerOptions() { TypeInfoResolver = ScanResultGenerationContext.Default });
                 return new ActionResult() { Sucess = true, Result = Marshal.StringToHGlobalUni(result) };
             }
             catch (Exception e)
@@ -132,12 +191,22 @@ namespace XescSDK
             if (Scanner == null)
                 LoadAux();
 
-            var result = Scanner!.ScanFile(filePath, out var _);
+            var result = Scanner!.ScanFile(filePath);
 
             if (result.MalwareScore == -1)
                 throw new Exception(result.Name);
 
             return result;
+        }
+
+        private static Model.ScanResult[] ScanFolderAux(string folderPath)
+        {
+            if (Scanner == null)
+                LoadAux();
+
+            var results = Scanner!.ScanFolder(folderPath);
+
+            return results.ToArray();
         }
 
         private static void LoadAux(bool force = false)
@@ -166,6 +235,7 @@ namespace XescSDK
         }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct ActionResult
     {
         public bool Sucess { get; set; }
@@ -173,6 +243,7 @@ namespace XescSDK
         public IntPtr Error { get; set; }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct ScanResult
     {
         public bool Sucess { get; set; }
@@ -180,5 +251,6 @@ namespace XescSDK
         public bool IsMalware { get; set; }
         public IntPtr Name { get; set; }
         public double MalwareScore { get; set; }
+        public IntPtr Path { get; set; }
     }
 }

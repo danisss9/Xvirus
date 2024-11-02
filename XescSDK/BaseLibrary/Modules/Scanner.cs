@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -19,15 +20,14 @@ namespace XescSDK
             this.ai = ai;
         }
 
-        public ScanResult ScanFile(string filePath, out string md5Result)
+        public ScanResult ScanFile(string filePath)
         {
-            md5Result = "";
             var fileInfo = new FileInfo(filePath);
             if (!fileInfo.Exists)
-                return new ScanResult(-1, "File not found!");
+                return new ScanResult(-1, "File not found!", filePath);
 
             if (settings.MaxScanLength != null && fileInfo.Length > settings.MaxScanLength)
-                return new ScanResult(-1, "File too big!");
+                return new ScanResult(-1, "File too big!", filePath);
 
             string? hash = null;
             using (var md5 = MD5.Create())
@@ -38,26 +38,24 @@ namespace XescSDK
             }
 
             if (hash == null)
-                return new ScanResult(-1, "Could not get file hash!");
-
-            md5Result = hash;
+                return new ScanResult(-1, "Could not get file hash!", filePath);
 
             if (database.safeHashList.Contains(hash))
-                return new ScanResult(0, "Safe");
+                return new ScanResult(0, "Safe", filePath);
 
             if (database.malHashList.Contains(hash))
-                return new ScanResult(1, "Malware");
+                return new ScanResult(1, "Malware", filePath);
 
             var certName = Utils.GetCertificateSubjectName(filePath);
             if (certName != null)
             {
                 if (database.malVendorList.TryGetValue(certName, out string? value))
                 {
-                    return new ScanResult(1, value);
+                    return new ScanResult(1, value, filePath);
                 }
                 else
                 {
-                    return new ScanResult(0, "Safe");
+                    return new ScanResult(0, "Safe", filePath);
                 }
             }
 
@@ -84,17 +82,17 @@ namespace XescSDK
                         if (match.Key != null)
                         {
                             var name = database.heurList[match.Key];
-                            return new ScanResult(1, name);
+                            return new ScanResult(1, name, filePath);
                         }
                     }
-                    else if(fileInfo.Length <= 52428800) // 50MBs
+                    else if(fileInfo.Length <= 10485760) // 10MBs
                     {
                         using var stream = Utils.ReadFile(filePath);
                         var match = database.heurScriptListPatterns.Search(stream).FirstOrDefault();
                         if (match.Key != null)
                         {
                             var name = database.heurScriptList[match.Key];
-                            return new ScanResult(1, name);
+                            return new ScanResult(1, name, filePath);
                         }
                     }
                 }
@@ -102,10 +100,23 @@ namespace XescSDK
                 if (isExecutable && settings.EnableAIScan)
                 {
                     var aiScore = ai.ScanFile(filePath);
-                    return new ScanResult(aiScore, $"AI.{aiScore * 100:F}");
+                    return new ScanResult(aiScore, $"AI.{aiScore * 100:F}", filePath);
                 }
             }
-            return new ScanResult(0, "Safe");
+            return new ScanResult(0, "Safe", filePath);
+        }
+
+        public IEnumerable<ScanResult> ScanFolder(string folderPath)
+        {
+            if (!Directory.Exists(folderPath))
+                yield break;
+
+            var filePaths = Directory.GetFiles(folderPath, "*", new EnumerationOptions() { RecurseSubdirectories = true, AttributesToSkip = 0 });
+
+            foreach (var filePath in filePaths)
+            {
+                yield return ScanFile(filePath);
+            }
         }
     }
 }
