@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using BaseLibrary.Serializers;
 
-namespace XescSDK
+namespace Xvirus
 {
     public class XvirusSDK
     {

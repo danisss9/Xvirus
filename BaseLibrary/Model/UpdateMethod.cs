@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace XescSDK.Model
+namespace Xvirus.Model
 {
     public class UpdateMethod
     {

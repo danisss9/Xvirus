@@ -16,13 +16,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="XescSDK\**" />
-	  <EmbeddedResource Remove="XescSDK\**" />
-	  <None Remove="XescSDK\**" />
+	  <Compile Remove="Xvirus\**" />
+	  <EmbeddedResource Remove="Xvirus\**" />
+	  <None Remove="Xvirus\**" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="XescSDK\CSharpSDK\CSharpSDK.csproj" />
+	  <ProjectReference Include="..\CSharpSDK\CSharpSDK.csproj" />
 	</ItemGroup>
 
 </Project>

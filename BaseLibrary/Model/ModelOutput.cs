@@ -1,6 +1,6 @@
 ﻿using Microsoft.ML.Data;
 
-namespace XescSDK.Model
+namespace Xvirus.Model
 {
     public class ModelOutput
     {

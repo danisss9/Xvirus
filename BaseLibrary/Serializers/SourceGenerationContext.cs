@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using XescSDK.Model;
+using Xvirus.Model;
 
 namespace BaseLibrary.Serializers
 {

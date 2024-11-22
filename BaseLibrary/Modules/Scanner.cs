@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using XescSDK.Model;
+using Xvirus.Model;
 
-namespace XescSDK
+namespace Xvirus
 {
     public class Scanner
     {

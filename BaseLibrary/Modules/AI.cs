@@ -2,9 +2,9 @@
 using PeNet;
 using System;
 using System.IO;
-using XescSDK.Model;
+using Xvirus.Model;
 
-namespace XescSDK
+namespace Xvirus
 {
     public class AI
     {

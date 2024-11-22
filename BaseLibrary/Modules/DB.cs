@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using XescSDK.Model;
+using Xvirus.Model;
 
-namespace XescSDK
+namespace Xvirus
 {
     public class DB
     {
@@ -95,7 +95,7 @@ namespace XescSDK
                     {
                         dictionary.Add(key, splitLine[1]);
 
-                        if (splitLines.Length > 2)
+                        if (splitLine.Length > 2)
                         {
                             dictionary2.Add(key, splitLine[2].Split(andChar));
                         }

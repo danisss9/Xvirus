@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.Json;
-using XescSDK.Model;
+using Xvirus.Model;
 
-namespace XescSDK
+namespace Xvirus
 {
     public class XvirusSDK
     {

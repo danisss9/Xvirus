@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using System.IO;
 using System.Collections.Generic;
-namespace XescSDK
+namespace Xvirus
 {
     public partial class XvirusAI
     {

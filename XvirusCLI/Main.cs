@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using static XescSDK.XvirusSDK;
+using static Xvirus.XvirusSDK;
 
 namespace XvirusCLI
 {

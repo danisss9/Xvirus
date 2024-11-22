@@ -1,4 +1,4 @@
-﻿namespace XescSDK.Model
+﻿namespace Xvirus.Model
 {
     public class UpdateInfo
     {

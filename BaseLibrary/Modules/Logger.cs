@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading;
 
-namespace XescSDK
+namespace Xvirus
 {
     public class Logger
     {
