@@ -78,21 +78,41 @@ namespace XescSDK
                     if (isExecutable)
                     {
                         using var stream = Utils.ReadFile(filePath, fileInfo.Length);
-                        var match = database.heurListPatterns.Search(stream).FirstOrDefault();
-                        if (match.Key != null)
+                        var matches = database.heurListPatterns.Search(stream);
+                        foreach (var match in matches)
                         {
-                            var name = database.heurList[match.Key];
-                            return new ScanResult(1, name, filePath);
+                            if (database.heurListDeps.TryGetValue(match.Key, out var matchDeps))
+                            {
+                                var matchesKeys = matches.Select(m => m.Key).ToHashSet();
+                                if (matchDeps.All(dep => dep[0] == '!' ? !matchesKeys.Contains(dep.Substring(1)) : matchesKeys.Contains(dep)))
+                                {
+                                    var name = database.heurList[match.Key];
+                                    return new ScanResult(1, name, filePath);
+                                }
+                            }
+                            else if (database.heurList.TryGetValue(match.Key, out var name))
+                            {
+                                return new ScanResult(1, name, filePath);
+                            }
                         }
                     }
                     else if(fileInfo.Length <= 10485760) // 10MBs
                     {
                         using var stream = Utils.ReadFile(filePath, fileInfo.Length);
-                        var match = database.heurScriptListPatterns.Search(stream).FirstOrDefault();
-                        if (match.Key != null)
+                        var matches = database.heurScriptListPatterns.Search(stream);
+                        foreach (var match in matches)
                         {
-                            var name = database.heurScriptList[match.Key];
-                            return new ScanResult(1, name, filePath);
+                            if(database.heurScriptListDeps.TryGetValue(match.Key, out var matchDeps))
+                            {
+                                var matchesKeys = matches.Select(m => m.Key).ToHashSet();
+                                if (matchDeps.All(dep => dep[0] == '!' ? !matchesKeys.Contains(dep.Substring(1)) : matchesKeys.Contains(dep)))
+                                {
+                                    var name = database.heurScriptList[match.Key];
+                                    return new ScanResult(1, name, filePath);
+                                }
+                            } else if(database.heurScriptList.TryGetValue(match.Key, out var name)) {
+                                return new ScanResult(1, name, filePath);
+                            }
                         }
                     }
                 }
