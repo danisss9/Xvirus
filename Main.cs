@@ -37,7 +37,7 @@ namespace XvirusCLI
                             Console.WriteLine(ScanString(args[1]));
                         break;
                     case "sf":
-                    case "scanFolder":
+                    case "scanfolder":
                         if (args.Length < 2)
                             Console.WriteLine("Invalid folder path");
                         else

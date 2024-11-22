@@ -33,12 +33,14 @@ namespace XescSDK
 
         public static string GetVersion()
         {
-            return "4.2.0.0";
+            return "4.2.3.0";   
         }
     
-        public static FileStream ReadFile(string filePath)
+        public static FileStream ReadFile(string filePath, long fileSize)
         {
-            return new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 16777216); // 16MBs
+            return fileSize >= 16777216 // 16MBs
+                ? new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 16777216) // 16MBs
+                : new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
         }
     }
 }

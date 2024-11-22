@@ -52,7 +52,8 @@ namespace XescSDK
 
         public static string ScanFolderString(string folderPath)
         {
-            return "[\n" + string.Join(",\n", ScanFolder(folderPath)) + "\n]";
+            var scanResultsString = JsonSerializer.Serialize(ScanFolder(folderPath));
+            return scanResultsString.Replace("[", "[\n", StringComparison.Ordinal).Replace("]", "\n]", StringComparison.Ordinal);
         }
         
         public static string CheckUpdates(bool checkSDKUpdates = false, bool loadDBAfterUpdate = false)

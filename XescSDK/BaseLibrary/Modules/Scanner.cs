@@ -32,7 +32,7 @@ namespace XescSDK
             string? hash = null;
             using (var md5 = MD5.Create())
             {
-                using var stream = Utils.ReadFile(filePath);
+                using var stream = Utils.ReadFile(filePath, fileInfo.Length);
                 var checksum = md5.ComputeHash(stream);
                 hash = BitConverter.ToString(checksum).Replace("-", string.Empty, StringComparison.Ordinal).ToUpperInvariant();
             }
@@ -77,7 +77,7 @@ namespace XescSDK
                 {
                     if (isExecutable)
                     {
-                        using var stream = Utils.ReadFile(filePath);
+                        using var stream = Utils.ReadFile(filePath, fileInfo.Length);
                         var match = database.heurListPatterns.Search(stream).FirstOrDefault();
                         if (match.Key != null)
                         {
@@ -87,7 +87,7 @@ namespace XescSDK
                     }
                     else if(fileInfo.Length <= 10485760) // 10MBs
                     {
-                        using var stream = Utils.ReadFile(filePath);
+                        using var stream = Utils.ReadFile(filePath, fileInfo.Length);
                         var match = database.heurScriptListPatterns.Search(stream).FirstOrDefault();
                         if (match.Key != null)
                         {
