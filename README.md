@@ -1,6 +1,6 @@
 # Xvirus SDK
 
-Xvirus SDK 4.2.2
+Xvirus SDK 4.2.3
 
 ## Table of Contents
 
@@ -40,6 +40,12 @@ The following Operating Systems are supported:
   - Ubuntu 18.04
 
 ## Changelog
+
+- Version **4.2.3**:
+  - Fixed Windows scan performance regression
+  - Fixed ScanFolder command not working in CLI
+  - Fixed ScanFolderString JSON not formatted correctly 
+  - Fixed update check always returning there was a update
 
 - Version **4.2.2**:
   - Optimized scanning speed of PDF files
