@@ -3,12 +3,12 @@
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<PackageId>XvirusCLI</PackageId>
 		<AssemblyName>XvirusCLI</AssemblyName>
 		<Version>4.2.3.0</Version>
 		<Authors>Xvirus</Authors>
 		<Company>Xvirus</Company>
 		<Product>XvirusCLI</Product>
+		<Copyright>Copyright $([System.DateTime]::Now.Year) $(Company)</Copyright>
 		<OutputType>Exe</OutputType>
 		<StartupObject>XvirusCLI.XvirusCLI</StartupObject>
 		<Platforms>AnyCPU;x64</Platforms>
