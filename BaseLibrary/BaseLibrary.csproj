@@ -1,33 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <Version>4.2.3.0</Version>
+    <Version>5.0.0.0</Version>
     <Authors>Xvirus</Authors>
     <Company>Xvirus</Company>
     <Copyright>Copyright $([System.DateTime]::Now.Year) $(Company)</Copyright>
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
-
   <ItemGroup>
-    <Compile Remove="XvirusAI.consumption.cs" />
-    <Compile Remove="XvirusAI.training.cs" />
+    <PackageReference Include="Microsoft.ML" Version="4.0.2" />
+    <PackageReference Include="Microsoft.ML.Vision" Version="4.0.2" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.10" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Include="XvirusAI.consumption.cs">
-      <DependentUpon>XvirusAI.mbconfig</DependentUpon>
-    </None>
-    <None Include="XvirusAI.training.cs">
-      <DependentUpon>XvirusAI.mbconfig</DependentUpon>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.ML" Version="1.7.1" />
-    <PackageReference Include="Microsoft.ML.FastTree" Version="1.7.1" />
-    <PackageReference Include="PeNet" Version="1.6.1" />
-  </ItemGroup>
-
 </Project>

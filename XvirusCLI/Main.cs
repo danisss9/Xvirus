@@ -83,7 +83,7 @@ namespace XvirusCLI
                 }
 
                 if (isInteractive)
-                    args = Console.ReadLine().Split(" ", 2);
+                    args = Console.ReadLine()!.Split(" ", 2);
 
             } while (isInteractive);
         }

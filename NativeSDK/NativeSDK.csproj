@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<PublishAot>true</PublishAot>
 		<StripSymbols>true</StripSymbols>
 		<Nullable>enable</Nullable>
 		<AssemblyName>XvirusSDK</AssemblyName>
-		<Version>4.2.3.0</Version>
+		<Version>5.0.0.0</Version>
 		<Authors>Xvirus</Authors>
 		<Company>Xvirus</Company>
 		<Product>XvirusSDK</Product>

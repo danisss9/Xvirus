@@ -66,7 +66,7 @@ namespace Xvirus
             try
             {
                 var filePathAux = Marshal.PtrToStringUni(filePath);
-                var result = JsonSerializer.Serialize(ScanAux(filePathAux), options: new JsonSerializerOptions() { TypeInfoResolver = ScanResultGenerationContext.Default });
+                var result = JsonSerializer.Serialize(ScanAux(filePathAux!), ScanResultGenerationContext.Default.ScanResult);
                 return new ActionResult() { Sucess = true, Result = Marshal.StringToHGlobalUni(result) };
             }
             catch (Exception e)
@@ -123,7 +123,7 @@ namespace Xvirus
             try
             {
                 var folderPathAux = Marshal.PtrToStringUni(folderPath);
-                var result = JsonSerializer.Serialize(ScanFolderAux(folderPathAux), options: new JsonSerializerOptions() { TypeInfoResolver = ScanResultGenerationContext.Default });
+                var result = JsonSerializer.Serialize(ScanFolderAux(folderPathAux!), ScanResultGenerationContext.Default.ScanResult);
                 return new ActionResult() { Sucess = true, Result = Marshal.StringToHGlobalUni(result) };
             }
             catch (Exception e)
@@ -156,7 +156,7 @@ namespace Xvirus
         {
             try
             {
-                var result = JsonSerializer.Serialize(GetSettingsAux(), options: new JsonSerializerOptions() { TypeInfoResolver = SettingsGenerationContext.Default });
+                var result = JsonSerializer.Serialize(GetSettingsAux(), SettingsGenerationContext.Default.SettingsDTO);
                 return new ActionResult() { Sucess = true, Result = Marshal.StringToHGlobalUni(result) };
             }
             catch (Exception e)
@@ -218,8 +218,8 @@ namespace Xvirus
             {
                 var settings = Settings.Load();
                 var database = new DB(settings);
-                //var ai = new AI();
-                Scanner = new Scanner(settings, database, null);
+                var ai = new AI(settings);
+                Scanner = new Scanner(settings, database, ai);
             }
         }
 

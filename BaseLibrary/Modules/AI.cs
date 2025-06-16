@@ -1,8 +1,10 @@
 ﻿using Microsoft.ML;
-using PeNet;
 using System;
 using System.IO;
 using Xvirus.Model;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp;
 
 namespace Xvirus
 {
@@ -24,93 +26,53 @@ namespace Xvirus
 
         public float ScanFile(string filePath)
         {
-            ModelInput? peinfo = GetFilePeInfo(filePath);
-            if (peinfo == null)
+            ModelInput? input = GetModelInput(filePath);
+            if (input == null)
                 return -1;
             
-            return model?.Predict(peinfo).Score[1] ?? -1;
+            return model?.Predict(input).Score[1] ?? -1;
         }
 
-        private static ModelInput? GetFilePeInfo(string path)
+        // Uses 256 width, PNG format and grayscale pixels
+        private ModelInput GetModelInput(string filePath)
         {
-            if (!PeFile.IsPEFile(path)) return null;
-            var file = new PeFile(path);
-            if (!file.IsEXE) return null;
+            int width = 256;
+            byte[] binaryData = File.ReadAllBytes(filePath);
+            int height = (int)Math.Ceiling((double)binaryData.Length / width);
 
-            float[] aux = new float[]
+            // Use Rgba32 to match Node.js behavior more closely
+            using var image = new Image<Rgba32>(width, height);
+            image.ProcessPixelRows(accessor =>
             {
-                file.FileSize,
-                Convert.ToSingle(file.HasValidComDescriptor),
-                Convert.ToSingle(file.HasValidExportDir),
-                Convert.ToSingle(file.HasValidImportDir),
-                Convert.ToSingle(file.HasValidRelocDir),
-                Convert.ToSingle(file.HasValidResourceDir),
-                Convert.ToSingle(file.HasValidSecurityDir)
+                for (int y = 0; y < height; y++)
+                {
+                    Span<Rgba32> pixelRow = accessor.GetRowSpan(y);
+
+                    for (int x = 0; x < width; x++)
+                    {
+                        int dataIndex = y * width + x;
+                        byte value = dataIndex < binaryData.Length ? binaryData[dataIndex] : (byte)0;
+
+                        // Create grayscale color same as Node.js: rgb(value, value, value)
+                        pixelRow[x] = new Rgba32(value, value, value, 255);
+                    }
+                }
+            });
+
+            // Use PNG encoder settings that might match Node.js better
+            var encoder = new PngEncoder()
+            {
+                ColorType = PngColorType.RgbWithAlpha,
+                BitDepth = PngBitDepth.Bit8,
+                CompressionLevel = PngCompressionLevel.NoCompression
             };
 
+            using var memoryStream = new MemoryStream();
+            image.Save(memoryStream, encoder);
 
-            float[] aux2 = new float[3];
-            float[] aux3 = new float[3];
-            float[] aux4 = new float[3];
-
-            if (file.ImpHash != null)
-            {
-                aux2 = new float[]
-                {
-                    Convert.ToSingle((float)Convert.ToInt64(file.ImpHash.Substring(0, 11), 16)),
-                    Convert.ToSingle((float)Convert.ToInt64(file.ImpHash.Substring(11, 11), 16)),
-                    Convert.ToSingle((float)Convert.ToInt64(file.ImpHash.Substring(22, 10), 16))
-                };
-
-            }
-
-            if (file.ImageNtHeaders != null)
-            {
-
-                if (file.ImageNtHeaders.FileHeader != null)
-                {
-                    aux3 = new float[]
-                   {
-                         file.ImageNtHeaders.FileHeader.NumberOfSections,
-                         file.ImageNtHeaders.FileHeader.SizeOfOptionalHeader,
-                         file.ImageNtHeaders.FileHeader.Characteristics
-                   };
-                }
-                if (file.ImageNtHeaders.OptionalHeader != null)
-                {
-                    aux4 = new float[]
-                    {
-                        file.ImageNtHeaders.OptionalHeader.AddressOfEntryPoint,
-                        file.ImageNtHeaders.OptionalHeader.Magic,
-                        file.ImageNtHeaders.OptionalHeader.LoaderFlags
-                    };
-                }
-            }
-
-            float[] result = new float[aux.Length + aux2.Length + aux3.Length + aux4.Length];
-            Array.Copy(aux, result, aux.Length);
-            Array.Copy(aux2, 0, result, aux.Length, aux2.Length);
-            Array.Copy(aux3, 0, result, aux.Length + aux2.Length, aux3.Length);
-            Array.Copy(aux4, 0, result, aux.Length + aux2.Length + aux3.Length, aux4.Length);
             return new ModelInput()
             {
-                VAR01 = result[0],
-                VAR02 = result[1],
-                VAR03 = result[2],
-                VAR04 = result[3],
-                VAR05 = result[4],
-                VAR06 = result[5],
-                VAR07 = result[6],
-                VAR08 = result[7],
-                VAR09 = result[8],
-                VAR10 = result[9],
-                VAR11 = result[10],
-                VAR12 = result[11],
-                VAR13 = result[12],
-                VAR14 = result[13],
-                VAR15 = result[14],
-                VAR16 = result[15],
-                Column18 = @"",
+                ImageSource = memoryStream.ToArray(),
             };
         }
     }
