@@ -24,13 +24,22 @@ namespace Xvirus
         public DB(SettingsDTO settings)
         {
             databaseFolder = settings.DatabaseFolder;
+
             safeHashList = LoadList("whitelist.db", "dailywl.db");
-            malHashList = LoadList("viruslist.db", "dailylist.db");
-            (heurList, heurListDeps) = LoadDictionary("heurlist.db", ',', '&');
-            heurListPatterns = LoadAhoCorasick("heurlist.db", ',', '&');
-            (heurScriptList, heurScriptListDeps) = LoadDictionary("heurlist2.db", ',', '&');
-            heurScriptListPatterns = LoadAhoCorasick("heurlist2.db", ',', '&');
             malVendorList = LoadDictionary("malvendor.db", '|');
+
+            if (settings.EnableSignatures)
+            {
+                malHashList = LoadList("viruslist.db", "dailylist.db");
+            }
+
+            if (settings.EnableHeuristics)
+            {
+                (heurList, heurListDeps) = LoadDictionary("heurlist.db", ',', '&');
+                heurListPatterns = LoadAhoCorasick("heurlist.db", ',', '&');
+                (heurScriptList, heurScriptListDeps) = LoadDictionary("heurlist2.db", ',', '&');
+                heurScriptListPatterns = LoadAhoCorasick("heurlist2.db", ',', '&');
+            }
         }
 
         private HashSet<string> LoadList(params string[] paths)

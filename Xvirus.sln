@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpSDK", "CSharpSDK\CSha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NativeSDK", "NativeSDK\NativeSDK.csproj", "{FE8E921C-610D-4673-B247-7FF97C56B200}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AITrainer", "AITrainer\AITrainer.csproj", "{A21752C8-96D9-447C-AA5B-70A85B9BED9C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,14 @@ Global
 		{FE8E921C-610D-4673-B247-7FF97C56B200}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FE8E921C-610D-4673-B247-7FF97C56B200}.Release|x64.ActiveCfg = Release|Any CPU
 		{FE8E921C-610D-4673-B247-7FF97C56B200}.Release|x64.Build.0 = Release|Any CPU
+		{A21752C8-96D9-447C-AA5B-70A85B9BED9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A21752C8-96D9-447C-AA5B-70A85B9BED9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A21752C8-96D9-447C-AA5B-70A85B9BED9C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A21752C8-96D9-447C-AA5B-70A85B9BED9C}.Debug|x64.Build.0 = Debug|Any CPU
+		{A21752C8-96D9-447C-AA5B-70A85B9BED9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A21752C8-96D9-447C-AA5B-70A85B9BED9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A21752C8-96D9-447C-AA5B-70A85B9BED9C}.Release|x64.ActiveCfg = Release|Any CPU
+		{A21752C8-96D9-447C-AA5B-70A85B9BED9C}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BaseLibrary.Serializers;
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using Xvirus.Model;
@@ -39,7 +40,7 @@ namespace Xvirus
 
         public static string ScanString(string filePath)
         {
-            return JsonSerializer.Serialize(Scan(filePath));
+            return JsonSerializer.Serialize(Scan(filePath), SourceGenerationContext.Default.ScanResult);
         }
 
         public static IEnumerable<ScanResult> ScanFolder(string folderPath)
@@ -52,14 +53,14 @@ namespace Xvirus
 
         public static string ScanFolderString(string folderPath)
         {
-            var scanResultsString = JsonSerializer.Serialize(ScanFolder(folderPath));
+            var scanResultsString = JsonSerializer.Serialize(ScanFolder(folderPath), SourceGenerationContext.Default.ScanResult);
             return scanResultsString.Replace("[", "[\n", StringComparison.Ordinal).Replace("]", "\n]", StringComparison.Ordinal);
         }
         
-        public static string CheckUpdates(bool checkSDKUpdates = false, bool loadDBAfterUpdate = false)
+        public static string CheckUpdates(bool loadDBAfterUpdate = false)
         {
             var settings = Settings.Load();
-            var result = Updater.CheckUpdates(settings, checkSDKUpdates);
+            var result = Updater.CheckUpdates(settings);
 
             if (loadDBAfterUpdate)
                 Load(true);
@@ -74,7 +75,7 @@ namespace Xvirus
 
         public static string GetSettingsString()
         {
-            return JsonSerializer.Serialize(GetSettings());
+            return JsonSerializer.Serialize(GetSettings(), SourceGenerationContext.Default.SettingsDTO);
         }
 
         public static bool Logging(bool? enableLogging = null)

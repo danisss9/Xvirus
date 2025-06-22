@@ -33,7 +33,7 @@ namespace Xvirus
 
         public static string GetVersion()
         {
-            return "4.2.3.0";   
+            return "5.0.0.0";   
         }
     
         public static FileStream ReadFile(string filePath, long fileSize)

@@ -8,6 +8,12 @@ namespace Xvirus
 {
     public class Settings
     {
+        private readonly static JsonSerializerOptions JsonSerializerOptions = new()
+        {
+            WriteIndented = true,
+            TypeInfoResolver = SourceGenerationContext.Default
+        };
+
         public static SettingsDTO Load(string path = "settings.json")
         {
             var fullPath = Utils.RelativeToFullPath(path);
@@ -16,7 +22,7 @@ namespace Xvirus
             try
             {
                 string jsonString = File.ReadAllText(fullPath);
-                return JsonSerializer.Deserialize(jsonString, SettingsGenerationContext.Default.SettingsDTO)!;
+                return JsonSerializer.Deserialize(jsonString, SourceGenerationContext.Default.SettingsDTO)!;
             }
             catch (Exception ex)
             {
@@ -30,7 +36,7 @@ namespace Xvirus
             var fullPath = Utils.RelativeToFullPath(path);
             try
             {
-                string jsonString = JsonSerializer.Serialize(settings, options: new JsonSerializerOptions() { WriteIndented = true,TypeInfoResolver = SettingsGenerationContext.Default }) ;
+                string jsonString = JsonSerializer.Serialize(settings, JsonSerializerOptions) ;
                 File.WriteAllText(fullPath, jsonString);
             }
             catch (Exception ex)

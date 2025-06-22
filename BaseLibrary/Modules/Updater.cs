@@ -9,6 +9,12 @@ namespace Xvirus
 {
     public class Updater
     {
+        private readonly static JsonSerializerOptions JsonSerializerOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            TypeInfoResolver = SourceGenerationContext.Default
+        };
+
         private static readonly UpdateMethod[] UpdateList = new UpdateMethod[]
         {
             new UpdateMethod {
@@ -62,13 +68,13 @@ namespace Xvirus
         };
         private static readonly string updateUrl = "https://cloud.xvirus.net/api/updateinfo?app=sdk";
 
-        public static string CheckUpdates(SettingsDTO settings, bool checkSDKUpdates)
+        public static string CheckUpdates(SettingsDTO settings)
         {
             using var wc = new HttpClient();
             try
             {
                 var updateInfoStr = wc.GetStringAsync(updateUrl).GetAwaiter().GetResult();
-                var updateInfo = JsonSerializer.Deserialize<UpdateInfo>(updateInfoStr, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, TypeInfoResolver = UpdateInfoGenerationContext.Default });
+                var updateInfo = JsonSerializer.Deserialize<UpdateInfo>(updateInfoStr, JsonSerializerOptions);
                 var newUpdates = false;
 
                 if (updateInfo == null)
@@ -99,7 +105,7 @@ namespace Xvirus
                 if (newUpdates)
                     Settings.Save(settings);
 
-                if (checkSDKUpdates && updateInfo.App.Version != Utils.GetVersion())
+                if (settings.CheckSDKUpdates && updateInfo.App.Version != Utils.GetVersion())
                 {
                     return "There is a new SDK version available!";
                 }

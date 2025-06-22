@@ -66,7 +66,7 @@ namespace Xvirus
             try
             {
                 var filePathAux = Marshal.PtrToStringUni(filePath);
-                var result = JsonSerializer.Serialize(ScanAux(filePathAux!), ScanResultGenerationContext.Default.ScanResult);
+                var result = JsonSerializer.Serialize(ScanAux(filePathAux!), SourceGenerationContext.Default.ScanResult);
                 return new ActionResult() { Sucess = true, Result = Marshal.StringToHGlobalUni(result) };
             }
             catch (Exception e)
@@ -123,7 +123,7 @@ namespace Xvirus
             try
             {
                 var folderPathAux = Marshal.PtrToStringUni(folderPath);
-                var result = JsonSerializer.Serialize(ScanFolderAux(folderPathAux!), ScanResultGenerationContext.Default.ScanResult);
+                var result = JsonSerializer.Serialize(ScanFolderAux(folderPathAux!), SourceGenerationContext.Default.ScanResult);
                 return new ActionResult() { Sucess = true, Result = Marshal.StringToHGlobalUni(result) };
             }
             catch (Exception e)
@@ -133,12 +133,12 @@ namespace Xvirus
         }
 
         [UnmanagedCallersOnly(EntryPoint = "checkUpdates")]
-        public static ActionResult CheckUpdates(bool checkSDKUpdates = false, bool loadDBAfterUpdate = false)
+        public static ActionResult CheckUpdates(bool loadDBAfterUpdate = false)
         {
             try
             {
                 var settings = Settings.Load();
-                var result = Updater.CheckUpdates(settings, checkSDKUpdates);
+                var result = Updater.CheckUpdates(settings);
 
                 if (loadDBAfterUpdate)
                     LoadAux(true);
@@ -156,7 +156,7 @@ namespace Xvirus
         {
             try
             {
-                var result = JsonSerializer.Serialize(GetSettingsAux(), SettingsGenerationContext.Default.SettingsDTO);
+                var result = JsonSerializer.Serialize(GetSettingsAux(), SourceGenerationContext.Default.SettingsDTO);
                 return new ActionResult() { Sucess = true, Result = Marshal.StringToHGlobalUni(result) };
             }
             catch (Exception e)

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using static Xvirus.XvirusSDK;
 
 namespace XvirusCLI
@@ -21,7 +20,7 @@ namespace XvirusCLI
                 {
                     case "l":
                     case "load":
-                        Load(args.Length > 1 && args[1].ToLower() == "true");
+                        Load(args.Length > 1 && args[1].Equals("true", StringComparison.CurrentCultureIgnoreCase));
                         Console.WriteLine("Load successful");
                         break;
                     case "u":
@@ -45,7 +44,7 @@ namespace XvirusCLI
                         break;
                     case "up":
                     case "update":
-                        Console.WriteLine(CheckUpdates(args.Length > 1 && args[1].ToLower() == "true", args.Length > 2 && args[2].ToLower() == "true"));
+                        Console.WriteLine(CheckUpdates(args.Length > 1 && args[1].Equals("true", StringComparison.CurrentCultureIgnoreCase)));
                         break;
                     case "st":
                     case "settings":
@@ -56,7 +55,7 @@ namespace XvirusCLI
                         if (args.Length < 2)
                             Console.WriteLine(Logging());
                         else
-                            Console.WriteLine(Logging(args[1].ToLower() == "true"));
+                            Console.WriteLine(Logging(args[1].Equals("true", StringComparison.CurrentCultureIgnoreCase)));
                         break;
                     case "bf":
                     case "basefolder":

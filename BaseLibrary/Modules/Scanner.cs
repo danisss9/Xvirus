@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using Xvirus.Model;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Xvirus
 {
@@ -43,7 +44,7 @@ namespace Xvirus
             if (database.safeHashList.Contains(hash))
                 return new ScanResult(0, "Safe", filePath);
 
-            if (database.malHashList.Contains(hash))
+            if (settings.EnableSignatures && database.malHashList.Contains(hash))
                 return new ScanResult(1, "Malware", filePath);
 
             var certName = Utils.GetCertificateSubjectName(filePath);
@@ -75,10 +76,11 @@ namespace Xvirus
 
                 if (settings.EnableHeuristics)
                 {
-                    if (isExecutable)
+                    if (isExecutable && (settings.MaxHeuristicsPeScanLength == null || fileInfo.Length <= settings.MaxHeuristicsPeScanLength))
                     {
                         using var stream = Utils.ReadFile(filePath, fileInfo.Length);
                         var matches = database.heurListPatterns.Search(stream);
+                        int score = 0;
                         foreach (var match in matches)
                         {
                             if (database.heurListDeps.TryGetValue(match.Key, out var matchDeps))
@@ -86,20 +88,28 @@ namespace Xvirus
                                 var matchesKeys = matches.Select(m => m.Key).ToHashSet();
                                 if (matchDeps.All(dep => dep[0] == '!' ? !matchesKeys.Contains(dep.Substring(1)) : matchesKeys.Contains(dep)))
                                 {
-                                    var name = database.heurList[match.Key];
-                                    return new ScanResult(1, name, filePath);
+                                    var nameDeps = database.heurList[match.Key];
+                                    return new ScanResult(1, nameDeps, filePath);
                                 }
                             }
-                            else if (database.heurList.TryGetValue(match.Key, out var name))
+
+                            if (score < (5 - settings.HeuristicsLevel))
+                            {
+                                score += match.Key.StartsWith("Suspicious:") ? 1 : 2;
+                                continue;
+                            }
+
+                            if (database.heurList.TryGetValue(match.Key, out var name))
                             {
                                 return new ScanResult(1, name, filePath);
                             }
                         }
                     }
-                    else if(fileInfo.Length <= 10485760) // 10MBs
+                    else if(!isExecutable && (settings.MaxHeuristicsOthersScanLength == null || fileInfo.Length <= settings.MaxHeuristicsOthersScanLength)) // 10MBs
                     {
                         using var stream = Utils.ReadFile(filePath, fileInfo.Length);
                         var matches = database.heurScriptListPatterns.Search(stream);
+                        int score = 0;
                         foreach (var match in matches)
                         {
                             if(database.heurScriptListDeps.TryGetValue(match.Key, out var matchDeps))
@@ -107,20 +117,29 @@ namespace Xvirus
                                 var matchesKeys = matches.Select(m => m.Key).ToHashSet();
                                 if (matchDeps.All(dep => dep[0] == '!' ? !matchesKeys.Contains(dep.Substring(1)) : matchesKeys.Contains(dep)))
                                 {
-                                    var name = database.heurScriptList[match.Key];
-                                    return new ScanResult(1, name, filePath);
+                                    var nameDeps = database.heurScriptList[match.Key];
+                                    return new ScanResult(1, nameDeps, filePath);
                                 }
-                            } else if(database.heurScriptList.TryGetValue(match.Key, out var name)) {
+                            }
+
+                            if (score < (5 - settings.HeuristicsLevel))
+                            {
+                                score += match.Key.StartsWith("Suspicious:") ? 1 : 2;
+                                continue;
+                            }
+
+                            if (database.heurScriptList.TryGetValue(match.Key, out var name))
+                            {
                                 return new ScanResult(1, name, filePath);
                             }
                         }
                     }
                 }
 
-                if (isExecutable && settings.EnableAIScan)
+                if (settings.EnableAIScan && isExecutable && (settings.MaxAIScanLength == null || fileInfo.Length <= settings.MaxAIScanLength))
                 {
                     var aiScore = ai.ScanFile(filePath);
-                    return new ScanResult(aiScore, $"AI.{aiScore * 100:F}", filePath);
+                    return new ScanResult(aiScore, $"AI.{aiScore * 100:F}", filePath, (100 - settings.AILevel) / 100);
                 }
             }
             return new ScanResult(0, "Safe", filePath);
