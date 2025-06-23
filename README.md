@@ -91,7 +91,7 @@ The following Operating Systems are supported:
 
 ## Known Issues
 
-- The checkUpdate function can check for SDK updates but can't update it automatically
+- The checkUpdate function can check for SDK/CLI updates but can't update it automatically
 
 ## Get Started
 
@@ -142,7 +142,7 @@ public class ScanResult
 
 ## Settings
 
-Settings are located in the "`settings.json`" file in the root folder of the SDK. Available options:
+Settings are located in the "`settings.json`" file in the root folder of the SDK/CLI. Available options:
 
 ### Engine Settings
 
