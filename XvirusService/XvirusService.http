@@ -1,0 +1,11 @@
+@XvirusService_HostAddress = http://localhost:5236
+
+GET {{XvirusService_HostAddress}}/todos/
+Accept: application/json
+
+###
+
+GET {{XvirusService_HostAddress}}/todos/1
+Accept: application/json
+
+###
