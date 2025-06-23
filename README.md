@@ -1,45 +1,56 @@
-# Xvirus SDK
+# Xvirus
 
-Xvirus SDK 4.2.3
+Xvirus SDK 5.0
 
 ## Table of Contents
 
-- [Xvirus SDK](#xvirus-sdk)
+- [Xvirus](#xvirus)
   - [Table of Contents](#table-of-contents)
   - [Minimum Requirements](#minimum-requirements)
   - [Changelog](#changelog)
   - [Known Issues](#known-issues)
   - [Get Started](#get-started)
-  - [Avaiable Functions](#avaiable-functions)
+  - [Available Functions](#available-functions)
   - [Model](#model)
   - [Settings](#settings)
+    - [Engine Settings](#engine-settings)
+    - [Scan Levels](#scan-levels)
+    - [File Size Limits](#file-size-limits)
+    - [Update Settings](#update-settings)
   - [Exceptions](#exceptions)
 
 ## Minimum Requirements
 
 To use Xvirus C# SDK you need:
 
-- .NET 7 SDK - [download](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
+- .NET 8 SDK - [download](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 
 The following Operating Systems are supported:
 
 - Windows:
   - Windows 10 1607
-  - Windows 11 22000
+  - Windows 11 22H2
   - Windows Server 2012
   - Windows Server Core	2012
-- Linux (glibc 2.17):
-  - Alpine Linux 3.15
-  - CentOS 7
-  - Debian 10
-  - Fedora 36
-  - openSUSE 15
-  - Oracle Linux 7
-  - Red Hat Enterprise Linux 7
-  - SUSE Enterprise Linux (SLES) 12 SP2
-  - Ubuntu 18.04
+- Linux (glibc 2.23):
+  - Alpine Linux 3.19
+  - Azure Linux 3.0
+  - CentOS Stream 9
+  - Debian 12
+  - Fedora 41
+  - openSUSE Leap 15.6
+  - Red Hat Enterprise Linux 8
+  - SUSE Enterprise Linux 15.6
+  - Ubuntu 22.04
 
 ## Changelog
+
+- Version **5.0**:
+  - Updated to .NET 8
+  - XvirusAI is now out of beta
+  - XvirusAI now works on C++ bindings
+  - Improved performance of heuristics engine
+  - Added new settings: `EnableSignatures, HeuristicsLevel, AILevel, MaxHeuristicsPeScanLength, MaxHeuristicsOthersScanLength, MaxAIScanLength, CheckSDKUpdates`
 
 - Version **4.2.3**:
   - Fixed Windows scan performance regression
@@ -80,17 +91,15 @@ The following Operating Systems are supported:
 
 ## Known Issues
 
-- XvirusAI engine is still in BETA. It is not recomended to use in production yet.
-- XvirusAI engine does not work in C++ bindings.
-- The checkUpdate function can now check for SDK updates but can't update it
+- The checkUpdate function can check for SDK updates but can't update it automatically
 
 ## Get Started
 
-The "`example`" folder contains an example project on how to import and use Xvirus SDK in C# (.NET 7).
+The "`example`" folder contains an example project on how to import and use Xvirus SDK in C# (.NET 8).
 
 You can run it by building it and then running executable file in the output folder.
 
-## Avaiable Functions
+## Available Functions
 
 You have the following functions available:
 
@@ -102,12 +111,12 @@ You have the following functions available:
   - "**Malware**" - If malware is detected but the name isn't known.
   - **_Malware Name_** - If it is malware from a known family (example: "Trojan.Downloader").
   - "**AI.{aiScore}**" - Score of the file using XvirusAI from 0 to 100, the higher the score the more probable it is malicious (example: "AI.99").
-  - "**File not found!**" - If no file is found in the submited path.
+  - "**File not found!**" - If no file is found in the submitted path.
   - "**File too big!**" - If the file size is bigger than the set limit.
   - "**Could not get file hash!**" - There was an error calculating the hash of the file.
 - **ScanFolder** - Scans all the files inside the folder at `folderpath`. It will return an IEnumerable of [`ScanResult`](#Model).
 - **ScanFolderString** - Scans all the files inside the folder at `folderpath`. It will return the scan result message for each file scanned.
-- **CheckUpdates** - Checks and updates the databases and AI engine to the most recent versions. If `checkSDKUpdates`=true then it will also check for SDK updates. If `loadDBAfterUpdate`=true then it will reload the Xvirus Scan Engine after the update is done. It can return the following strings:
+- **CheckUpdates** - Checks and updates the databases and AI engine to the most recent versions. If `loadDBAfterUpdate`=true then it will reload the Xvirus Scan Engine after the update is done. It can return the following strings:
   - "**There is a new SDK version available!**"
   - "**Database was updated!**"
   - "**Database is up-to-date!**"
@@ -133,11 +142,29 @@ public class ScanResult
 
 ## Settings
 
-Settings are located in the "`settings.json`" file in the root folder of the SDK. There are 5 avaiable options:
+Settings are located in the "`settings.json`" file in the root folder of the SDK. Available options:
 
+### Engine Settings
+
+- **EnableSignatures** - Enables signature-based scanning of files. Default: _true_
 - **EnableHeuristics** - Enables heuristics scanning of files. Default: _true_
-- **EnableAIScan** - Enables XvirusAI scan engine. This feature is still in BETA. Default: _false_
+- **EnableAIScan** - Enables XvirusAI scan engine. Default: _true_
+
+### Scan Levels
+
+- **HeuristicsLevel** - Heuristics aggressiveness level from 1 to 5, higher is more aggressive. Default: _4_
+- **AILevel** - AI scan aggressiveness level from 1 to 100, higher is more aggressive. Default: _10_
+
+### File Size Limits
+
 - **MaxScanLength** - Maximum file size to be scanned in bytes. If set "null" then there is no limit. Default: _null_
+- **MaxHeuristicsPeScanLength** - Maximum PE file size for heuristics scanning in bytes. If set "null" then there is no limit. Default: _20971520_ (20MB)
+- **MaxHeuristicsOthersScanLength** - Maximum non-PE file size for heuristics scanning in bytes. If set "null" then there is no limit. Default: _10485760_ (10MB)  
+- **MaxAIScanLength** - Maximum file size for AI scanning in bytes. If set "null" then there is no limit. Default: _20971520_ (20MB)
+
+### Update Settings
+
+- **CheckSDKUpdates** - Enables checking for SDK updates. Default: _true_
 - **DatabaseFolder** - Path to the database folder, it accepts both relative and absolute paths. Default: _"Database"_
 - **DatabaseVersion** - KeyValue list of database files version. This is updated automatically when using the "checkUpdate()" function.
 
@@ -145,9 +172,16 @@ Example of a `settings.json` file:
 
 ```JSON
 {
+  "EnableSignatures": true,
   "EnableHeuristics": true,
-  "EnableAIScan": false,
+  "EnableAIScan": true,
+  "HeuristicsLevel": 4,
+  "AILevel": 10,
   "MaxScanLength": null,
+  "MaxHeuristicsPeScanLength": 20971520,
+  "MaxHeuristicsOthersScanLength": 10485760,
+  "MaxAIScanLength": 20971520,
+  "CheckSDKUpdates": true,
   "DatabaseFolder": "Database",
   "DatabaseVersion": {
     "AIModel": 0,
@@ -164,6 +198,6 @@ Example of a `settings.json` file:
 
 ## Exceptions
 
-If any of the functions fail it may return an [exception](https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/exceptions/).
+If any of the functions fail it may return an [exception](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/exceptions/).
 
 All exceptions are logged in the `errorlog.txt` file.
