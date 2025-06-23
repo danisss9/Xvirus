@@ -32,7 +32,7 @@ The following Operating Systems are supported:
   - Windows 11 22H2
   - Windows Server 2012
   - Windows Server Core	2012
-- Linux (glibc 2.23):
+- Linux (glibc 2.35):
   - Alpine Linux 3.19
   - Azure Linux 3.0
   - CentOS Stream 9
