@@ -139,7 +139,7 @@ namespace Xvirus
                 if (settings.EnableAIScan && isExecutable && (settings.MaxAIScanLength == null || fileInfo.Length <= settings.MaxAIScanLength))
                 {
                     var aiScore = ai.ScanFile(filePath);
-                    return new ScanResult(aiScore, $"AI.{aiScore * 100:F}", filePath, (100 - settings.AILevel) / 100);
+                    return new ScanResult(aiScore, $"AI.{aiScore * 100:00.00}", filePath, (100 - (double)settings.AILevel) / 100);
                 }
             }
             return new ScanResult(0, "Safe", filePath);

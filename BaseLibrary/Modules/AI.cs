@@ -18,8 +18,9 @@ namespace Xvirus
         {
             var path = Utils.RelativeToFullPath(settings.DatabaseFolder, "model.ai");
 
-            if(settings.EnableAIScan && File.Exists(path))
+            if (settings.EnableAIScan && File.Exists(path))
             {
+                Environment.SetEnvironmentVariable("TF_CPP_MIN_LOG_LEVEL", "3"); // TODO - does not work
                 var mlContext = new MLContext();
                 ITransformer mlModel = mlContext.Model.Load(path, out var _);
                 model = mlContext.Model.CreatePredictionEngine<ModelInput, ModelOutput>(mlModel);
@@ -58,7 +59,7 @@ namespace Xvirus
             else if (sizeInKB <= 60)
             {
                 width = 128;
-            }   
+            }
             else if (sizeInKB <= 100)
             {
                 width = 256;
@@ -80,8 +81,8 @@ namespace Xvirus
                 width = 2048;
             }
             int height = (int)Math.Ceiling((double)binaryData.Length / width);
-         
-           
+
+
             using var image = new Image<L8>(width, height);
             image.ProcessPixelRows(accessor =>
             {

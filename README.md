@@ -92,6 +92,7 @@ The following Operating Systems are supported:
 ## Known Issues
 
 - The checkUpdate function can check for SDK/CLI updates but can't update it automatically
+- When loading or scanning files with the AI scanner, the TensorFlow library might print diagnostic information to the console. To suppress these messages, set the environment variable "TF_CPP_MIN_LOG_LEVEL" to "3" before starting the SDK/CLI.
 
 ## Get Started
 
@@ -110,7 +111,7 @@ You have the following functions available:
   - "**Safe**" - If no malware is detected.
   - "**Malware**" - If malware is detected but the name isn't known.
   - **_Malware Name_** - If it is malware from a known family (example: "Trojan.Downloader").
-  - "**AI.{aiScore}**" - Score of the file using XvirusAI from 0 to 100, the higher the score the more probable it is malicious (example: "AI.99").
+  - "**AI.{aiScore}**" - Score of the file using XvirusAI from 0 to 100, the higher the score the more probable it is malicious (example: "AI.99.99").
   - "**File not found!**" - If no file is found in the submitted path.
   - "**File too big!**" - If the file size is bigger than the set limit.
   - "**Could not get file hash!**" - There was an error calculating the hash of the file.
