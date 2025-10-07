@@ -7,13 +7,16 @@
     <Company>Xvirus</Company>
     <Copyright>Copyright $([System.DateTime]::Now.Year) $(Company)</Copyright>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="Microsoft.ML" Version="4.0.2" />
     <PackageReference Include="Microsoft.ML.Vision" Version="4.0.2" />
     <PackageReference Include="SciSharp.TensorFlow.Redist" Version="2.3.1" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.10" />
   </ItemGroup>
+  
   <ItemGroup Label="XvirusAI">
     <None Include="XvirusAI.mlnet">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>

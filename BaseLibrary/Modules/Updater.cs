@@ -9,12 +9,6 @@ namespace Xvirus
 {
     public class Updater
     {
-        private readonly static JsonSerializerOptions JsonSerializerOptions = new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            TypeInfoResolver = SourceGenerationContext.Default
-        };
-
         private static readonly UpdateMethod[] UpdateList = new UpdateMethod[]
         {
             new UpdateMethod {
@@ -74,7 +68,7 @@ namespace Xvirus
             try
             {
                 var updateInfoStr = wc.GetStringAsync(updateUrl).GetAwaiter().GetResult();
-                var updateInfo = JsonSerializer.Deserialize<UpdateInfo>(updateInfoStr, JsonSerializerOptions);
+                var updateInfo = JsonSerializer.Deserialize(updateInfoStr, SourceGenerationContextCamelCase.Default.UpdateInfo);
                 var newUpdates = false;
 
                 if (updateInfo == null)
@@ -83,7 +77,7 @@ namespace Xvirus
                 var dirPath = Utils.RelativeToFullPath(settings.DatabaseFolder);
                 if (!Directory.Exists(dirPath))
                     Directory.CreateDirectory(dirPath);
-                
+
                 foreach (var updateMethod in UpdateList)
                 {
                     var currVersion = updateMethod.GetDatabaseInfoVersion(settings.DatabaseVersion);
@@ -92,7 +86,7 @@ namespace Xvirus
                     {
                         var database = wc.GetByteArrayAsync(versionInfo.DownloadUrl).GetAwaiter().GetResult();
 
-                        if(database != null)
+                        if (database != null)
                         {
                             var path = Utils.RelativeToFullPath(settings.DatabaseFolder, updateMethod.FileName);
                             File.WriteAllBytes(path, database);
