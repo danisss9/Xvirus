@@ -1,13 +1,14 @@
 ﻿using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using Xvirus.Model;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
-using System.Linq;
+using SixLabors.ImageSharp.Formats.Png;
 
 namespace Xvirus
 {
@@ -60,6 +61,62 @@ namespace Xvirus
 
         public static float[] GetInputData(string filePath)
         {
+            // Load and preprocess image
+            using var image = GetFileImage(filePath);
+
+            // Prepare input tensor (1, 3, 224, 224) for RGB model
+            var inputData = new float[1 * 3 * 224 * 224];
+
+            // ImageNet normalization constants from train_export_tf.py
+            var mean = new float[] { 0.485f, 0.456f, 0.406f };
+            var std = new float[] { 0.229f, 0.224f, 0.225f };
+
+            // Extract pixels directly from resized image and normalize with ImageNet stats
+            image.ProcessPixelRows(accessor =>
+            {
+                for (int y = 0; y < 224; y++)
+                {
+                    var pixelRow = accessor.GetRowSpan(y);
+                    for (int x = 0; x < 224; x++)
+                    {
+                        // Get grayscale pixel value [0-255]
+                        var pixelValue = pixelRow[x].PackedValue / 255.0f;
+
+                        // Convert grayscale to RGB by replicating across 3 channels
+                        var pixelIndex = y * 224 + x;
+                        for (int c = 0; c < 3; c++)
+                        {
+                            // Apply ImageNet normalization
+                            inputData[c * 224 * 224 + pixelIndex] =
+                                (pixelValue - mean[c]) / std[c];
+                        }
+                    }
+                }
+            });
+
+            return inputData;
+        }
+
+        public static byte[] GetFileImageBytes(string filePath)
+        {
+            using var image = GetFileImage(filePath);
+
+            // Use PNG encoder
+            var encoder = new PngEncoder()
+            {
+                ColorType = PngColorType.Grayscale,
+                BitDepth = PngBitDepth.Bit8,
+                CompressionLevel = PngCompressionLevel.NoCompression
+            };
+
+            // Get image bytes
+            using var memoryStream = new MemoryStream();
+            image.Save(memoryStream, encoder);
+            return memoryStream.ToArray();
+        }
+
+        private static Image<L8> GetFileImage(string filePath)
+        {
             var binaryData = File.ReadAllBytes(filePath);
 
             var sizeInKB = binaryData.Length / 1024;
@@ -98,7 +155,7 @@ namespace Xvirus
             }
             var height = (int)Math.Ceiling((double)binaryData.Length / width);
 
-            using var image = new Image<L8>(width, height);
+            var image = new Image<L8>(width, height);
             image.ProcessPixelRows(accessor =>
             {
                 for (int y = 0; y < height; y++)
@@ -125,37 +182,7 @@ namespace Xvirus
                 PadColor = Color.Black
             }));
 
-            // Prepare input tensor (1, 3, 224, 224) for RGB model
-            var inputData = new float[1 * 3 * 224 * 224];
-
-            // ImageNet normalization constants from train_export_tf.py
-            var mean = new float[] { 0.485f, 0.456f, 0.406f };
-            var std = new float[] { 0.229f, 0.224f, 0.225f };
-
-            // Extract pixels directly from resized image and normalize with ImageNet stats
-            image.ProcessPixelRows(accessor =>
-            {
-                for (int y = 0; y < 224; y++)
-                {
-                    var pixelRow = accessor.GetRowSpan(y);
-                    for (int x = 0; x < 224; x++)
-                    {
-                        // Get grayscale pixel value [0-255]
-                        var pixelValue = pixelRow[x].PackedValue / 255.0f;
-
-                        // Convert grayscale to RGB by replicating across 3 channels
-                        var pixelIndex = y * 224 + x;
-                        for (int c = 0; c < 3; c++)
-                        {
-                            // Apply ImageNet normalization
-                            inputData[c * 224 * 224 + pixelIndex] =
-                                (pixelValue - mean[c]) / std[c];
-                        }
-                    }
-                }
-            });
-
-            return inputData;
+            return image;
         }
     }
 }

@@ -1,6 +1,6 @@
 # Xvirus
 
-Xvirus SDK 5.0
+Xvirus SDK 5.1
 
 ## Table of Contents
 
@@ -45,10 +45,14 @@ The following Operating Systems are supported:
 
 ## Changelog
 
+- Version **5.1**:
+  - XvirusAI now uses ONNX model instead of ML.NET
+  - XvirusAI now works on C++ bindings
+  - Updated `ImageSharp` version
+
 - Version **5.0**:
   - Updated to .NET 8
   - XvirusAI is now out of beta
-  - XvirusAI now works on C++ bindings
   - Improved performance of heuristics engine
   - Added new settings: `EnableSignatures, HeuristicsLevel, AILevel, MaxHeuristicsPeScanLength, MaxHeuristicsOthersScanLength, MaxAIScanLength, CheckSDKUpdates`
 
@@ -92,7 +96,6 @@ The following Operating Systems are supported:
 ## Known Issues
 
 - The checkUpdate function can check for SDK/CLI updates but can't update it automatically
-- When loading or scanning files with the AI scanner, the TensorFlow library might print diagnostic information to the console. To suppress these messages, set the environment variable "TF_CPP_MIN_LOG_LEVEL" to "3" before starting the SDK/CLI.
 
 ## Get Started
 
