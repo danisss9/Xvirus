@@ -1,18 +1,19 @@
-﻿using Microsoft.ML;
+﻿using Microsoft.ML.OnnxRuntime;
+using Microsoft.ML.OnnxRuntime.Tensors;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Xvirus.Model;
-using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp;
-using System.Linq;
 using SixLabors.ImageSharp.Processing;
+using System.Linq;
 
 namespace Xvirus
 {
     public class AI
     {
-        private readonly PredictionEngine<ModelInput, ModelOutput>? model;
+        private readonly InferenceSession? model;
 
         public AI(SettingsDTO settings)
         {
@@ -20,10 +21,7 @@ namespace Xvirus
 
             if (settings.EnableAIScan && File.Exists(path))
             {
-                Environment.SetEnvironmentVariable("TF_CPP_MIN_LOG_LEVEL", "3"); // TODO - does not work
-                var mlContext = new MLContext();
-                ITransformer mlModel = mlContext.Model.Load(path, out var _);
-                model = mlContext.Model.CreatePredictionEngine<ModelInput, ModelOutput>(mlModel);
+                model = new InferenceSession(path);
             }
         }
 
@@ -32,19 +30,37 @@ namespace Xvirus
             if (model == null)
                 return -1;
 
-
-            ModelInput input = new ModelInput()
-            {
-                ImageSource = GetFileImageBytes(filePath),
+            var inputData = GetInputData(filePath);
+            var inputTensor = new DenseTensor<float>(inputData, [1, 3, 224, 224]);
+            var inputs = new List<NamedOnnxValue> {
+                NamedOnnxValue.CreateFromTensor("input", inputTensor)
             };
 
-            var prediction = model.Predict(input);
-            return prediction.PredictedLabel == "mal" ? prediction.Score.Max() : prediction.Score.Min();
+            using var results = model.Run(inputs);
+            if (results[0]?.Value is IEnumerable<float> predictions)
+            {
+                var scores = predictions.ToArray();
+                if (scores.Length == 2)
+                {
+                    var benignScore = scores[0];
+                    var malwareScore = scores[1];
+                    var maxScore = Math.Max(benignScore, malwareScore);
+
+                    var expBenign = (float)Math.Exp(benignScore - maxScore);
+                    var expMalware = (float)Math.Exp(malwareScore - maxScore);
+                    var sumExp = expBenign + expMalware;
+
+                    var malwareProbability = expMalware / sumExp;
+                    return Math.Clamp(malwareProbability, 0f, 1f);
+                }
+            }
+
+            return -1;
         }
 
-        public static byte[] GetFileImageBytes(string filePath)
+        public static float[] GetInputData(string filePath)
         {
-            byte[] binaryData = File.ReadAllBytes(filePath);
+            var binaryData = File.ReadAllBytes(filePath);
 
             var sizeInKB = binaryData.Length / 1024;
             int width;
@@ -80,20 +96,19 @@ namespace Xvirus
             {
                 width = 2048;
             }
-            int height = (int)Math.Ceiling((double)binaryData.Length / width);
-
+            var height = (int)Math.Ceiling((double)binaryData.Length / width);
 
             using var image = new Image<L8>(width, height);
             image.ProcessPixelRows(accessor =>
             {
                 for (int y = 0; y < height; y++)
                 {
-                    Span<L8> pixelRow = accessor.GetRowSpan(y);
+                    var pixelRow = accessor.GetRowSpan(y);
 
                     for (int x = 0; x < width; x++)
                     {
-                        int dataIndex = y * width + x;
-                        byte value = dataIndex < binaryData.Length ? binaryData[dataIndex] : (byte)0;
+                        var dataIndex = y * width + x;
+                        var value = dataIndex < binaryData.Length ? binaryData[dataIndex] : (byte)0;
 
                         // Create grayscale color
                         pixelRow[x] = new L8(value);
@@ -110,18 +125,37 @@ namespace Xvirus
                 PadColor = Color.Black
             }));
 
-            // Use PNG encoder
-            var encoder = new PngEncoder()
+            // Prepare input tensor (1, 3, 224, 224) for RGB model
+            var inputData = new float[1 * 3 * 224 * 224];
+
+            // ImageNet normalization constants from train_export_tf.py
+            var mean = new float[] { 0.485f, 0.456f, 0.406f };
+            var std = new float[] { 0.229f, 0.224f, 0.225f };
+
+            // Extract pixels directly from resized image and normalize with ImageNet stats
+            image.ProcessPixelRows(accessor =>
             {
-                ColorType = PngColorType.Grayscale,
-                BitDepth = PngBitDepth.Bit8,
-                CompressionLevel = PngCompressionLevel.NoCompression
-            };
+                for (int y = 0; y < 224; y++)
+                {
+                    var pixelRow = accessor.GetRowSpan(y);
+                    for (int x = 0; x < 224; x++)
+                    {
+                        // Get grayscale pixel value [0-255]
+                        var pixelValue = pixelRow[x].PackedValue / 255.0f;
 
-            using var memoryStream = new MemoryStream();
-            image.Save(memoryStream, encoder);
+                        // Convert grayscale to RGB by replicating across 3 channels
+                        var pixelIndex = y * 224 + x;
+                        for (int c = 0; c < 3; c++)
+                        {
+                            // Apply ImageNet normalization
+                            inputData[c * 224 * 224 + pixelIndex] =
+                                (pixelValue - mean[c]) / std[c];
+                        }
+                    }
+                }
+            });
 
-            return memoryStream.ToArray();
+            return inputData;
         }
     }
 }

@@ -1,7 +1,8 @@
-﻿using Microsoft.ML;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text;
 using Xvirus;
-using Xvirus.Model;
 
 var malFolder = GetArgument("--malware");
 var safeFolder = GetArgument("--safe");
@@ -27,28 +28,9 @@ ProcessFolder(malFolder, Path.Join(targetFolder, "mal"));
 // Safe Files
 ProcessFolder(safeFolder, Path.Join(targetFolder, "safe"));
 
-// Create Context
-var mlContext = new MLContext();
-
-// Load images from folder
-var fullData = LoadImageFromFolder(mlContext, targetFolder);
-var splitData = mlContext.Data.TrainTestSplit(fullData, testFraction: 0.2);
-
-// Train Mode
-var model = TrainModel(mlContext, splitData.TrainSet);
-
-// Save Model
-mlContext.Model.Save(model, splitData.TrainSet.Schema, Path.Combine(outputFolder, "model.ai"));
-
-// Evaluate Model
-var metrics = mlContext.MulticlassClassification.Evaluate(splitData.TestSet);
-Console.WriteLine("=== MODEL EVALUATION ===");
-Console.WriteLine($"Accuracy Macro: {metrics.MacroAccuracy:P2}");
-Console.WriteLine($"Accuracy Micro: {metrics.MicroAccuracy:P2}");
-Console.WriteLine($"Log Loss: {metrics.LogLoss:F2}");
-Console.WriteLine("Confusion Matrix:");
-foreach (var row in metrics.ConfusionMatrix.PerClassPrecision)
-    Console.WriteLine($"Class Precision: {row:P2}");
+// Call python script to train ML model (pass the arguments)
+string scriptArgs = $"--target {QuoteIfNeeded(targetFolder)} --output {QuoteIfNeeded(outputFolder)} --epochs 10 --patience 5 --batch-size 32";
+RunPythonScriptFromOutput("train_export_tf.py", scriptArgs);
 
 // Delete target folder
 if (!string.IsNullOrEmpty(deleteImages) && deleteImages.Equals("true", StringComparison.OrdinalIgnoreCase))
@@ -122,47 +104,58 @@ static void ProcessFolder(string srcRoot, string dstRoot)
     Console.WriteLine($"Processed {count} files in {srcRoot}");
 }
 
-static IDataView LoadImageFromFolder(MLContext mlContext, string folder)
+static int RunPythonScriptFromOutput(string scriptFileName, string scriptArgs, int timeoutMs = 0)
 {
-    var res = new List<ModelInput>();
-    var allowedImageExtensions = new[] { ".png", ".jpg", ".jpeg", ".gif" };
-    DirectoryInfo rootDirectoryInfo = new DirectoryInfo(folder);
-    DirectoryInfo[] subDirectories = rootDirectoryInfo.GetDirectories();
-
-    if (subDirectories.Length == 0)
+    // scriptFileName is relative to the app output folder, e.g., "train_export_tf.py"
+    string appFolder = AppContext.BaseDirectory!;
+    string scriptPath = Path.Combine(appFolder, scriptFileName);
+    if (!File.Exists(scriptPath))
     {
-        throw new Exception("fail to find subdirectories");
+        Console.Error.WriteLine($"Script not found: {scriptPath}");
+        return -1;
     }
 
-    foreach (DirectoryInfo directory in subDirectories)
+    // Prefer "py" on Windows, otherwise "python" or "python3"
+    string pythonExe = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "py" : "python3";
+    // If you want to force "python" change the string above.
+
+    string args = $"{QuoteIfNeeded(scriptPath)} {scriptArgs}";
+
+    var psi = new ProcessStartInfo
     {
-        var imageList = directory.EnumerateFiles().Where(f => allowedImageExtensions.Contains(f.Extension.ToLower()));
-        if (imageList.Count() > 0)
+        FileName = pythonExe,
+        Arguments = args,
+        RedirectStandardOutput = true,
+        RedirectStandardError = true,
+        UseShellExecute = false,
+        CreateNoWindow = false,
+        StandardOutputEncoding = Encoding.UTF8,
+        StandardErrorEncoding = Encoding.UTF8
+    };
+
+    using var process = new Process { StartInfo = psi };
+    process.OutputDataReceived += (s, e) => { if (e.Data != null) Console.WriteLine(e.Data); };
+    process.ErrorDataReceived += (s, e) => { if (e.Data != null) Console.Error.WriteLine(e.Data); };
+
+    process.Start();
+    process.BeginOutputReadLine();
+    process.BeginErrorReadLine();
+
+    if (timeoutMs > 0)
+    {
+        if (!process.WaitForExit(timeoutMs))
         {
-            res.AddRange(imageList.Select(i => new ModelInput
-            {
-                Label = directory.Name,
-                ImageSource = File.ReadAllBytes(i.FullName),
-            }));
+            try { process.Kill(true); } catch { }
+            Console.Error.WriteLine("Python process timed out and was killed.");
+            return -2;
         }
     }
-    return mlContext.Data.LoadFromEnumerable(res);
+    else
+    {
+        process.WaitForExit();
+    }
+
+    return process.ExitCode;
 }
 
-static ITransformer TrainModel(MLContext mlContext, IDataView trainData)
-{
-    var pipeline = BuildPipeline(mlContext);
-    var model = pipeline.Fit(trainData);
-
-    return model;
-}
-
-static IEstimator<ITransformer> BuildPipeline(MLContext mlContext)
-{
-    // Data process configuration with pipeline data transformations
-    var pipeline = mlContext.Transforms.Conversion.MapValueToKey(outputColumnName: @"Label", inputColumnName: @"Label", addKeyValueAnnotationsAsText: false)
-                            .Append(mlContext.MulticlassClassification.Trainers.ImageClassification(labelColumnName: @"Label", scoreColumnName: @"Score", featureColumnName: @"ImageSource"))
-                            .Append(mlContext.Transforms.Conversion.MapKeyToValue(outputColumnName: @"PredictedLabel", inputColumnName: @"PredictedLabel"));
-
-    return pipeline;
-}
+static string QuoteIfNeeded(string s) => s.Contains(' ') ? $"\"{s}\"" : s;

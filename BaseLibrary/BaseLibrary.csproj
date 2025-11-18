@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <Version>5.0.0.0</Version>
+    <Version>5.1.0.0</Version>
     <Authors>Xvirus</Authors>
     <Company>Xvirus</Company>
     <Copyright>Copyright $([System.DateTime]::Now.Year) $(Company)</Copyright>
@@ -11,15 +11,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Microsoft.ML" Version="4.0.2" />
-    <PackageReference Include="Microsoft.ML.Vision" Version="4.0.2" />
-    <PackageReference Include="SciSharp.TensorFlow.Redist" Version="2.3.1" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.10" />
-  </ItemGroup>
-  
-  <ItemGroup Label="XvirusAI">
-    <None Include="XvirusAI.mlnet">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.23.2" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
   </ItemGroup>
 </Project>
