@@ -1,7 +1,19 @@
-using System.Text.Json.Serialization;
+using XvirusService;
 
+// Create the web application builder
 var builder = WebApplication.CreateSlimBuilder(args);
 
+// Configure for Windows Service
+builder.Host.UseWindowsService(o =>
+{
+    o.ServiceName = "XvirusService";
+});
+
+// Register services
+builder.Services.AddSingleton<RealTimeScanner>();
+builder.Services.AddSingleton<ServerEventService>();
+
+// Configure JSON serialization for Native AOT
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
@@ -17,6 +29,7 @@ var sampleTodos = new Todo[] {
     new(5, "Clean the car", DateOnly.FromDateTime(DateTime.Now.AddDays(2)))
 };
 
+// TODO API endpoints
 var todosApi = app.MapGroup("/todos");
 todosApi.MapGet("/", () => sampleTodos);
 todosApi.MapGet("/{id}", (int id) =>
@@ -24,12 +37,20 @@ todosApi.MapGet("/{id}", (int id) =>
         ? Results.Ok(todo)
         : Results.NotFound());
 
-app.Run();
+// Server-Sent Events endpoint
+app.MapGet("/events", (ServerEventService eventService, HttpContext context, CancellationToken cancellationToken)
+    => eventService.HandleEvents(context, cancellationToken));
 
-public record Todo(int Id, string? Title, DateOnly? DueBy = null, bool IsComplete = false);
+// Start the Real-Time Scanner
+var scanner = app.Services.GetRequiredService<RealTimeScanner>();
+scanner.Start();
 
-[JsonSerializable(typeof(Todo[]))]
-internal partial class AppJsonSerializerContext : JsonSerializerContext
+// Graceful shutdown
+var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+lifetime.ApplicationStopping.Register(() =>
 {
+    scanner.Stop();
+    scanner.Dispose();
+});
 
-}
+app.Run();
