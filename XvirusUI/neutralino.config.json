@@ -13,7 +13,14 @@
     "enabled": true,
     "writeToLogFile": true
   },
-  "nativeAllowList": ["app.*", "os.*", "debug.log", "filesystem.readDirectory"],
+  "nativeAllowList": [
+    "app.*",
+    "os.*",
+    "computer.*",
+    "window.*",
+    "debug.log",
+    "filesystem.readDirectory"
+  ],
   "globalVariables": {
     "TEST1": "Hello",
     "TEST2": [2, 4, 5],
@@ -24,21 +31,21 @@
   },
   "modes": {
     "window": {
-      "title": "XvirusUI",
+      "title": "Xvirus AntiMalware",
       "width": 800,
       "height": 500,
       "minWidth": 400,
       "minHeight": 200,
-      "center": true,
+      "center": false,
       "fullScreen": false,
-      "alwaysOnTop": false,
+      "alwaysOnTop": true,
       "icon": "/resources/icons/appIcon.png",
-      "enableInspector": true,
-      "borderless": false,
+      "enableInspector": false,
+      "borderless": true,
       "maximize": false,
       "hidden": false,
-      "resizable": true,
-      "exitProcessOnClose": false
+      "resizable": false,
+      "exitProcessOnClose": true
     },
     "browser": {
       "globalVariables": {

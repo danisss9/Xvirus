@@ -3,9 +3,46 @@
   import viteLogo from '/vite.svg';
   import Counter from './lib/Counter.svelte';
   import { onMount } from 'svelte';
-  import { filesystem } from '@neutralinojs/lib';
+  import {
+    filesystem,
+    os,
+    app,
+    window,
+    computer,
+    type TrayOptions,
+    events,
+  } from '@neutralinojs/lib';
 
   onMount(async () => {
+    const screens = await computer.getDisplays();
+    const screen = screens[0].resolution;
+    const windowSize = await window.getSize();
+
+    const x = screen.width - windowSize.width!;
+    const y = screen.height - windowSize.height! - 40;
+
+    await window.move(x, y);
+
+    const tray: TrayOptions = {
+      icon: '/resources/trayIcon.png',
+      menuItems: [{ id: 'open', text: 'Open' }, { text: '-' }, { id: 'quit', text: 'Quit' }],
+    };
+
+    await os.setTray(tray);
+
+    events.on('trayMenuItemClicked', async (event) => {
+      switch (event.detail.id) {
+        case 'open':
+          await window.show();
+          await window.focus();
+          break;
+
+        case 'quit':
+          app.exit();
+          break;
+      }
+    });
+
     filesystem
       .readDirectory('./')
       .then((data) => {
