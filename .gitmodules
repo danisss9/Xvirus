@@ -1,0 +1,6 @@
+[submodule "Portal"]
+	path = Portal
+	url = ./Portal
+[submodule "Website"]
+	path = Website
+	url = ./Website
