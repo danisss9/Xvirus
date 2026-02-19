@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "esnext", // Use the latest JavaScript features
+    "module": "esnext", // Use ES Modules
+    "jsx": "react-jsx", // Enable JSX support for Preact
+    "jsxImportSource": "preact", // Use Preact for JSX
+    "strict": true, // Enable strict type-checking options
+    "moduleResolution": "bundler", // Resolve modules in Node.js style
+    "esModuleInterop": true, // Allow default imports from CommonJS modules
+    "skipLibCheck": true, // Skip type checking of declaration files
+    "forceConsistentCasingInFileNames": true, // Ensure consistent file casing
+    "baseUrl": "./", // Base directory for resolving non-relative module names
+    "paths": {
+      "@/*": ["src/*"] // Alias for the src directory
+    }
+  },
+  "include": ["src"], // Include all files in the src directory
+  "exclude": ["node_modules"] // Exclude node_modules
+}

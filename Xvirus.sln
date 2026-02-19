@@ -15,8 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AITrainer", "AITrainer\AITr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XvirusService", "XvirusService\XvirusService.csproj", "{9EDA5AD1-0E77-48C9-8AEA-3343FBBA2962}"
 EndProject
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "XvirusUI", "XvirusUI\XvirusUI.esproj", "{21AE4CB3-740A-B1DF-DEC4-E51CB18DE489}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,18 +71,6 @@ Global
 		{9EDA5AD1-0E77-48C9-8AEA-3343FBBA2962}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9EDA5AD1-0E77-48C9-8AEA-3343FBBA2962}.Release|x64.ActiveCfg = Release|Any CPU
 		{9EDA5AD1-0E77-48C9-8AEA-3343FBBA2962}.Release|x64.Build.0 = Release|Any CPU
-		{21AE4CB3-740A-B1DF-DEC4-E51CB18DE489}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{21AE4CB3-740A-B1DF-DEC4-E51CB18DE489}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{21AE4CB3-740A-B1DF-DEC4-E51CB18DE489}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{21AE4CB3-740A-B1DF-DEC4-E51CB18DE489}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{21AE4CB3-740A-B1DF-DEC4-E51CB18DE489}.Debug|x64.Build.0 = Debug|Any CPU
-		{21AE4CB3-740A-B1DF-DEC4-E51CB18DE489}.Debug|x64.Deploy.0 = Debug|Any CPU
-		{21AE4CB3-740A-B1DF-DEC4-E51CB18DE489}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{21AE4CB3-740A-B1DF-DEC4-E51CB18DE489}.Release|Any CPU.Build.0 = Release|Any CPU
-		{21AE4CB3-740A-B1DF-DEC4-E51CB18DE489}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{21AE4CB3-740A-B1DF-DEC4-E51CB18DE489}.Release|x64.ActiveCfg = Release|Any CPU
-		{21AE4CB3-740A-B1DF-DEC4-E51CB18DE489}.Release|x64.Build.0 = Release|Any CPU
-		{21AE4CB3-740A-B1DF-DEC4-E51CB18DE489}.Release|x64.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
