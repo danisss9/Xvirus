@@ -1,6 +1,6 @@
 using Xvirus;
 using Xvirus.Model;
-using XvirusService;
+using XvirusService.Model;
 
 namespace XvirusService.Api
 {
