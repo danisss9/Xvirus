@@ -1,5 +1,7 @@
 using XvirusService;
 using Xvirus;
+using Xvirus.Model;
+using XvirusService.Api;
 
 // Create the web application builder
 var builder = WebApplication.CreateSlimBuilder(args);
@@ -23,21 +25,9 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 var app = builder.Build();
 
-var sampleTodos = new Todo[] {
-    new(1, "Walk the dog"),
-    new(2, "Do the dishes", DateOnly.FromDateTime(DateTime.Now)),
-    new(3, "Do the laundry", DateOnly.FromDateTime(DateTime.Now.AddDays(1))),
-    new(4, "Clean the bathroom"),
-    new(5, "Clean the car", DateOnly.FromDateTime(DateTime.Now.AddDays(2)))
-};
+// Register API endpoints
+app.MapSettingsEndpoints();
 
-// TODO API endpoints
-var todosApi = app.MapGroup("/todos");
-todosApi.MapGet("/", () => sampleTodos);
-todosApi.MapGet("/{id}", (int id) =>
-    sampleTodos.FirstOrDefault(a => a.Id == id) is { } todo
-        ? Results.Ok(todo)
-        : Results.NotFound());
 
 // Scan API endpoint
 app.MapPost("/scan", (ScanRequest request, ScanHistory history) =>
@@ -75,34 +65,7 @@ app.MapPost("/scan", (ScanRequest request, ScanHistory history) =>
     }
     catch (Exception ex)
     {
-        return Results.BadRequest(new { Error = ex.Message });
-    }
-});
-
-// Settings API endpoints
-app.MapGet("/settings", () =>
-{
-    try
-    {
-        var settings = Settings.Load();
-        return Results.Ok(settings);
-    }
-    catch (Exception ex)
-    {
-        return Results.BadRequest(new { Error = ex.Message });
-    }
-});
-
-app.MapPut("/settings", (SettingsDTO newSettings) =>
-{
-    try
-    {
-        Settings.Save(newSettings);
-        return Results.Ok(new { Message = "Settings saved" });
-    }
-    catch (Exception ex)
-    {
-        return Results.BadRequest(new { Error = ex.Message });
+        return Results.BadRequest(new ErrorResponseDTO { Error = ex.Message });
     }
 });
 
