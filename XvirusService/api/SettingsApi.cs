@@ -12,8 +12,8 @@ namespace XvirusService.Api
             {
                 try
                 {
-                    var settings = XvirusSDK.GetSettings();
-                    var appSettings = Settings.LoadApp();
+                    var settings = Settings.Load();
+                    var appSettings = Settings.LoadAppSettings();
                     var response = new SettingsResponseDTO { Settings = settings, AppSettings = appSettings };
                     return Results.Ok(response);
                 }
@@ -23,12 +23,12 @@ namespace XvirusService.Api
                 }
             });
 
-            app.MapPut("/settings", (SettingsDTO newSettings, AppSettingsDTO newAppSettings) =>
+            app.MapPut("/settings", (SettingsResponseDTO newSettings) =>
             {
                 try
                 {
-                    Settings.Save(newSettings);
-                    Settings.SaveApp(newAppSettings);
+                    Settings.Save(newSettings.Settings);
+                    Settings.SaveAppSettings(newSettings.AppSettings);
                     return Results.Ok();
                 }
                 catch (Exception ex)

@@ -40,7 +40,7 @@ namespace Xvirus
             }
         }
 
-        public static AppSettingsDTO LoadApp(string path = "appsettings.json")
+        public static AppSettingsDTO LoadAppSettings(string path = "appsettings.json")
         {
             var fullPath = Utils.RelativeToFullPath(path);
             if (!File.Exists(fullPath))
@@ -57,7 +57,7 @@ namespace Xvirus
             }
         }
 
-        public static void SaveApp(AppSettingsDTO settings, string path = "appsettings.json")
+        public static void SaveAppSettings(AppSettingsDTO settings, string path = "appsettings.json")
         {
             var fullPath = Utils.RelativeToFullPath(path);
             try

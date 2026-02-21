@@ -1,118 +1,82 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
+import { SettingsDTO } from '../model/SettingsDTO';
+import { AppSettingsDTO } from '../model/AppSettingsDTO';
+import { SettingsResponseDTO } from '../model/SettingsResponseDTO';
+import { fetchSettings, saveSettings } from '../api/settingsApi';
 
 export default function SettingsView() {
-  const [settings, setSettings] = useState({
+// split state to match backend DTOs
+  const [settings, setSettings] = useState<SettingsDTO>({
     enableSignatures: true,
     enableHeuristics: true,
     enableAIScan: true,
-    checkSDKUpdates: true,
     heuristicsLevel: 4,
     aiLevel: 10,
+    maxScanLength: null,
+    maxHeuristicsPeScanLength: 20971520,
+    maxHeuristicsOthersScanLength: 10485760,
+    maxAIScanLength: 20971520,
+    checkSDKUpdates: true,
+    databaseFolder: 'Database',
+    databaseVersion: { aiModel: 0, mainDB: 0, dailyDB: 0, whiteDB: 0, dailywlDB: 0, heurDB: 0, heurDB2: 0, malvendorDB: 0 }
+  });
+
+  const [appSettings, setAppSettings] = useState<AppSettingsDTO>({
+    language: 'en',
+    darkMode: true,
+    startWithWindows: true,
     enableContextMenu: true,
     passwordProtection: false,
     enableLogs: true,
     onlyScanExecutables: true,
-    maxExeScanLength: 20971520,
-    maxOtherScanLength: 10485760,
-    autoQuarantine: true
-  });
-  
-
-
-  const [localSettings, setLocalSettings] = useState({
-    scheduledScan: localStorage.getItem('scheduledScan') === 'true',
-    scanInterval: localStorage.getItem('scanInterval') || 'daily',
-    language: localStorage.getItem('language') || 'en',
-    darkMode: localStorage.getItem('darkMode') === 'true',
-    startWithWindows: localStorage.getItem('startWithWindows') === 'true'
+    autoQuarantine: true,
+    scheduledScan: 'off',
+    realTimeProtection: true,
+    threatAction: 'auto',
+    behaviorProtection: true,
+    cloudScan: false,
+    networkProtection: true,
+    selfDefense: true,
+    showNotifications: true
   });
 
   useEffect(() => {
-    // Fetch settings from backend
-    const fetchSettings = async () => {
+    // Fetch structured settings from backend via helper
+    const get = async () => {
       try {
-        const response = await fetch('http://localhost:5236/settings');
-        const data = await response.json();
-        setSettings({
-          enableSignatures: data.enableSignatures,
-          enableHeuristics: data.enableHeuristics,
-          enableAIScan: data.enableAIScan,
-          checkSDKUpdates: data.checkSDKUpdates,
-          heuristicsLevel: data.heuristicsLevel,
-          aiLevel: data.aiLevel,
-          enableContextMenu: data.enableContextMenu ?? true,
-          passwordProtection: data.passwordProtection ?? false,
-          enableLogs: data.enableLogs ?? true,
-          onlyScanExecutables: data.onlyScanExecutables ?? true,
-          maxExeScanLength: data.maxExeScanLength ?? 20971520,
-          maxOtherScanLength: data.maxOtherScanLength ?? 10485760,
-          autoQuarantine: data.autoQuarantine ?? true,
-          // protection settings
-          behaviorProtection: data.behaviorProtection ?? true,
-          cloudScan: data.cloudScan ?? false,
-          networkProtection: data.networkProtection ?? true,
-          selfDefense: data.selfDefense ?? true,
-          showNotifications: data.showNotifications ?? true,
-          threatAction: data.threatAction ?? 'auto'
-        } as any);
+        const data = await fetchSettings();
+        setSettings(data.settings);
+        setAppSettings(data.appSettings);
       } catch (error) {
         console.error('Failed to fetch settings:', error);
       }
     };
 
-    fetchSettings();
+    get();
   }, []);
 
-  const handleSettingChange = async (field: string, value: boolean | string | number) => {
-    const newSettings = { ...settings, [field]: value };
-    setSettings(newSettings);
+  const handleSettingChange = (field: keyof SettingsDTO, value: boolean | string | number | null) => {
+    setSettings(prev => ({ ...prev, [field]: value } as any));
+  };
 
-    // Save to backend
+  const handleAppSettingChange = (field: keyof AppSettingsDTO, value: string | boolean) => {
+    setAppSettings(prev => ({ ...prev, [field]: value } as any));
+  };
+
+  const saveAllSettings = async () => {
     try {
-      await fetch('http://localhost:5236/settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          enableSignatures: newSettings.enableSignatures,
-          enableHeuristics: newSettings.enableHeuristics,
-          enableAIScan: newSettings.enableAIScan,
-          checkSDKUpdates: newSettings.checkSDKUpdates,
-          heuristicsLevel: newSettings.heuristicsLevel,
-          aiLevel: newSettings.aiLevel,
-          enableContextMenu: newSettings.enableContextMenu,
-          passwordProtection: newSettings.passwordProtection,
-          enableLogs: newSettings.enableLogs,
-          onlyScanExecutables: newSettings.onlyScanExecutables,
-          maxExeScanLength: newSettings.maxExeScanLength,
-          maxOtherScanLength: newSettings.maxOtherScanLength,
-          autoQuarantine: newSettings.autoQuarantine,
-          // protection settings
-          behaviorProtection: (newSettings as any).behaviorProtection,
-          cloudScan: (newSettings as any).cloudScan,
-          networkProtection: (newSettings as any).networkProtection,
-          selfDefense: (newSettings as any).selfDefense,
-          showNotifications: (newSettings as any).showNotifications,
-          threatAction: (newSettings as any).threatAction || 'auto',
-          databaseFolder: 'Database',
-          databaseVersion: { aiModel: 0, mainDB: 0, dailyDB: 0, whiteDB: 0, dailywlDB: 0, heurDB: 0, heurDB2: 0, malvendorDB: 0 },
-          maxScanLength: null,
-          maxHeuristicsPeScanLength: 20971520,
-          maxHeuristicsOthersScanLength: 10485760,
-          maxAIScanLength: 20971520
-        })
-      });
+      const payload: SettingsResponseDTO = { settings, appSettings };
+      await saveSettings(payload);
     } catch (error) {
       console.error('Failed to save settings:', error);
     }
   };
 
-  const handleLocalSettingChange = (field: string, value: string | boolean) => {
-    const newLocalSettings = { ...localSettings, [field]: value };
-    setLocalSettings(newLocalSettings);
-    localStorage.setItem(field, value.toString());
-  };
+  // appSettings replaces previous localSettings
+  // the saveAllSettings helper will be used when any value changes
+  
 
-  const isRealTimeProtectionEnabled = settings.enableSignatures && settings.enableHeuristics && settings.enableAIScan;
+  const isRealTimeProtectionEnabled = appSettings.realTimeProtection;
 
   // Slider state for three pages: 0 = General, 1 = Scan, 2 = Protection
   const [page, setPage] = useState(0);
@@ -121,6 +85,9 @@ export default function SettingsView() {
   const startX = useRef<number | null>(null);
   const currentTranslate = useRef(0);
   const isDragging = useRef(false);
+
+  // how many pixels you must move before the swipe gesture is recognised
+  const dragThreshold = 8;
 
   const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 
@@ -131,22 +98,33 @@ export default function SettingsView() {
 
   const onPointerDown = (e: any) => {
     startX.current = e.touches ? e.touches[0].clientX : e.clientX;
-    isDragging.current = true;
-    if (sliderRef.current) sliderRef.current.style.transition = 'none';
+    // don't immediately treat it as dragging; wait until movement exceeds threshold
+    isDragging.current = false;
   };
 
   const onPointerMove = (e: any) => {
-    if (!isDragging.current || startX.current == null) return;
+    if (startX.current == null) return;
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const dx = clientX - startX.current;
+
+    if (!isDragging.current) {
+      // only start actual dragging when threshold exceeded
+      if (Math.abs(dx) < dragThreshold) return;
+      isDragging.current = true;
+      if (sliderRef.current) sliderRef.current.style.transition = 'none';
+    }
+
     const width = viewportRef.current?.clientWidth || 1;
-    const base = -page * width;
-    currentTranslate.current = base + dx;
+    currentTranslate.current = -page * width + dx;
     if (sliderRef.current) sliderRef.current.style.transform = `translateX(${currentTranslate.current}px)`;
   };
 
   const onPointerUp = (e: any) => {
-    if (!isDragging.current) return;
+    if (!isDragging.current) {
+      // it was just a tap or insignificant movement
+      startX.current = null;
+      return;
+    }
     isDragging.current = false;
     const width = viewportRef.current?.clientWidth || 1;
     const dx = currentTranslate.current + page * width; // offset from base
@@ -171,16 +149,6 @@ export default function SettingsView() {
     }
   }, [page]);
 
-  const [isPaused, setIsPaused] = useState(false);
-
-  // autoplay demo: advance pages every 4s unless paused
-  useEffect(() => {
-    if (isPaused) return;
-    const id = setInterval(() => {
-      setPage((p) => (p < 2 ? p + 1 : 0));
-    }, 4000);
-    return () => clearInterval(id);
-  }, [isPaused]);
   const pageTitles = ['General Settings', 'Scan Settings', 'Protection Settings'];
   const pageTitle = pageTitles[page] || 'Settings';
 
@@ -188,8 +156,6 @@ export default function SettingsView() {
     <div class="view-container">
       <div
         class="card settings-card"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
       >
         <h2 class="title">{pageTitle}</h2>
 
@@ -210,8 +176,8 @@ export default function SettingsView() {
                 <label class="setting-label">Language</label>
                 <select
                   class="dropdown"
-                  value={localSettings.language}
-                  onChange={(e: any) => handleLocalSettingChange('language', e.currentTarget.value)}
+                  value={appSettings.language}
+                  onChange={(e: any) => { handleAppSettingChange('language', e.currentTarget.value); saveAllSettings(); }}
                 >
                   <option value="en">English</option>
                 </select>
@@ -221,8 +187,8 @@ export default function SettingsView() {
                 <input
                   type="checkbox"
                   class="toggle-switch"
-                  checked={localSettings.darkMode}
-                  onChange={(e: any) => handleLocalSettingChange('darkMode', e.currentTarget.checked)}
+                  checked={appSettings.darkMode}
+                  onChange={(e: any) => { handleAppSettingChange('darkMode', e.currentTarget.checked); saveAllSettings(); }}
                 />
               </div>
 
@@ -231,8 +197,8 @@ export default function SettingsView() {
                 <input
                   type="checkbox"
                   class="toggle-switch"
-                  checked={localSettings.startWithWindows}
-                  onChange={(e: any) => handleLocalSettingChange('startWithWindows', e.currentTarget.checked)}
+                  checked={appSettings.startWithWindows}
+                  onChange={(e: any) => { handleAppSettingChange('startWithWindows', e.currentTarget.checked); saveAllSettings(); }}
                 />
               </div>
               <div class="setting-item">
@@ -241,7 +207,7 @@ export default function SettingsView() {
                   type="checkbox"
                   class="toggle-switch"
                   checked={settings.checkSDKUpdates}
-                  onChange={(e: any) => handleSettingChange('checkSDKUpdates', e.currentTarget.checked)}
+                  onChange={(e: any) => { handleSettingChange('checkSDKUpdates', e.currentTarget.checked); saveAllSettings(); }}
                 />
               </div>
 
@@ -250,8 +216,8 @@ export default function SettingsView() {
                 <input
                   type="checkbox"
                   class="toggle-switch"
-                  checked={settings.enableContextMenu}
-                  onChange={(e: any) => handleSettingChange('enableContextMenu', e.currentTarget.checked)}
+                  checked={appSettings.enableContextMenu}
+                  onChange={(e: any) => { handleAppSettingChange('enableContextMenu', e.currentTarget.checked); saveAllSettings(); }}
                 />
               </div>
 
@@ -260,8 +226,8 @@ export default function SettingsView() {
                 <input
                   type="checkbox"
                   class="toggle-switch"
-                  checked={settings.passwordProtection}
-                  onChange={(e: any) => handleSettingChange('passwordProtection', e.currentTarget.checked)}
+                  checked={appSettings.passwordProtection}
+                  onChange={(e: any) => { handleAppSettingChange('passwordProtection', e.currentTarget.checked); saveAllSettings(); }}
                 />
               </div>
 
@@ -270,8 +236,8 @@ export default function SettingsView() {
                 <input
                   type="checkbox"
                   class="toggle-switch"
-                  checked={settings.enableLogs}
-                  onChange={(e: any) => handleSettingChange('enableLogs', e.currentTarget.checked)}
+                  checked={appSettings.enableLogs}
+                  onChange={(e: any) => { handleAppSettingChange('enableLogs', e.currentTarget.checked); saveAllSettings(); }}
                 />
               </div>
             </section>
@@ -282,7 +248,7 @@ export default function SettingsView() {
                 <select
                   class="dropdown"
                   value={String(settings.heuristicsLevel)}
-                  onChange={(e: any) => handleSettingChange('heuristicsLevel', Number(e.currentTarget.value))}
+                  onChange={(e: any) => { handleSettingChange('heuristicsLevel', Number(e.currentTarget.value)); saveAllSettings(); }}
                 >
                   <option value="5">High</option>
                   <option value="3">Medium</option>
@@ -296,7 +262,7 @@ export default function SettingsView() {
                 <select
                   class="dropdown"
                   value={String(settings.aiLevel)}
-                  onChange={(e: any) => handleSettingChange('aiLevel', Number(e.currentTarget.value))}
+                  onChange={(e: any) => { handleSettingChange('aiLevel', Number(e.currentTarget.value)); saveAllSettings(); }}
                 >
                   <option value="80">High</option>
                   <option value="50">Medium</option>
@@ -310,8 +276,8 @@ export default function SettingsView() {
                 <input
                   type="checkbox"
                   class="toggle-switch"
-                  checked={settings.onlyScanExecutables}
-                  onChange={(e: any) => handleSettingChange('onlyScanExecutables', e.currentTarget.checked)}
+                  checked={appSettings.onlyScanExecutables}
+                  onChange={(e: any) => { handleAppSettingChange('onlyScanExecutables', e.currentTarget.checked); saveAllSettings(); }}
                 />
               </div>
 
@@ -319,8 +285,8 @@ export default function SettingsView() {
                 <label class="setting-label">Max EXE scan length</label>
                 <select
                   class="dropdown"
-                  value={String(settings.maxExeScanLength)}
-                  onChange={(e: any) => handleSettingChange('maxExeScanLength', Number(e.currentTarget.value))}
+                  value={String(settings.maxHeuristicsPeScanLength)}
+                  onChange={(e: any) => { handleSettingChange('maxHeuristicsPeScanLength', Number(e.currentTarget.value)); saveAllSettings(); }}
                 >
                   <option value="0">Unlimited</option>
                   <option value="1048576">1 MB</option>
@@ -335,8 +301,8 @@ export default function SettingsView() {
                 <label class="setting-label">Max Other files scan length</label>
                 <select
                   class="dropdown"
-                  value={String(settings.maxOtherScanLength)}
-                  onChange={(e: any) => handleSettingChange('maxOtherScanLength', Number(e.currentTarget.value))}
+                  value={String(settings.maxHeuristicsOthersScanLength)}
+                  onChange={(e: any) => { handleSettingChange('maxHeuristicsOthersScanLength', Number(e.currentTarget.value)); saveAllSettings(); }}
                 >
                   <option value="0">Unlimited</option>
                   <option value="1048576">1 MB</option>
@@ -352,8 +318,8 @@ export default function SettingsView() {
                 <input
                   type="checkbox"
                   class="toggle-switch"
-                  checked={settings.autoQuarantine}
-                  onChange={(e: any) => handleSettingChange('autoQuarantine', e.currentTarget.checked)}
+                  checked={appSettings.autoQuarantine}
+                  onChange={(e: any) => { handleAppSettingChange('autoQuarantine', e.currentTarget.checked); saveAllSettings(); }}
                 />
               </div>
 
@@ -361,11 +327,11 @@ export default function SettingsView() {
                 <label class="setting-label">Scheduled scan</label>
                 <select
                   class="dropdown"
-                  value={localSettings.scanInterval}
+                  value={appSettings.scheduledScan}
                   onChange={(e: any) => {
-                    const val = e.currentTarget.value;
-                    handleLocalSettingChange('scanInterval', val);
-                    handleLocalSettingChange('scheduledScan', val !== 'off');
+                    const val = e.currentTarget.value as AppSettingsDTO['scheduledScan'];
+                    handleAppSettingChange('scheduledScan', val);
+                    saveAllSettings();
                   }}
                 >
                   <option value="off">Off</option>
@@ -385,9 +351,12 @@ export default function SettingsView() {
                   checked={isRealTimeProtectionEnabled}
                   onChange={(e: any) => {
                     const enabled = e.currentTarget.checked;
+                    handleAppSettingChange('realTimeProtection', enabled);
+                    // keep engines in sync as before
                     handleSettingChange('enableSignatures', enabled);
                     handleSettingChange('enableHeuristics', enabled);
                     handleSettingChange('enableAIScan', enabled);
+                    saveAllSettings();
                   }}
                 />
               </div>
@@ -396,8 +365,8 @@ export default function SettingsView() {
                 <label class="setting-label">If a threat is found</label>
                 <select
                   class="dropdown"
-                  value={(settings as any).threatAction || 'auto'}
-                  onChange={(e: any) => handleSettingChange('threatAction', e.currentTarget.value)}
+                  value={appSettings.threatAction || 'auto'}
+                  onChange={(e: any) => { handleAppSettingChange('threatAction', e.currentTarget.value); saveAllSettings(); }}
                 >
                   <option value="auto">Automatically quarantine</option>
                   <option value="ask">Ask me</option>
@@ -409,8 +378,8 @@ export default function SettingsView() {
                 <input
                   type="checkbox"
                   class="toggle-switch"
-                  checked={(settings as any).behaviorProtection ?? true}
-                  onChange={(e: any) => handleSettingChange('behaviorProtection', e.currentTarget.checked)}
+                  checked={appSettings.behaviorProtection ?? true}
+                  onChange={(e: any) => { handleAppSettingChange('behaviorProtection', e.currentTarget.checked); saveAllSettings(); }}
                 />
               </div>
 
@@ -419,8 +388,8 @@ export default function SettingsView() {
                 <input
                   type="checkbox"
                   class="toggle-switch"
-                  checked={(settings as any).cloudScan ?? false}
-                  onChange={(e: any) => handleSettingChange('cloudScan', e.currentTarget.checked)}
+                  checked={appSettings.cloudScan ?? false}
+                  onChange={(e: any) => { handleAppSettingChange('cloudScan', e.currentTarget.checked); saveAllSettings(); }}
                 />
               </div>
 
@@ -429,8 +398,8 @@ export default function SettingsView() {
                 <input
                   type="checkbox"
                   class="toggle-switch"
-                  checked={(settings as any).networkProtection ?? true}
-                  onChange={(e: any) => handleSettingChange('networkProtection', e.currentTarget.checked)}
+                  checked={appSettings.networkProtection ?? true}
+                  onChange={(e: any) => { handleAppSettingChange('networkProtection', e.currentTarget.checked); saveAllSettings(); }}
                 />
               </div>
 
@@ -439,8 +408,8 @@ export default function SettingsView() {
                 <input
                   type="checkbox"
                   class="toggle-switch"
-                  checked={(settings as any).selfDefense ?? true}
-                  onChange={(e: any) => handleSettingChange('selfDefense', e.currentTarget.checked)}
+                  checked={appSettings.selfDefense ?? true}
+                  onChange={(e: any) => { handleAppSettingChange('selfDefense', e.currentTarget.checked); saveAllSettings(); }}
                 />
               </div>
 
@@ -449,8 +418,8 @@ export default function SettingsView() {
                 <input
                   type="checkbox"
                   class="toggle-switch"
-                  checked={(settings as any).showNotifications ?? true}
-                  onChange={(e: any) => handleSettingChange('showNotifications', e.currentTarget.checked)}
+                  checked={appSettings.showNotifications ?? true}
+                  onChange={(e: any) => { handleAppSettingChange('showNotifications', e.currentTarget.checked); saveAllSettings(); }}
                 />
               </div>
             </section>

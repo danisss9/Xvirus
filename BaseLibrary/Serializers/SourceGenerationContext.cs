@@ -8,6 +8,7 @@ namespace BaseLibrary.Serializers
     [JsonSerializable(typeof(SettingsDTO))]
     [JsonSerializable(typeof(AppSettingsDTO))]
     [JsonSerializable(typeof(DatabaseDTO))]
+    [JsonSerializable(typeof(HistoryEntry))]
     public partial class SourceGenerationContext : JsonSerializerContext { }
 
     [JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Default, WriteIndented = true)]

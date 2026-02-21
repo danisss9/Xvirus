@@ -1,6 +1,7 @@
 using System.Threading.Channels;
+using XvirusService;
 
-namespace XvirusService;
+namespace XvirusService.Services;
 
 public class ServerEventService
 {

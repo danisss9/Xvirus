@@ -1,13 +1,12 @@
 using System.Text.Json.Serialization;
 using Xvirus.Model;
 using XvirusService.Model;
+using XvirusService.Services;
 
 namespace XvirusService;
 
 [JsonSerializable(typeof(ServerEvent))]
 [JsonSerializable(typeof(ProcessSpawnEvent))]
-[JsonSerializable(typeof(ScanHistoryEntry))]
-[JsonSerializable(typeof(List<ScanHistoryEntry>))]
 [JsonSerializable(typeof(ScanRequest))]
 [JsonSerializable(typeof(ScanResult))]
 [JsonSerializable(typeof(SettingsDTO))]

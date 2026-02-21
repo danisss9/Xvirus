@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import { HistoryEntry } from '../model/HistoryEntry';
 import { Rule } from '../model/Rule';
 import { QuarantineEntry } from '../model/QuarantineEntry';
+import { fetchHistory, clearHistory as apiClearHistory } from '../api/historyApi';
 
 const IconTrash = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
@@ -66,7 +67,7 @@ export default function HistoryView() {
     const fetchAll = async () => {
       try {
         const [histRes, rulesRes, quarRes] = await Promise.allSettled([
-          fetch('http://localhost:5236/history').then(r => r.json()),
+          fetchHistory(),
           fetch('http://localhost:5236/rules').then(r => r.json()),
           fetch('http://localhost:5236/quarantine').then(r => r.json()),
         ]);
@@ -85,8 +86,6 @@ export default function HistoryView() {
           type: 'Error',
           timestamp: Date.now(),
           details: 'Unable to load scan history',
-          filesScanned: 0,
-          threatsFound: 0,
         }]);
         setRules([
           { id: 'example-rule-1', name: 'Example rule 1', path: 'C:\\path\\to\\exclude1' },
@@ -197,7 +196,7 @@ export default function HistoryView() {
 
   const clearHistory = async () => {
     try {
-      await fetch('http://localhost:5236/history', { method: 'DELETE' });
+      await apiClearHistory();
       setEntries([]);
     } catch (e) { console.error(e); }
   };
@@ -272,15 +271,6 @@ export default function HistoryView() {
 
   const pageTitles = ['History', 'Rules', 'Quarantine'];
 
-  if (loading) {
-    return (
-      <div class="view-container">
-        <div class="card history-card">
-          <p class="loading-text">Loading...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div class="view-container">
@@ -369,7 +359,9 @@ export default function HistoryView() {
 
             {/* Page 1 – History */}
             <section class="settings-page slider-page">
-              {filteredEntries.length === 0 ? (
+              {loading ? (
+                <p class="loading-text">Loading...</p>
+              ) : filteredEntries.length === 0 ? (
                 <p class="no-history">No history found</p>
               ) : filteredEntries.map((entry, i) => (
                 <div key={i} class="list-item">
@@ -380,18 +372,15 @@ export default function HistoryView() {
                   <p class="history-details">
                     {entry.details}
                   </p>
-                  {entry.filesScanned > 0 && (
-                    <p class="history-stats">
-                      {entry.filesScanned} files &bull; {entry.threatsFound} threats
-                    </p>
-                  )}
                 </div>
               ))}
             </section>
 
             {/* Page 2 – Rules */}
             <section class="settings-page slider-page">
-              {filteredRules.length === 0 ? (
+              {loading ? (
+                <p class="loading-text">Loading...</p>
+              ) : filteredRules.length === 0 ? (
                 <p class="no-history">No rules</p>
               ) : filteredRules.map((rule) => (
                 <div key={rule.id} class="list-item row-center-gap">
@@ -432,7 +421,9 @@ export default function HistoryView() {
 
             {/* Page 3 – Quarantine */}
             <section class="settings-page slider-page">
-              {filteredQuarantine.length === 0 ? (
+              {loading ? (
+                <p class="loading-text">Loading...</p>
+              ) : filteredQuarantine.length === 0 ? (
                 <p class="no-history">No quarantined files</p>
               ) : filteredQuarantine.map((file) => (
                 <div key={file.id} class="list-item row-center-gap">

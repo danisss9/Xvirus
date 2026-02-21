@@ -15,7 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BaseLibrary\BaseLibrary.csproj" />
-    <ProjectReference Include="..\CSharpSDK\CSharpSDK.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
 using System.Management;
 
-namespace XvirusService;
+namespace XvirusService.Services;
 
 public class ProcessSpawnEventArgs : EventArgs
 {
