@@ -377,6 +377,7 @@ body {
 .settings-slider-viewport {
   width: 100%;
   overflow: hidden;
+  flex: 1;
 }
 
 .settings-card {
@@ -543,9 +544,203 @@ body {
   padding-right: 32px;
 }
 
+
+/* Slider page common styles */
+.slider-page {
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  max-height: 340px;
+  padding-right: 2px;
+}
+
+.list-item {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.icon-btn {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.loading-text {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 20px;
+}
+
+.action-btn {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+  padding: 0;
+  margin-left: 8px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 8px 0;
+  position: relative;
+}
+
+.confirm-popover {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 200;
+  width: 140px;
+  text-align: center;
+}
+
+.confirm-popover p {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* menu style used by Add rule popover */
+.rule-menu {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 200;
+  width: auto;
+  text-align: left;
+}
+
+.rule-menu p {
+  margin: 0 0 4px 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.search-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 10px 8px 32px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--text-primary);
+  outline: none;
+  font-family: inherit;
+}
+
+.row-center-gap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.actions-row {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.flex-1 {
+  flex: 1;
+  min-width: 0;
+}
+
+.btn-danger {
+  color: var(--danger);
+}
+
+.btn-teal {
+  color: var(--teal);
+}
+
+.btn-bg-teal {
+  background: var(--teal);
+  color: white;
+  border: 1px solid var(--teal);
+}
+
+.item-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-path {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 2px 0 0 0;
+  word-break: break-all;
+}
+
 /* History View Styles */
 .history-card {
   max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.history-stats {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 3px 0 0 0;
 }
 
 .history-list {
@@ -706,6 +901,34 @@ body {
   transform: translateY(0) scale(0.96);
 }
 
+/* custom scrollbar - modern thin style */
+
+/* WebKit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
 ::-webkit-scrollbar-thumb:hover {
+  background: var(--teal);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+*::-webkit-scrollbar-thumb:hover {
   background: var(--teal);
 }
