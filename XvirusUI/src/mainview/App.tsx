@@ -5,7 +5,7 @@ import SettingsView from './views/SettingsView';
 import HistoryView from './views/HistoryView';
 import BottomNav from './components/BottomNav';
 import WindowControls from './components/WindowControls';
-import { initializeWindow } from './utils/windowUtils';
+import { initializeWindow } from './api/bunRpc';
 import './styles/app.css';
 
 export default function App() {

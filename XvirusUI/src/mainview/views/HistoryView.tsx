@@ -4,6 +4,7 @@ import { Rule } from '../model/Rule';
 import { QuarantineEntry } from '../model/QuarantineEntry';
 import { fetchHistory, clearHistory as apiClearHistory } from '../api/historyApi';
 import { fetchRules, addAllowRule, addBlockRule, removeRule } from '../api/rulesApi';
+import { getFilePath } from '../api/bunRpc';
 
 const IconTrash = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
@@ -74,7 +75,7 @@ export default function HistoryView() {
         ]);
         if (histRes.status === 'fulfilled') setEntries(histRes.value || []);
         if (rulesRes.status === 'fulfilled') {
-          setRules(rulesRes.value.map(r => ({ ...r, name: r.name || r.path })));
+          setRules(rulesRes.value);
         }
         if (quarRes.status === 'fulfilled') setQuarantine(quarRes.value || []);
       } catch (e) {
@@ -91,16 +92,16 @@ export default function HistoryView() {
           details: 'Unable to load scan history',
         }]);
         setRules([
-          { id: 'example-rule-1', name: 'Example rule 1', path: 'C:\\path\\to\\exclude1' },
-          { id: 'example-rule-2', name: 'Example rule 2', path: 'C:\\path\\to\\exclude2' },
-          { id: 'example-rule-3', name: 'Example rule 3', path: 'C:\\path\\to\\exclude3' },
-          { id: 'example-rule-4', name: 'Example rule 4', path: 'C:\\path\\to\\exclude4' },
-          { id: 'example-rule-5', name: 'Example rule 5', path: 'C:\\path\\to\\exclude5' },
-          { id: 'example-rule-6', name: 'Example rule 6', path: 'C:\\path\\to\\exclude6' },
-          { id: 'example-rule-7', name: 'Example rule 7', path: 'C:\\path\\to\\exclude7' },
-          { id: 'example-rule-8', name: 'Example rule 8', path: 'C:\\path\\to\\exclude8' },
-          { id: 'example-rule-9', name: 'Example rule 9', path: 'C:\\path\\to\\exclude9' },
-          { id: 'example-rule-10', name: 'Example rule 10', path: 'C:\\path\\to\\exclude10' },
+          { id: 'example-rule-1', path: 'C:\\path\\to\\exclude1', type: 'allow' },
+          { id: 'example-rule-2', path: 'C:\\path\\to\\exclude2', type: 'block' },
+          { id: 'example-rule-3', path: 'C:\\path\\to\\exclude3', type: 'allow' },
+          { id: 'example-rule-4', path: 'C:\\path\\to\\exclude4', type: 'block' },
+          { id: 'example-rule-5', path: 'C:\\path\\to\\exclude5', type: 'allow' },
+          { id: 'example-rule-6', path: 'C:\\path\\to\\exclude6', type: 'block' },
+          { id: 'example-rule-7', path: 'C:\\path\\to\\exclude7', type: 'allow' },
+          { id: 'example-rule-8', path: 'C:\\path\\to\\exclude8', type: 'block' },
+          { id: 'example-rule-9', path: 'C:\\path\\to\\exclude9', type: 'allow' },
+          { id: 'example-rule-10', path: 'C:\\path\\to\\exclude10', type: 'block' },
         ]);
         setQuarantine([{
           id: 'example-file',
@@ -206,15 +207,14 @@ export default function HistoryView() {
 
   // type can be 'allow' or 'block'; used for menu selection.
   const addRule = async (type: 'allow' | 'block' = 'allow') => {
-    const path = prompt(`Enter file or folder path to ${type} rule:`);
+    const path = await getFilePath();
     if (!path) return;
     try {
       const newRule = type === 'allow'
         ? await addAllowRule(path)
         : await addBlockRule(path);
-      // ensure we have a name for display
-      const ruleWithName = { ...newRule, name: newRule.name || newRule.path };
-      setRules(prev => [...prev, ruleWithName]);
+      const ruleWithType = { ...newRule, type };
+      setRules(prev => [...prev, ruleWithType]);
     } catch (e) { console.error(e); }
   };
 
@@ -264,7 +264,8 @@ export default function HistoryView() {
     e.type.toLowerCase().includes(q) || e.details.toLowerCase().includes(q)
   );
   const filteredRules = rules.filter(r =>
-    (r.name ?? '').toLowerCase().includes(q) || r.path.toLowerCase().includes(q)
+    r.path.toLowerCase().includes(q) ||
+    (r.type ?? '').toLowerCase().includes(q)
   );
   const filteredQuarantine = quarantine.filter(f =>
     f.name.toLowerCase().includes(q) || f.path.toLowerCase().includes(q)
@@ -386,12 +387,10 @@ export default function HistoryView() {
               ) : filteredRules.map((rule) => (
                 <div key={rule.id} class="list-item row-center-gap">
                   <div class="flex-1">
-                    <p class="item-title">
-                      {rule.name}
-                    </p>
-                    <p class="item-path">
-                      {rule.path}
-                    </p>
+                    {rule.type && (
+                      <span class={`rule-type badge badge-${rule.type}`}>{rule.type}</span>
+                    )}
+                    <p class="item-path">{rule.path}</p>
                   </div>
                   <div style="position:relative;">
                     <button

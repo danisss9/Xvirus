@@ -32,6 +32,15 @@ const myWebviewRPC = BrowserView.defineRPC<any>({
       minimizeWindow: () => {
         mainWindow?.minimize();
       },
+      getFilePath: async () => {
+        // open file dialog and return selected file path
+        const filePath = await Utils.openFileDialog({
+          allowsMultipleSelection: false,
+          canChooseDirectory: false,
+          canChooseFiles: true,
+        });
+        return filePath?.[0];
+      },
     },
     // When the browser sends a message we can handle it
     // in the main bun process

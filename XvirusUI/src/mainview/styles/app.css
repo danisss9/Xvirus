@@ -719,6 +719,25 @@ body {
   word-break: break-all;
 }
 
+.rule-type {
+  font-size: 10px;
+  text-transform: uppercase;
+  padding: 1px 4px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-bottom: 4px; /* space above path */
+}
+
+.rule-type.badge-allow {
+  background: var(--teal);
+  color: white;
+}
+
+.rule-type.badge-block {
+  background: var(--danger);
+  color: white;
+}
+
 /* History View Styles */
 .history-card {
   max-width: 360px;

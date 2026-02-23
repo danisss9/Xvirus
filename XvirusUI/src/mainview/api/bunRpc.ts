@@ -12,6 +12,10 @@ export type MyWebviewRPCType = {
         params: {};
         response: void;
       };
+      getFilePath: {
+        params: {};
+        response: string;
+      };
     };
   }>;
   // functions that execute in the browser context
@@ -52,5 +56,9 @@ export async function minimizeWindow() {
 }
 
 export async function closeWindow() {
-  electroview.rpc!.request.closeWindow();
+  await electroview.rpc!.request.closeWindow();
+}
+
+export async function getFilePath() {
+  return await electroview.rpc!.request.getFilePath();
 }
