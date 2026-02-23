@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using Xvirus.Model;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace Xvirus
 {
@@ -13,12 +12,14 @@ namespace Xvirus
         public readonly SettingsDTO settings;
         private readonly DB database;
         private readonly AI ai;
+        private readonly Rules rules;
 
-        public Scanner(SettingsDTO settings, DB database, AI ai)
+        public Scanner(SettingsDTO settings, DB database, AI ai, Rules rules)
         {
             this.settings = settings;
             this.database = database;
             this.ai = ai;
+            this.rules = rules;
         }
 
         public ScanResult ScanFile(string filePath)
@@ -29,6 +30,12 @@ namespace Xvirus
 
             if (settings.MaxScanLength != null && fileInfo.Length > settings.MaxScanLength)
                 return new ScanResult(-1, "File too big!", filePath);
+
+            var rule = rules.GetRuleType(filePath);
+            if (rule == RuleType.Block)
+                return new ScanResult(1, "Blocked", filePath);
+            else if (rule == RuleType.Allow)
+                return new ScanResult(0, "Safe", filePath);
 
             string? hash = null;
             using (var md5 = MD5.Create())
@@ -105,14 +112,14 @@ namespace Xvirus
                             }
                         }
                     }
-                    else if(!isExecutable && (settings.MaxHeuristicsOthersScanLength == null || fileInfo.Length <= settings.MaxHeuristicsOthersScanLength)) // 10MBs
+                    else if (!isExecutable && (settings.MaxHeuristicsOthersScanLength == null || fileInfo.Length <= settings.MaxHeuristicsOthersScanLength)) // 10MBs
                     {
                         using var stream = Utils.ReadFile(filePath, fileInfo.Length);
                         var matches = database.heurScriptListPatterns.Search(stream);
                         int score = 0;
                         foreach (var match in matches)
                         {
-                            if(database.heurScriptListDeps.TryGetValue(match.Key, out var matchDeps))
+                            if (database.heurScriptListDeps.TryGetValue(match.Key, out var matchDeps))
                             {
                                 var matchesKeys = matches.Select(m => m.Key).ToHashSet();
                                 if (matchDeps.All(dep => dep[0] == '!' ? !matchesKeys.Contains(dep.Substring(1)) : matchesKeys.Contains(dep)))

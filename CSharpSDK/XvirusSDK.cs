@@ -12,7 +12,7 @@ namespace Xvirus
 
         public static void Load(bool force = false)
         {
-            if(force) 
+            if (force)
                 Unload();
 
             if (force || Scanner == null)
@@ -20,7 +20,8 @@ namespace Xvirus
                 var settings = Settings.Load();
                 var database = new DB(settings);
                 var ai = new AI(settings);
-                Scanner = new Scanner(settings, database, ai);
+                var rules = new Rules();
+                Scanner = new Scanner(settings, database, ai, rules);
             }
         }
 
@@ -56,7 +57,7 @@ namespace Xvirus
             var scanResultsString = JsonSerializer.Serialize(ScanFolder(folderPath), SourceGenerationContext.Default.ScanResult);
             return scanResultsString.Replace("[", "[\n", StringComparison.Ordinal).Replace("]", "\n]", StringComparison.Ordinal);
         }
-        
+
         public static string CheckUpdates(bool loadDBAfterUpdate = false)
         {
             var settings = Settings.Load();

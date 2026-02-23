@@ -13,4 +13,8 @@ namespace XvirusService;
 [JsonSerializable(typeof(AppSettingsDTO))]
 [JsonSerializable(typeof(SettingsResponseDTO))]
 [JsonSerializable(typeof(ErrorResponseDTO))]
+[JsonSerializable(typeof(HistoryEntry))]
+[JsonSerializable(typeof(List<HistoryEntry>))]
+[JsonSerializable(typeof(Rule))]
+[JsonSerializable(typeof(List<Rule>))]
 internal partial class AppJsonSerializerContext : JsonSerializerContext { }

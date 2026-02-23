@@ -1,3 +1,4 @@
+using Xvirus;
 using XvirusService;
 using XvirusService.Api;
 using XvirusService.Services;
@@ -14,6 +15,7 @@ builder.Host.UseWindowsService(o =>
 // Register services
 builder.Services.AddSingleton<RealTimeScanner>();
 builder.Services.AddSingleton<ServerEventService>();
+builder.Services.AddSingleton<Rules>();
 
 // Configure JSON serialization for Native AOT
 builder.Services.ConfigureHttpJsonOptions(options =>
@@ -26,6 +28,7 @@ var app = builder.Build();
 // Register API endpoints
 app.MapSettingsEndpoints();
 app.MapHistoryEndpoints();
+app.MapRulesEndpoints();
 
 // Server-Sent Events endpoint
 app.MapGet("/events", (ServerEventService eventService, HttpContext context, CancellationToken cancellationToken)

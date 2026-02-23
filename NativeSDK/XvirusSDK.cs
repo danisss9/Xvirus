@@ -219,7 +219,8 @@ namespace Xvirus
                 var settings = Settings.Load();
                 var database = new DB(settings);
                 var ai = new AI(settings);
-                Scanner = new Scanner(settings, database, ai);
+                var rules = new Rules();
+                Scanner = new Scanner(settings, database, ai, rules);
             }
         }
 

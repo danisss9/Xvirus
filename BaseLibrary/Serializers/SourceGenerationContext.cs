@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using Xvirus.Model;
 
 namespace BaseLibrary.Serializers
@@ -9,6 +10,7 @@ namespace BaseLibrary.Serializers
     [JsonSerializable(typeof(AppSettingsDTO))]
     [JsonSerializable(typeof(DatabaseDTO))]
     [JsonSerializable(typeof(HistoryEntry))]
+    [JsonSerializable(typeof(Rule))]
     public partial class SourceGenerationContext : JsonSerializerContext { }
 
     [JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Default, WriteIndented = true)]

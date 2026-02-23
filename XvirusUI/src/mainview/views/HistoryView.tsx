@@ -3,6 +3,7 @@ import { HistoryEntry } from '../model/HistoryEntry';
 import { Rule } from '../model/Rule';
 import { QuarantineEntry } from '../model/QuarantineEntry';
 import { fetchHistory, clearHistory as apiClearHistory } from '../api/historyApi';
+import { fetchRules, addAllowRule, addBlockRule, removeRule } from '../api/rulesApi';
 
 const IconTrash = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
@@ -68,11 +69,13 @@ export default function HistoryView() {
       try {
         const [histRes, rulesRes, quarRes] = await Promise.allSettled([
           fetchHistory(),
-          fetch('http://localhost:5236/rules').then(r => r.json()),
+          fetchRules(),
           fetch('http://localhost:5236/quarantine').then(r => r.json()),
         ]);
         if (histRes.status === 'fulfilled') setEntries(histRes.value || []);
-        if (rulesRes.status === 'fulfilled') setRules(rulesRes.value || []);
+        if (rulesRes.status === 'fulfilled') {
+          setRules(rulesRes.value.map(r => ({ ...r, name: r.name || r.path })));
+        }
         if (quarRes.status === 'fulfilled') setQuarantine(quarRes.value || []);
       } catch (e) {
         console.error('Failed to fetch data:', e);
@@ -205,15 +208,13 @@ export default function HistoryView() {
   const addRule = async (type: 'allow' | 'block' = 'allow') => {
     const path = prompt(`Enter file or folder path to ${type} rule:`);
     if (!path) return;
-    const name = path.split(/[/\\]/).pop() || path;
     try {
-      const res = await fetch('http://localhost:5236/rules', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, path, type }),
-      });
-      const newRule = await res.json();
-      setRules(prev => [...prev, newRule]);
+      const newRule = type === 'allow'
+        ? await addAllowRule(path)
+        : await addBlockRule(path);
+      // ensure we have a name for display
+      const ruleWithName = { ...newRule, name: newRule.name || newRule.path };
+      setRules(prev => [...prev, ruleWithName]);
     } catch (e) { console.error(e); }
   };
 
@@ -226,7 +227,7 @@ export default function HistoryView() {
 
   const deleteRule = async (id: string) => {
     try {
-      await fetch(`http://localhost:5236/rules/${id}`, { method: 'DELETE' });
+      await removeRule(id);
       setRules(prev => prev.filter(r => r.id !== id));
     } catch (e) { console.error(e); }
   };
@@ -263,7 +264,7 @@ export default function HistoryView() {
     e.type.toLowerCase().includes(q) || e.details.toLowerCase().includes(q)
   );
   const filteredRules = rules.filter(r =>
-    r.name.toLowerCase().includes(q) || r.path.toLowerCase().includes(q)
+    (r.name ?? '').toLowerCase().includes(q) || r.path.toLowerCase().includes(q)
   );
   const filteredQuarantine = quarantine.filter(f =>
     f.name.toLowerCase().includes(q) || f.path.toLowerCase().includes(q)
