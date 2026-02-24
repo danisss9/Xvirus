@@ -41,6 +41,9 @@ const myWebviewRPC = BrowserView.defineRPC<any>({
         });
         return filePath?.[0];
       },
+      showNotification: ({ title, body }) => {
+        Utils.showNotification({ title, body });
+      },
     },
     // When the browser sends a message we can handle it
     // in the main bun process

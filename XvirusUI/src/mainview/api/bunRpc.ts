@@ -16,6 +16,13 @@ export type MyWebviewRPCType = {
         params: {};
         response: string;
       };
+      showNotification: {
+        params: {
+          title: string;
+          body: string;
+        };
+        response: void;
+      };
     };
   }>;
   // functions that execute in the browser context
@@ -57,6 +64,10 @@ export async function minimizeWindow() {
 
 export async function closeWindow() {
   await electroview.rpc!.request.closeWindow();
+}
+
+export async function showNotification(title: string, body: string) {
+  await electroview.rpc!.request.showNotification({ title, body });
 }
 
 export async function getFilePath() {

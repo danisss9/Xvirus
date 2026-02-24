@@ -96,8 +96,8 @@ namespace Xvirus
                     }
                 }
 
-                if (newUpdates)
-                    Settings.Save(settings);
+                settings.LastUpdateCheck = DateTime.UtcNow;
+                Settings.Save(settings);
 
                 if (settings.CheckSDKUpdates && updateInfo.App.Version != Utils.GetVersion())
                 {

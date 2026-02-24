@@ -13,9 +13,11 @@ builder.Host.UseWindowsService(o =>
 });
 
 // Register services
-builder.Services.AddSingleton<RealTimeScanner>();
+builder.Services.AddSingleton<SettingsService>();
 builder.Services.AddSingleton<ServerEventService>();
 builder.Services.AddSingleton<Rules>();
+builder.Services.AddSingleton<Quarantine>();
+builder.Services.AddSingleton<RealTimeScanner>();
 
 // Configure JSON serialization for Native AOT
 builder.Services.ConfigureHttpJsonOptions(options =>
@@ -29,6 +31,8 @@ var app = builder.Build();
 app.MapSettingsEndpoints();
 app.MapHistoryEndpoints();
 app.MapRulesEndpoints();
+app.MapQuarantineEndpoints();
+app.MapUpdateEndpoints();
 
 // Server-Sent Events endpoint
 app.MapGet("/events", (ServerEventService eventService, HttpContext context, CancellationToken cancellationToken)

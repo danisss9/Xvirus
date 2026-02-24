@@ -1,23 +1,41 @@
-import { useState } from 'preact/hooks';
+import { useState, useEffect } from 'preact/hooks';
+import { fetchLastUpdateCheck, checkUpdates } from '../api/updateApi';
+import { showNotification } from '../api/bunRpc';
 
 export default function HomeView({ onScanStart }: {
   onScanStart: () => void;
 }) {
   const [realtimeProtection, setRealtimeProtection] = useState(true);
   const [checkingUpdates, setCheckingUpdates] = useState(false);
+  const [lastChecked, setLastChecked] = useState<string | null>(null);
+  const [updateMessage, setUpdateMessage] = useState<string | null>(null);
 
   const handleCheckUpdates = async () => {
     setCheckingUpdates(true);
-    // Simulate checking for updates
-    setTimeout(() => {
+    try {
+      const res = await checkUpdates();
+      setUpdateMessage(res.message);
+      setLastChecked(res.lastUpdateCheck || null);
+      await showNotification('Update Check', res.message);
+    } catch (e) {
+      console.error(e);
+      await showNotification('Update Check', 'Update check failed');
+    } finally {
       setCheckingUpdates(false);
-      alert('No updates available');
-    }, 2000);
+    }
   };
 
-  const handleToggleProtection = () => {
-    setRealtimeProtection(!realtimeProtection);
-  };
+  useEffect(() => {
+    const loadLast = async () => {
+      try {
+        const res = await fetchLastUpdateCheck();
+        setLastChecked(res.lastUpdateCheck || null);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    loadLast();
+  }, []);
 
   return (
     <div class="view-container home-view-container">
@@ -33,17 +51,30 @@ export default function HomeView({ onScanStart }: {
       </div>
 
       <div class="card update-card" onClick={handleCheckUpdates}>
-        <div class="update-content">
+        <div class={`update-content ${checkingUpdates ? 'updating' : ''}`}>
           <div class="update-info">
-            <p class="update-title">Up-To-Date</p>
-            <p class="update-subtitle">Checked 5 days ago</p>
+            <p class="update-title">
+              { updateMessage || 'Up-To-Date'}
+            </p>
+            <p class="update-subtitle">
+              {lastChecked ? `Checked ${new Date(lastChecked).toLocaleString()}` : 'Never checked'}
+            </p>
           </div>
-          <div class="update-hover">
-            <svg class="loop-icon" viewBox="0 0 24 24" width="36" height="36" aria-hidden="true">
+          <div class="update-hover" style={{ opacity: checkingUpdates ? 1 : undefined }}>
+            <svg
+              class="loop-icon"
+              viewBox="0 0 24 24"
+              width="36"
+              height="36"
+              aria-hidden="true"
+              style={{ animation: checkingUpdates ? 'spin 2s linear infinite' : 'none' }}
+            >
               <path d="M21 12a9 9 0 1 1-3-6.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
               <polyline points="21 3 21 9 15 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            <p class="update-hover-text">Check for Updates</p>
+            <p class="update-hover-text">
+              {checkingUpdates ? 'Checking for updates...' : 'Check for Updates'}
+            </p>
           </div>
         </div>
       </div>

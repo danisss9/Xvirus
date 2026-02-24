@@ -1,6 +1,6 @@
 using Xvirus;
-using Xvirus.Model;
 using XvirusService.Model;
+using XvirusService.Services;
 
 namespace XvirusService.Api
 {
@@ -8,13 +8,11 @@ namespace XvirusService.Api
     {
         public static void MapSettingsEndpoints(this WebApplication app)
         {
-            app.MapGet("/settings", () =>
+            app.MapGet("/settings", (SettingsService settingsService) =>
             {
                 try
                 {
-                    var settings = Settings.Load();
-                    var appSettings = Settings.LoadAppSettings();
-                    var response = new SettingsResponseDTO { Settings = settings, AppSettings = appSettings };
+                    var response = new SettingsResponseDTO { Settings = settingsService.Settings, AppSettings = settingsService.AppSettings };
                     return Results.Ok(response);
                 }
                 catch (Exception ex)

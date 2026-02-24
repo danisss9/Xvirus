@@ -4,6 +4,7 @@ import { Rule } from '../model/Rule';
 import { QuarantineEntry } from '../model/QuarantineEntry';
 import { fetchHistory, clearHistory as apiClearHistory } from '../api/historyApi';
 import { fetchRules, addAllowRule, addBlockRule, removeRule } from '../api/rulesApi';
+import { fetchQuarantine, deleteQuarantine as apiDeleteQuarantine, restoreQuarantine as apiRestoreQuarantine } from '../api/quarantineApi';
 import { getFilePath } from '../api/bunRpc';
 
 const IconTrash = () => (
@@ -71,7 +72,7 @@ export default function HistoryView() {
         const [histRes, rulesRes, quarRes] = await Promise.allSettled([
           fetchHistory(),
           fetchRules(),
-          fetch('http://localhost:5236/quarantine').then(r => r.json()),
+          fetchQuarantine(),
         ]);
         if (histRes.status === 'fulfilled') setEntries(histRes.value || []);
         if (rulesRes.status === 'fulfilled') {
@@ -105,8 +106,13 @@ export default function HistoryView() {
         ]);
         setQuarantine([{
           id: 'example-file',
-          name: 'infected.exe',
-          path: 'C:\\path\\to\\infected.exe',
+          originalFileName: 'infected.exe',
+          originalFilePath: 'C:\\path\\to\\infected.exe',
+          quarantinedFileName: 'q123.bin',
+          originalAttributes: 'readonly',
+          originalCreationTime: new Date().toISOString(),
+          originalLastWriteTime: new Date().toISOString(),
+          originalLastAccessTime: new Date().toISOString(),
         }]);
       }
     };
@@ -234,15 +240,14 @@ export default function HistoryView() {
 
   const restoreFile = async (id: string) => {
     try {
-      await fetch(`http://localhost:5236/quarantine/${id}/restore`, { method: 'POST' });
+      await apiRestoreQuarantine(id);
       setQuarantine(prev => prev.filter(q => q.id !== id));
     } catch (e) { console.error(e); }
   };
 
   const deleteQuarantine = async (id: string) => {
-    if (!confirm('Permanently delete this file?')) return;
     try {
-      await fetch(`http://localhost:5236/quarantine/${id}`, { method: 'DELETE' });
+      await apiDeleteQuarantine(id);
       setQuarantine(prev => prev.filter(q => q.id !== id));
     } catch (e) { console.error(e); }
   };
@@ -268,7 +273,8 @@ export default function HistoryView() {
     (r.type ?? '').toLowerCase().includes(q)
   );
   const filteredQuarantine = quarantine.filter(f =>
-    f.name.toLowerCase().includes(q) || f.path.toLowerCase().includes(q)
+    f.originalFileName.toLowerCase().includes(q) ||
+    f.originalFilePath.toLowerCase().includes(q)
   );
 
   const pageTitles = ['History', 'Rules', 'Quarantine'];
@@ -429,10 +435,10 @@ export default function HistoryView() {
                 <div key={file.id} class="list-item row-center-gap">
                   <div class="flex-1">
                     <p class="item-title">
-                      {file.name}
+                      {file.originalFileName}
                     </p>
                     <p class="item-path">
-                      {file.path}
+                      {file.originalFilePath}
                     </p>
                   </div>
                   <div class="actions-row">

@@ -17,4 +17,7 @@ namespace XvirusService;
 [JsonSerializable(typeof(List<HistoryEntry>))]
 [JsonSerializable(typeof(Rule))]
 [JsonSerializable(typeof(List<Rule>))]
+[JsonSerializable(typeof(QuarantineEntry))]
+[JsonSerializable(typeof(List<QuarantineEntry>))]
+[JsonSerializable(typeof(UpdateStatusDTO))]
 internal partial class AppJsonSerializerContext : JsonSerializerContext { }

@@ -1,4 +1,6 @@
-﻿namespace Xvirus.Model
+﻿using System;
+
+namespace Xvirus.Model
 {
     public class SettingsDTO
     {
@@ -20,6 +22,7 @@
         // Update Settings
         public bool CheckSDKUpdates { get; set; } = true;
         public string DatabaseFolder { get; set; } = "Database";
+        public DateTime? LastUpdateCheck { get; set; } = null;
         public DatabaseDTO DatabaseVersion { get; set; } = new DatabaseDTO();
     }
 }

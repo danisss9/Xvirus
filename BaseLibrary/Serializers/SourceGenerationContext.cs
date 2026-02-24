@@ -11,11 +11,13 @@ namespace BaseLibrary.Serializers
     [JsonSerializable(typeof(DatabaseDTO))]
     [JsonSerializable(typeof(HistoryEntry))]
     [JsonSerializable(typeof(Rule))]
+    [JsonSerializable(typeof(QuarantineEntry))]
     public partial class SourceGenerationContext : JsonSerializerContext { }
 
     [JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Default, WriteIndented = true)]
     [JsonSerializable(typeof(SettingsDTO))]
     [JsonSerializable(typeof(AppSettingsDTO))]
+    [JsonSerializable(typeof(List<QuarantineEntry>))]
     public partial class SourceGenerationContextIndent : JsonSerializerContext { }
 
     [JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Default, PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
