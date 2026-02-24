@@ -1,4 +1,4 @@
-import { minimizeWindow, closeWindow } from '../api/bunRpc';
+import { minimizeWindow, closeWindow } from '../services/bunRpc';
 
 export default function WindowControls() {
   const handleMinimize = async () => {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 import { fetchLastUpdateCheck, checkUpdates } from '../api/updateApi';
-import { showNotification } from '../api/bunRpc';
+import { showNotification } from '../services/bunRpc';
 
 export default function HomeView({ onScanStart }: {
   onScanStart: () => void;

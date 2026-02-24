@@ -5,9 +5,9 @@ import SettingsView from './views/SettingsView';
 import HistoryView from './views/HistoryView';
 import BottomNav from './components/BottomNav';
 import WindowControls from './components/WindowControls';
-import { initializeWindow } from './api/bunRpc';
+import { initializeWindow } from './services/bunRpc';
 import './styles/app.css';
-import { title } from './services/env';
+import { isFirewall } from './services/env';
 
 export default function App() {
   const [currentView, setCurrentView] = useState('home');
@@ -38,7 +38,7 @@ export default function App() {
   return (
     <div class="app-container">
       <div class="app-header">
-        <h1 class="app-title">{title}</h1>
+        <h1 class="app-title">{isFirewall ? 'Xvirus Firewall' : 'Xvirus Anti-Malware'}</h1>
         <WindowControls />
       </div>
       <div class="app-content">
