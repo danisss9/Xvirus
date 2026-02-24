@@ -1,59 +1,69 @@
 import { Electroview, RPCSchema } from 'electrobun/view';
 
+// ---------------------------------------------------------------------------
+// Server-push event types (sent from C# → bun → webview)
+// ---------------------------------------------------------------------------
+
+export type ServerEventType =
+  | { type: 'updating'; message: string }
+  | { type: 'update-complete'; message: string }
+  | { type: 'threat'; message: string };
+
+type ServerEventHandler = (event: ServerEventType) => void;
+const _serverEventHandlers: ServerEventHandler[] = [];
+
+/** Subscribe to server-push events forwarded from the C# backend. Returns an unsubscribe function. */
+export function onServerEvent(handler: ServerEventHandler): () => void {
+  _serverEventHandlers.push(handler);
+  return () => {
+    const i = _serverEventHandlers.indexOf(handler);
+    if (i !== -1) _serverEventHandlers.splice(i, 1);
+  };
+}
+
+function dispatchServerEvent(event: ServerEventType) {
+  _serverEventHandlers.forEach((h) => h(event));
+}
+
+// ---------------------------------------------------------------------------
+// RPC type definitions
+// ---------------------------------------------------------------------------
+
 export type MyWebviewRPCType = {
-  // functions that execute in the main process
+  // functions that execute in the main bun process
   bun: RPCSchema<{
     requests: {
-      closeWindow: {
-        params: {};
-        response: void;
-      };
-      minimizeWindow: {
-        params: {};
-        response: void;
-      };
-      getFilePath: {
-        params: {};
-        response: string;
-      };
-      showNotification: {
-        params: {
-          title: string;
-          body: string;
-        };
-        response: void;
-      };
+      closeWindow: { params: {}; response: void };
+      minimizeWindow: { params: {}; response: void };
+      getFilePath: { params: {}; response: string };
+      showNotification: { params: { title: string; body: string }; response: void };
     };
   }>;
-  // functions that execute in the browser context
+  // functions/messages that bun sends into this webview
   webview: RPCSchema<{
-    /* requests: {
-      someWebviewFunction: {
-        params: {
-          a: number;
-          b: number;
-        };
-        response: number;
-      };
-    };
     messages: {
-      logToWebview: {
-        msg: string;
-      };
-    }; */
+      serverEvent: { type: string; message: string };
+    };
   }>;
 };
 
+// ---------------------------------------------------------------------------
+// RPC instance
+// ---------------------------------------------------------------------------
+
 const rpc = Electroview.defineRPC<any>({
   handlers: {
-    requests: {
-      /*   someWebviewFunction: ({ a, b }) => {
-        document.body.innerHTML += `bun asked me to do math with ${a} and ${b}\n`;
-        return a + b;
-      }, */
+    messages: {
+      // bun calls mainWindow.rpc.send.serverEvent({ type, message })
+      serverEvent: ({ type, message }: { type: string; message: string }) => {
+        if (type === 'updating' || type === 'update-complete' || type === 'threat') {
+          dispatchServerEvent({ type, message } as ServerEventType);
+        }
+      },
     },
   },
 });
+
 const electroview = new Electroview({ rpc });
 
 export async function initializeWindow() {}

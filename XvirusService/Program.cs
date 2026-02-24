@@ -14,10 +14,11 @@ builder.Host.UseWindowsService(o =>
 
 // Register services
 builder.Services.AddSingleton<SettingsService>();
+builder.Services.AddSingleton<ServerEventService>();
 builder.Services.AddSingleton<Rules>();
 builder.Services.AddSingleton<Quarantine>();
 builder.Services.AddSingleton<RealTimeProtection>();
-builder.Services.AddSingleton<ServerEventService>();
+builder.Services.AddHostedService<AutoUpdater>();
 
 // Configure JSON serialization for Native AOT
 builder.Services.ConfigureHttpJsonOptions(options =>

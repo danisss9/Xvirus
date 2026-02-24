@@ -1,89 +1,79 @@
-using System.Threading.Channels;
-using XvirusService;
-using XvirusService.Model;
+using System.Text;
 
 namespace XvirusService.Services;
 
+/// <summary>
+/// Singleton that keeps every connected SSE client's <see cref="HttpResponse"/>
+/// and lets any other service push named events to all of them.
+/// </summary>
 public class ServerEventService
 {
-    private readonly RealTimeProtection _scanner;
+    private readonly List<HttpResponse> _clients = [];
+    private readonly object _lock = new();
 
-    public ServerEventService(RealTimeProtection scanner)
-    {
-        _scanner = scanner;
-    }
+    // -----------------------------------------------------------------------
+    // SSE endpoint – called by ServerSentEventApi to hold a connection open
+    // -----------------------------------------------------------------------
 
-    public IAsyncEnumerable<string> HandleEvents(HttpContext context, CancellationToken cancellationToken)
+    public async Task HandleEvents(HttpContext context, CancellationToken cancellationToken)
     {
         context.Response.Headers.Append("Content-Type", "text/event-stream");
         context.Response.Headers.Append("Cache-Control", "no-cache");
         context.Response.Headers.Append("Connection", "keep-alive");
         context.Response.Headers.Append("X-Accel-Buffering", "no");
+        context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
 
-        return SendEvents(context, cancellationToken);
-    }
+        await context.Response.Body.FlushAsync(cancellationToken);
 
-    private async IAsyncEnumerable<string> SendEvents(HttpContext context, System.Threading.CancellationToken cancellationToken)
-    {
-        var messageId = 0;
-        var eventQueue = Channel.CreateUnbounded<string>();
-
-        // Subscribe to process spawn events
-        EventHandler<ProcessSpawnEventArgs> handler = (sender, args) =>
-        {
-            try
-            {
-                var sse = FormatServerSentEvent(++messageId, args);
-                eventQueue.Writer.TryWrite(sse);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error queuing event: {ex.Message}");
-            }
-        };
-
-        _scanner.ProcessSpawned += handler;
+        lock (_lock) _clients.Add(context.Response);
 
         try
         {
-            while (await eventQueue.Reader.WaitToReadAsync(cancellationToken))
-            {
-                if (eventQueue.Reader.TryRead(out var sse))
-                {
-                    yield return sse;
-                }
-            }
+            // Hold the connection open until the client disconnects or the host stops.
+            await Task.Delay(Timeout.Infinite, cancellationToken);
         }
+        catch (OperationCanceledException) { }
         finally
         {
-            _scanner.ProcessSpawned -= handler;
-            eventQueue.Writer.Complete();
+            lock (_lock) _clients.Remove(context.Response);
         }
     }
 
-    private static string FormatServerSentEvent(int messageId, ProcessSpawnEventArgs args)
-    {
-        var data = new ProcessSpawnEvent(
-            messageId,
-            args.ProcessId,
-            args.ProcessName ?? "Unknown",
-            args.CommandLine,
-            args.ExecutablePath,
-            args.Timestamp
-        );
+    // -----------------------------------------------------------------------
+    // Push API – called by other services to notify the front-end
+    // -----------------------------------------------------------------------
 
-        var json = System.Text.Json.JsonSerializer.Serialize(data, AppJsonSerializerContext.Default.ProcessSpawnEvent);
-        return $"id: {messageId}\ndata: {json}\n\n";
+    /// <summary>
+    /// Broadcast a named SSE event with a pre-serialised JSON payload to every
+    /// connected front-end client.
+    /// </summary>
+    /// <param name="eventType">
+    ///   Logical event name, e.g. <c>"updating"</c>, <c>"update-complete"</c>,
+    ///   <c>"threat"</c>, <c>"protection-changed"</c>.
+    /// </param>
+    /// <param name="jsonPayload">Already-serialised JSON string used as the SSE <c>data</c> field.</param>
+    public async Task SendAsync(string eventType, string jsonPayload)
+    {
+        List<HttpResponse> snapshot;
+        lock (_lock) snapshot = [.. _clients];
+
+        if (snapshot.Count == 0) return;
+
+        // SSE wire format:  "event: <type>\ndata: <json>\n\n"
+        var bytes = Encoding.UTF8.GetBytes($"event: {eventType}\ndata: {jsonPayload}\n\n");
+
+        foreach (var response in snapshot)
+        {
+            try
+            {
+                await response.Body.WriteAsync(bytes);
+                await response.Body.FlushAsync();
+            }
+            catch
+            {
+                // Client disconnected; it will be removed from the list
+                // when its Task.Delay above is cancelled.
+            }
+        }
     }
 }
-
-public record ServerEvent(int Id, string Message, DateTime Timestamp);
-
-public record ProcessSpawnEvent(
-    int MessageId,
-    int ProcessId,
-    string ProcessName,
-    string? CommandLine,
-    string? ExecutablePath,
-    DateTime Timestamp
-);

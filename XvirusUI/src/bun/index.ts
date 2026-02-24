@@ -1,7 +1,24 @@
-import { BrowserWindow, Updater, Utils, Screen, BrowserView } from 'electrobun/bun';
+import { BrowserWindow, Updater, Utils, Screen, BrowserView, type RPCSchema } from 'electrobun/bun';
+
+type AppRPCType = {
+  bun: RPCSchema<{
+    requests: {
+      closeWindow: { params: {}; response: void };
+      minimizeWindow: { params: {}; response: void };
+      getFilePath: { params: {}; response: string };
+      showNotification: { params: { title: string; body: string }; response: void };
+    };
+  }>;
+  webview: RPCSchema<{
+    messages: {
+      serverEvent: { type: string; message: string };
+    };
+  }>;
+};
 
 const DEV_SERVER_PORT = 5173;
 const DEV_SERVER_URL = `http://localhost:${DEV_SERVER_PORT}`;
+const SERVICE_BASE_URL = 'http://localhost:5236';
 
 // Check if Vite dev server is running for HMR
 async function getMainViewUrl(): Promise<string> {
@@ -22,7 +39,7 @@ async function getMainViewUrl(): Promise<string> {
 const url = await getMainViewUrl();
 
 // Setup RPC
-const myWebviewRPC = BrowserView.defineRPC<any>({
+const myWebviewRPC = BrowserView.defineRPC<AppRPCType>({
   maxRequestTime: 5000,
   handlers: {
     requests: {
@@ -33,7 +50,6 @@ const myWebviewRPC = BrowserView.defineRPC<any>({
         mainWindow?.minimize();
       },
       getFilePath: async () => {
-        // open file dialog and return selected file path
         const filePath = await Utils.openFileDialog({
           allowsMultipleSelection: false,
           canChooseDirectory: false,
@@ -45,16 +61,6 @@ const myWebviewRPC = BrowserView.defineRPC<any>({
         Utils.showNotification({ title, body });
       },
     },
-    // When the browser sends a message we can handle it
-    // in the main bun process
-    /*     messages: {
-      "*": (messageName, payload) => {
-        console.log("global message handler", messageName, payload);
-      },
-      logToBun: (msg) => {
-        console.log("Log to bun: ", msg);
-      },
-    }, */
   },
 });
 
@@ -85,3 +91,71 @@ const mainWindow = new BrowserWindow({
 mainWindow.on('close', () => {
   Utils.quit();
 });
+
+// ---------------------------------------------------------------------------
+// Subscribe to C# backend Server-Sent Events and forward them to the webview
+// ---------------------------------------------------------------------------
+
+async function subscribeToServiceEvents(): Promise<void> {
+  while (true) {
+    try {
+      const response = await fetch(`${SERVICE_BASE_URL}/events`);
+      if (!response.body) throw new Error('SSE response has no body');
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // SSE events are separated by a blank line (\n\n)
+        const parts = buffer.split('\n\n');
+        buffer = parts.pop() ?? '';
+
+        for (const part of parts) {
+          const eventMatch = part.match(/^event:\s*(.+)/m);
+          const dataMatch = part.match(/^data:\s*(.+)/m);
+          if (!eventMatch || !dataMatch) continue;
+
+          const eventType = eventMatch[1].trim();
+          let payload: { message?: string } = {};
+          try {
+            payload = JSON.parse(dataMatch[1].trim());
+          } catch {
+            /* ignore malformed */
+          }
+
+          const message = payload.message ?? '';
+
+          // Show an OS notification for notable events
+          if (eventType === 'updating') {
+            Utils.showNotification({ title: 'Xvirus', body: message || 'Checking for updates…' });
+          } else if (eventType === 'update-complete') {
+            Utils.showNotification({ title: 'Xvirus', body: message || 'Update check complete.' });
+          } else if (eventType === 'threat') {
+            Utils.showNotification({ title: 'Xvirus – Threat Detected', body: message });
+          }
+
+          // Forward to the webview so UI components can react
+          try {
+            mainWindow.webview.rpc!.send.serverEvent({ type: eventType, message });
+          } catch {
+            // Window may not be ready yet; event is non-critical
+          }
+        }
+      }
+    } catch (err) {
+      console.error('SSE connection to XvirusService lost, retrying in 5 s:', err);
+    }
+
+    // Back-off before reconnecting
+    await new Promise<void>((resolve) => setTimeout(resolve, 5000));
+  }
+}
+
+// Start SSE subscription loop in the background (does not block window creation)
+subscribeToServiceEvents();

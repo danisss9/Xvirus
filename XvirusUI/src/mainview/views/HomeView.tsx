@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 import { fetchLastUpdateCheck, checkUpdates } from '../api/updateApi';
-import { showNotification } from '../services/bunRpc';
+import { showNotification, onServerEvent } from '../services/bunRpc';
 import { fetchSettings, saveSettings } from '../api/settingsApi';
 import { isFirewall } from '../services/env';
 
@@ -57,6 +57,21 @@ export default function HomeView({ onScanStart, onOpenNetworkMonitor }: {
       }
     };
     loadData();
+  }, []);
+
+  // React to server-push events from the C# backend (forwarded via bun SSE)
+  useEffect(() => {
+    return onServerEvent(event => {
+      if (event.type === 'updating') {
+        setCheckingUpdates(true);
+      } else if (event.type === 'update-complete') {
+        setCheckingUpdates(false);
+        // Refresh last-checked timestamp from the backend
+        fetchLastUpdateCheck()
+          .then(res => setLastChecked(res.lastUpdateCheck || null))
+          .catch(() => {});
+      }
+    });
   }, []);
 
   const updatedRecently = lastChecked !== null && isWithin7Days(lastChecked);

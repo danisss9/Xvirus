@@ -1,13 +1,9 @@
 using System.Text.Json.Serialization;
 using Xvirus.Model;
 using XvirusService.Model;
-using XvirusService.Services;
 
 namespace XvirusService;
 
-[JsonSerializable(typeof(ServerEvent))]
-[JsonSerializable(typeof(ProcessSpawnEvent))]
-[JsonSerializable(typeof(ScanRequest))]
 [JsonSerializable(typeof(ScanResult))]
 [JsonSerializable(typeof(SettingsDTO))]
 [JsonSerializable(typeof(AppSettingsDTO))]
@@ -21,4 +17,5 @@ namespace XvirusService;
 [JsonSerializable(typeof(List<QuarantineEntry>))]
 [JsonSerializable(typeof(UpdateStatusDTO))]
 [JsonSerializable(typeof(ProcessSpawnEventArgs))]
+[JsonSerializable(typeof(SseMessageDTO))]
 internal partial class AppJsonSerializerContext : JsonSerializerContext { }

@@ -3,6 +3,7 @@ import { SettingsDTO } from '../model/SettingsDTO';
 import { AppSettingsDTO } from '../model/AppSettingsDTO';
 import { SettingsResponseDTO } from '../model/SettingsResponseDTO';
 import { fetchSettings, saveSettings } from '../api/settingsApi';
+import { isFirewall } from '../services/env';
 
 export default function SettingsView() {
 // split state to match backend DTOs
@@ -78,7 +79,12 @@ export default function SettingsView() {
 
   const isRealTimeProtectionEnabled = appSettings.realTimeProtection;
 
-  // Slider state for three pages: 0 = General, 1 = Scan, 2 = Protection
+  // Slider: 2 pages in firewall mode (General, Protection), 3 in AM mode (General, Scan, Protection)
+  const pageTitles = isFirewall
+    ? ['General Settings', 'Protection Settings']
+    : ['General Settings', 'Scan Settings', 'Protection Settings'];
+  const maxPage = pageTitles.length - 1;
+
   const [page, setPage] = useState(0);
   const sliderRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
@@ -86,14 +92,12 @@ export default function SettingsView() {
   const currentTranslate = useRef(0);
   const isDragging = useRef(false);
 
-  // how many pixels you must move before the swipe gesture is recognised
   const dragThreshold = 8;
 
   const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 
   const goToPage = (index: number) => {
-    const idx = clamp(index, 0, 2);
-    setPage(idx);
+    setPage(clamp(index, 0, maxPage));
   };
 
   const onPointerDown = (e: any) => {
@@ -119,7 +123,7 @@ export default function SettingsView() {
     if (sliderRef.current) sliderRef.current.style.transform = `translateX(${currentTranslate.current}px)`;
   };
 
-  const onPointerUp = (e: any) => {
+  const onPointerUp = (_e: any) => {
     if (!isDragging.current) {
       // it was just a tap or insignificant movement
       startX.current = null;
@@ -129,7 +133,7 @@ export default function SettingsView() {
     const width = viewportRef.current?.clientWidth || 1;
     const dx = currentTranslate.current + page * width; // offset from base
     const threshold = width * 0.18;
-    if (dx < -threshold && page < 2) {
+    if (dx < -threshold && page < maxPage) {
       goToPage(page + 1);
     } else if (dx > threshold && page > 0) {
       goToPage(page - 1);
@@ -149,7 +153,6 @@ export default function SettingsView() {
     }
   }, [page]);
 
-  const pageTitles = ['General Settings', 'Scan Settings', 'Protection Settings'];
   const pageTitle = pageTitles[page] || 'Settings';
 
   return (
@@ -170,7 +173,7 @@ export default function SettingsView() {
           onTouchMove={onPointerMove}
           onTouchEnd={onPointerUp}
         >
-          <div class="settings-slider" ref={sliderRef}>
+          <div class="settings-slider" ref={sliderRef} style={{ width: `${pageTitles.length * 100}%` }}>
             <section class="settings-page">
               <div class="setting-item">
                 <label class="setting-label">Language</label>
@@ -211,38 +214,44 @@ export default function SettingsView() {
                 />
               </div>
 
-              <div class="setting-item">
-                <label class="setting-label">Enable context-menu scan</label>
-                <input
-                  type="checkbox"
-                  class="toggle-switch"
-                  checked={appSettings.enableContextMenu}
-                  onChange={(e: any) => { handleAppSettingChange('enableContextMenu', e.currentTarget.checked); saveAllSettings(); }}
-                />
-              </div>
+              {!isFirewall && (
+                <div class="setting-item">
+                  <label class="setting-label">Enable context-menu scan</label>
+                  <input
+                    type="checkbox"
+                    class="toggle-switch"
+                    checked={appSettings.enableContextMenu}
+                    onChange={(e: any) => { handleAppSettingChange('enableContextMenu', e.currentTarget.checked); saveAllSettings(); }}
+                  />
+                </div>
+              )}
 
-              <div class="setting-item">
-                <label class="setting-label">Password protection</label>
-                <input
-                  type="checkbox"
-                  class="toggle-switch"
-                  checked={appSettings.passwordProtection}
-                  onChange={(e: any) => { handleAppSettingChange('passwordProtection', e.currentTarget.checked); saveAllSettings(); }}
-                />
-              </div>
+              {!isFirewall && (
+                <div class="setting-item">
+                  <label class="setting-label">Password protection</label>
+                  <input
+                    type="checkbox"
+                    class="toggle-switch"
+                    checked={appSettings.passwordProtection}
+                    onChange={(e: any) => { handleAppSettingChange('passwordProtection', e.currentTarget.checked); saveAllSettings(); }}
+                  />
+                </div>
+              )}
 
-              <div class="setting-item">
-                <label class="setting-label">Enable logging</label>
-                <input
-                  type="checkbox"
-                  class="toggle-switch"
-                  checked={appSettings.enableLogs}
-                  onChange={(e: any) => { handleAppSettingChange('enableLogs', e.currentTarget.checked); saveAllSettings(); }}
-                />
-              </div>
+              {!isFirewall && (
+                <div class="setting-item">
+                  <label class="setting-label">Enable logging</label>
+                  <input
+                    type="checkbox"
+                    class="toggle-switch"
+                    checked={appSettings.enableLogs}
+                    onChange={(e: any) => { handleAppSettingChange('enableLogs', e.currentTarget.checked); saveAllSettings(); }}
+                  />
+                </div>
+              )}
             </section>
 
-            <section class="settings-page">
+            {!isFirewall && (<section class="settings-page">
               <div class="setting-item">
                 <label class="setting-label">Heuristics Level</label>
                 <select
@@ -340,7 +349,7 @@ export default function SettingsView() {
                   <option value="monthly">Monthly</option>
                 </select>
               </div>
-            </section>
+            </section>)}
 
             <section class="settings-page">
               <div class="setting-item">
@@ -373,15 +382,17 @@ export default function SettingsView() {
                 </select>
               </div>
 
-              <div class="setting-item">
-                <label class="setting-label">Behavior protection</label>
-                <input
-                  type="checkbox"
-                  class="toggle-switch"
-                  checked={appSettings.behaviorProtection ?? true}
-                  onChange={(e: any) => { handleAppSettingChange('behaviorProtection', e.currentTarget.checked); saveAllSettings(); }}
-                />
-              </div>
+              {!isFirewall && (
+                <div class="setting-item">
+                  <label class="setting-label">Behavior protection</label>
+                  <input
+                    type="checkbox"
+                    class="toggle-switch"
+                    checked={appSettings.behaviorProtection ?? true}
+                    onChange={(e: any) => { handleAppSettingChange('behaviorProtection', e.currentTarget.checked); saveAllSettings(); }}
+                  />
+                </div>
+              )}
 
               <div class="setting-item">
                 <label class="setting-label">Scan files in the cloud</label>
@@ -393,25 +404,29 @@ export default function SettingsView() {
                 />
               </div>
 
-              <div class="setting-item">
-                <label class="setting-label">Network protection</label>
-                <input
-                  type="checkbox"
-                  class="toggle-switch"
-                  checked={appSettings.networkProtection ?? true}
-                  onChange={(e: any) => { handleAppSettingChange('networkProtection', e.currentTarget.checked); saveAllSettings(); }}
-                />
-              </div>
+              {!isFirewall && (
+                <div class="setting-item">
+                  <label class="setting-label">Network protection</label>
+                  <input
+                    type="checkbox"
+                    class="toggle-switch"
+                    checked={appSettings.networkProtection ?? true}
+                    onChange={(e: any) => { handleAppSettingChange('networkProtection', e.currentTarget.checked); saveAllSettings(); }}
+                  />
+                </div>
+              )}
 
-              <div class="setting-item">
-                <label class="setting-label">Self-defense (protect app from tampering)</label>
-                <input
-                  type="checkbox"
-                  class="toggle-switch"
-                  checked={appSettings.selfDefense ?? true}
-                  onChange={(e: any) => { handleAppSettingChange('selfDefense', e.currentTarget.checked); saveAllSettings(); }}
-                />
-              </div>
+              {!isFirewall && (
+                <div class="setting-item">
+                  <label class="setting-label">Self-defense (protect app from tampering)</label>
+                  <input
+                    type="checkbox"
+                    class="toggle-switch"
+                    checked={appSettings.selfDefense ?? true}
+                    onChange={(e: any) => { handleAppSettingChange('selfDefense', e.currentTarget.checked); saveAllSettings(); }}
+                  />
+                </div>
+              )}
 
               <div class="setting-item">
                 <label class="setting-label">Show notifications</label>
@@ -427,10 +442,11 @@ export default function SettingsView() {
         </div>
 
         <div class="settings-dots">
-          {[0, 1, 2].map((i) => (
+          {pageTitles.map((title, i) => (
             <button
+              key={i}
               class={`dot ${i === page ? 'active' : ''}`}
-              aria-label={`Go to page ${i + 1}`}
+              aria-label={title}
               onClick={() => goToPage(i)}
             />
           ))}
