@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<OutputType>Library</OutputType>
+		<PublishAot>true</PublishAot>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<StripSymbols>true</StripSymbols>
+		<Nullable>enable</Nullable>
+		<InvariantGlobalization>true</InvariantGlobalization>
+		<AssemblyName>XvirusNodeSDK</AssemblyName>
+		<Version>5.0.0.0</Version>
+		<Authors>Xvirus</Authors>
+		<Company>Xvirus</Company>
+		<Product>XvirusNodeSDK</Product>
+		<Copyright>Copyright $([System.DateTime]::Now.Year) $(Company)</Copyright>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.JavaScript.NodeApi" Version="0.7.*" />
+		<PackageReference Include="Microsoft.JavaScript.NodeApi.Generator" Version="0.7.*" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\BaseLibrary\BaseLibrary.csproj" />
+	</ItemGroup>
+
+</Project>
