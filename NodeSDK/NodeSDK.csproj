@@ -4,6 +4,8 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<OutputType>Library</OutputType>
 		<PublishAot>true</PublishAot>
+		<PublishNodeModule>true</PublishNodeModule>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<StripSymbols>true</StripSymbols>
 		<Nullable>enable</Nullable>

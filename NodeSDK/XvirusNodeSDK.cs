@@ -8,29 +8,38 @@ using Xvirus.NodeSDK.Serializers;
 namespace Xvirus;
 
 /// <summary>
-/// Represents the result of a file scan, exported as a JavaScript class.
+/// Represents the result of a single file scan.
 /// </summary>
 [JSExport]
 public class ScanResultNode
 {
+    /// <summary>Whether the file was classified as malware.</summary>
     public bool IsMalware { get; set; }
+
+    /// <summary>Detection name, or an empty string when the file is clean.</summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>Malware probability score in the range [0, 1].</summary>
     public double MalwareScore { get; set; }
+
+    /// <summary>Absolute path of the scanned file.</summary>
     public string Path { get; set; } = string.Empty;
 }
 
 /// <summary>
-/// Xvirus SDK exported as a Node.js native AOT module.
-/// All public static members are exported as module-level functions.
+/// Xvirus SDK — Node.js native AOT module.
+/// Build with <c>dotnet publish -r &lt;rid&gt; -c Release</c>.
+/// Produces <c>XvirusNodeSDK.node</c> and an ESM wrapper <c>XvirusNodeSDK.js</c>.
 /// </summary>
+[JSExport]
 public static class XvirusNodeSDK
 {
     private static Scanner? Scanner;
 
     /// <summary>
-    /// Loads the Xvirus engine and its databases.
+    /// Loads the Xvirus engine and all detection databases.
+    /// Call this once before scanning. Pass <c>force=true</c> to reload.
     /// </summary>
-    [JSExport]
     public static void Load(bool force = false)
     {
         if (force)
@@ -47,9 +56,8 @@ public static class XvirusNodeSDK
     }
 
     /// <summary>
-    /// Unloads the Xvirus engine and frees resources.
+    /// Unloads the engine and releases all held resources.
     /// </summary>
-    [JSExport]
     public static void Unload()
     {
         Scanner = null;
@@ -57,9 +65,11 @@ public static class XvirusNodeSDK
     }
 
     /// <summary>
-    /// Scans a single file and returns a structured result object.
+    /// Scans a single file and returns a typed result object.
     /// </summary>
-    [JSExport]
+    /// <param name="filePath">Absolute path to the file to scan.</param>
+    /// <returns>A <see cref="ScanResultNode"/> with detection details.</returns>
+    /// <exception cref="Exception">Thrown when the file cannot be scanned.</exception>
     public static ScanResultNode Scan(string filePath)
     {
         if (Scanner == null)
@@ -82,7 +92,7 @@ public static class XvirusNodeSDK
     /// <summary>
     /// Scans a single file and returns the result as a JSON string.
     /// </summary>
-    [JSExport]
+    /// <param name="filePath">Absolute path to the file to scan.</param>
     public static string ScanAsString(string filePath)
     {
         var result = Scan(filePath);
@@ -92,7 +102,7 @@ public static class XvirusNodeSDK
     /// <summary>
     /// Scans all files in a folder and returns an array of result objects.
     /// </summary>
-    [JSExport]
+    /// <param name="folderPath">Absolute path to the folder to scan.</param>
     public static ScanResultNode[] ScanFolder(string folderPath)
     {
         if (Scanner == null)
@@ -112,7 +122,7 @@ public static class XvirusNodeSDK
     /// <summary>
     /// Scans all files in a folder and returns the results as a JSON string.
     /// </summary>
-    [JSExport]
+    /// <param name="folderPath">Absolute path to the folder to scan.</param>
     public static string ScanFolderAsString(string folderPath)
     {
         var results = ScanFolder(folderPath);
@@ -120,9 +130,12 @@ public static class XvirusNodeSDK
     }
 
     /// <summary>
-    /// Checks for database and SDK updates. Returns a JSON string with update info.
+    /// Checks for database and SDK updates.
     /// </summary>
-    [JSExport]
+    /// <param name="loadDBAfterUpdate">
+    /// When <c>true</c>, reloads the engine databases after a successful update.
+    /// </param>
+    /// <returns>A JSON string describing available updates.</returns>
     public static string CheckUpdates(bool loadDBAfterUpdate = false)
     {
         var settings = Settings.Load();
@@ -137,7 +150,6 @@ public static class XvirusNodeSDK
     /// <summary>
     /// Returns the current engine settings as a JSON string.
     /// </summary>
-    [JSExport]
     public static string GetSettings()
     {
         var settings = Scanner != null ? Scanner.settings : Settings.Load();
@@ -145,9 +157,11 @@ public static class XvirusNodeSDK
     }
 
     /// <summary>
-    /// Gets or sets logging. Pass true/false to set; omit to query the current state.
+    /// Gets or sets whether logging is enabled.
+    /// Omit the argument to query the current state without changing it.
     /// </summary>
-    [JSExport]
+    /// <param name="enableLogging">Pass <c>true</c>/<c>false</c> to enable/disable logging.</param>
+    /// <returns>The current logging state after the call.</returns>
     public static bool Logging(bool? enableLogging = null)
     {
         Logger.EnableLogging = enableLogging ?? Logger.EnableLogging;
@@ -156,9 +170,10 @@ public static class XvirusNodeSDK
 
     /// <summary>
     /// Gets or sets the base folder used to locate databases and resources.
-    /// Omit the argument to query the current base folder.
+    /// Omit the argument to query the current value without changing it.
     /// </summary>
-    [JSExport]
+    /// <param name="baseFolder">Absolute path to use as the base folder.</param>
+    /// <returns>The current base folder path after the call.</returns>
     public static string BaseFolder(string? baseFolder = null)
     {
         Utils.CurrentDir = baseFolder ?? AppContext.BaseDirectory;
@@ -168,7 +183,6 @@ public static class XvirusNodeSDK
     /// <summary>
     /// Returns the SDK version string.
     /// </summary>
-    [JSExport]
     public static string Version()
     {
         return Utils.GetVersion();
