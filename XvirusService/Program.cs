@@ -14,10 +14,10 @@ builder.Host.UseWindowsService(o =>
 
 // Register services
 builder.Services.AddSingleton<SettingsService>();
-builder.Services.AddSingleton<ServerEventService>();
 builder.Services.AddSingleton<Rules>();
 builder.Services.AddSingleton<Quarantine>();
-builder.Services.AddSingleton<RealTimeScanner>();
+builder.Services.AddSingleton<RealTimeProtection>();
+builder.Services.AddSingleton<ServerEventService>();
 
 // Configure JSON serialization for Native AOT
 builder.Services.ConfigureHttpJsonOptions(options =>
@@ -33,21 +33,18 @@ app.MapHistoryEndpoints();
 app.MapRulesEndpoints();
 app.MapQuarantineEndpoints();
 app.MapUpdateEndpoints();
+app.MapServerSentEvents();
 
-// Server-Sent Events endpoint
-app.MapGet("/events", (ServerEventService eventService, HttpContext context, CancellationToken cancellationToken)
-    => eventService.HandleEvents(context, cancellationToken));
-
-// Start the Real-Time Scanner
-var scanner = app.Services.GetRequiredService<RealTimeScanner>();
-scanner.Start();
+// Start the Real-Time Protection
+var protection = app.Services.GetRequiredService<RealTimeProtection>();
+protection.Start();
 
 // Graceful shutdown
 var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
 lifetime.ApplicationStopping.Register(() =>
 {
-    scanner.Stop();
-    scanner.Dispose();
+    protection.Stop();
+    protection.Dispose();
 });
 
 app.Run();

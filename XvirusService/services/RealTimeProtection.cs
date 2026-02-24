@@ -1,17 +1,9 @@
 using System.Management;
+using XvirusService.Model;
 
 namespace XvirusService.Services;
 
-public class ProcessSpawnEventArgs : EventArgs
-{
-    public int ProcessId { get; set; }
-    public string? ProcessName { get; set; }
-    public string? CommandLine { get; set; }
-    public DateTime Timestamp { get; set; }
-    public string? ExecutablePath { get; set; }
-}
-
-public class RealTimeScanner : IDisposable
+public class RealTimeProtection : IDisposable
 {
     private ManagementEventWatcher? _processWatcher;
     private readonly object _lockObject = new object();

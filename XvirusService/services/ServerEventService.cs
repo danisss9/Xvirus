@@ -1,13 +1,14 @@
 using System.Threading.Channels;
 using XvirusService;
+using XvirusService.Model;
 
 namespace XvirusService.Services;
 
 public class ServerEventService
 {
-    private readonly RealTimeScanner _scanner;
+    private readonly RealTimeProtection _scanner;
 
-    public ServerEventService(RealTimeScanner scanner)
+    public ServerEventService(RealTimeProtection scanner)
     {
         _scanner = scanner;
     }
