@@ -42,7 +42,7 @@ export default function App() {
         <WindowControls />
       </div>
       <div class="app-content">
-        {currentView === 'home' && <HomeView onScanStart={handleScanStart} />}
+        {currentView === 'home' && <HomeView onScanStart={handleScanStart} onOpenNetworkMonitor={() => setCurrentView('network')} />}
         {currentView === 'scanning' && <ScanningView onComplete={handleScanComplete} scanEvents={scanEvents} />}
         {currentView === 'settings' && <SettingsView />}
         {currentView === 'history' && <HistoryView />}

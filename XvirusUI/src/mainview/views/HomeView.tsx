@@ -1,20 +1,26 @@
 import { useState, useEffect } from 'preact/hooks';
 import { fetchLastUpdateCheck, checkUpdates } from '../api/updateApi';
 import { showNotification } from '../services/bunRpc';
+import { fetchSettings, saveSettings } from '../api/settingsApi';
+import { isFirewall } from '../services/env';
 
-export default function HomeView({ onScanStart }: {
+function isWithin7Days(dateStr: string): boolean {
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  return diffMs <= 7 * 24 * 60 * 60 * 1000;
+}
+
+export default function HomeView({ onScanStart, onOpenNetworkMonitor }: {
   onScanStart: () => void;
+  onOpenNetworkMonitor?: () => void;
 }) {
   const [realtimeProtection, setRealtimeProtection] = useState(true);
   const [checkingUpdates, setCheckingUpdates] = useState(false);
   const [lastChecked, setLastChecked] = useState<string | null>(null);
-  const [updateMessage, setUpdateMessage] = useState<string | null>(null);
 
   const handleCheckUpdates = async () => {
     setCheckingUpdates(true);
     try {
       const res = await checkUpdates();
-      setUpdateMessage(res.message);
       setLastChecked(res.lastUpdateCheck || null);
       await showNotification('Update Check', res.message);
     } catch (e) {
@@ -25,36 +31,83 @@ export default function HomeView({ onScanStart }: {
     }
   };
 
+  const handleEnableProtection = async () => {
+    try {
+      const s = await fetchSettings();
+      s.appSettings.realTimeProtection = true;
+      await saveSettings(s);
+      setRealtimeProtection(true);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   useEffect(() => {
-    const loadLast = async () => {
+    const loadData = async () => {
       try {
-        const res = await fetchLastUpdateCheck();
-        setLastChecked(res.lastUpdateCheck || null);
+        const [updateRes, settingsRes] = await Promise.all([
+          fetchLastUpdateCheck(),
+          fetchSettings(),
+        ]);
+        setLastChecked(updateRes.lastUpdateCheck || null);
+        setRealtimeProtection(settingsRes.appSettings.realTimeProtection);
       } catch (e) {
         console.error(e);
+         setRealtimeProtection(false);
       }
     };
-    loadLast();
+    loadData();
   }, []);
+
+  const updatedRecently = lastChecked !== null && isWithin7Days(lastChecked);
+  const isProtected = realtimeProtection && (lastChecked !== null && updatedRecently);
+  const needsUpdate = !updatedRecently;
+
+  let primaryLabel: string;
+  let primaryAction: () => void;
+  if (!realtimeProtection) {
+    primaryLabel = 'Enable Protection';
+    primaryAction = handleEnableProtection;
+  } else if (needsUpdate) {
+    primaryLabel = 'Check for Updates';
+    primaryAction = handleCheckUpdates;
+  } else if (isFirewall) {
+    primaryLabel = 'Open Network Monitor';
+    primaryAction = onOpenNetworkMonitor ?? (() => {});
+  } else {
+    primaryLabel = 'Scan Now';
+    primaryAction = onScanStart;
+  }
 
   return (
     <div class="view-container home-view-container">
       <div class="card">
-        <div class="shield-icon">
-          <svg viewBox="0 0 100 100" class="shield-svg">
-            <path d="M50 10 L80 25 L80 50 Q80 75 50 85 Q20 75 20 50 L20 25 Z" fill="none" stroke="currentColor" stroke-width="2"/>
-            <path d="M35 50 L45 60 L65 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+        <div class={`shield-icon ${isProtected ? 'shield-protected' : 'shield-unprotected'}`}>
+          {isProtected ? (
+            <svg viewBox="0 0 100 100" class="shield-svg">
+              <path d="M50 10 L80 25 L80 50 Q80 75 50 85 Q20 75 20 50 L20 25 Z" fill="none" stroke="currentColor" stroke-width="4"/>
+              <path d="M35 50 L45 60 L65 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          ) : (
+            <svg viewBox="0 0 100 100" class="shield-svg">
+              <path d="M50 10 L80 25 L80 50 Q80 75 50 85 Q20 75 20 50 L20 25 Z" fill="none" stroke="currentColor" stroke-width="4"/>
+              <path d="M40 38 L60 62 M60 38 L40 62" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+          )}
         </div>
-        <p class="protection-text">System is protected</p>
-        <button class="btn-primary" onClick={onScanStart}>Scan Now</button>
+        <p class={`protection-text ${isProtected ? '' : 'protection-text-danger'}`}>
+          {isProtected ? 'System is Protected' : 'System is not protected'}
+        </p>
+        <button class="btn-primary" onClick={primaryAction} disabled={checkingUpdates}>
+          {checkingUpdates && primaryLabel === 'Check for Updates' ? 'Checking...' : primaryLabel}
+        </button>
       </div>
 
       <div class="card update-card" onClick={handleCheckUpdates}>
         <div class={`update-content ${checkingUpdates ? 'updating' : ''}`}>
           <div class="update-info">
             <p class="update-title">
-              { updateMessage || 'Up-To-Date'}
+              {  (updatedRecently ? 'Up-To-Date' : 'Out-of-date')}
             </p>
             <p class="update-subtitle">
               {lastChecked ? `Checked ${new Date(lastChecked).toLocaleString()}` : 'Never checked'}
@@ -89,7 +142,18 @@ export default function HomeView({ onScanStart }: {
             type="checkbox"
             class="toggle-switch"
             checked={realtimeProtection}
-            onChange={(e: any) => setRealtimeProtection(e.currentTarget.checked)}
+            onChange={async (e: any) => {
+              const checked = e.currentTarget.checked;
+              setRealtimeProtection(checked);
+              try {
+                const s = await fetchSettings();
+                s.appSettings.realTimeProtection = checked;
+                await saveSettings(s);
+              } catch (err) {
+                console.error(err);
+                setRealtimeProtection(!checked);
+              }
+            }}
             aria-label="Real-time protection"
           />
         </div>

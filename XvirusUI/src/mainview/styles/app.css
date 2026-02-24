@@ -1,6 +1,8 @@
 :root {
   --teal: #3ABFA0;
   --teal-dark: #2a9082;
+  --red: #E05252;
+  --red-dark: #C43C3C;
   --bg: #F2F2F2;
   --card-bg: #FFFFFF;
   --text-primary: #333333;
@@ -147,8 +149,16 @@ body {
 .shield-svg {
   width: 80px;
   height: 80px;
+}
+
+.shield-protected .shield-svg {
   color: var(--teal);
   animation: pulse 2s infinite;
+}
+
+.shield-unprotected .shield-svg {
+  color: var(--red);
+  animation: none;
 }
 
 @keyframes pulse {
@@ -166,6 +176,10 @@ body {
   color: var(--teal);
   margin: 16px 0;
   font-weight: 500;
+}
+
+.protection-text-danger {
+  color: var(--red);
 }
 
 .status-text {
@@ -196,25 +210,25 @@ body {
 .update-content {
   position: relative;
   width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
+  height: 56px;
 }
 
 .update-info {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   text-align: left;
-  transition: all 0.3s ease;
   opacity: 1;
   transform: translateY(0);
-  width: 100%;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .updating .update-info,
 .update-card:hover .update-info {
   opacity: 0;
-  transform: translateY(-30px);
-  position: absolute;
+  transform: translateY(-20px);
 }
 
 .update-title {
@@ -231,14 +245,15 @@ body {
 }
 
 .update-hover {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 12px;
   opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.3s ease;
-  margin-left: 12px;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .updating .update-hover,
@@ -606,45 +621,184 @@ body {
   position: relative;
 }
 
-.confirm-popover {
-  position: absolute;
-  top: 40px;
-  right: 0;
+/* Confirm modal */
+.confirm-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  animation: fade-in 0.15s ease;
+}
+
+.confirm-modal {
   background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  z-index: 200;
-  width: 140px;
+  border-radius: 14px;
+  padding: 24px 20px 20px;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
+  animation: modal-pop 0.18s cubic-bezier(.2,.9,.3,1);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modal-pop {
+  from { opacity: 0; transform: scale(0.9) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.confirm-modal-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.confirm-modal-icon-danger {
+  background: rgba(224, 82, 82, 0.12);
+  color: var(--red);
+}
+
+.confirm-modal-icon-teal {
+  background: rgba(58, 191, 160, 0.12);
+  color: var(--teal);
+}
+
+.confirm-modal-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
   text-align: center;
 }
 
-.confirm-popover p {
-  margin: 0 0 6px 0;
-  font-size: 14px;
-  font-weight: 500;
+.confirm-modal-message {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+  text-align: center;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 
-/* menu style used by Add rule popover */
-.rule-menu {
+.confirm-modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.confirm-modal-btn {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: opacity 0.15s ease;
+}
+
+.confirm-modal-btn:hover {
+  opacity: 0.85;
+}
+
+.confirm-modal-btn-cancel {
+  background: var(--bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.confirm-modal-btn-danger {
+  background: var(--red);
+  color: white;
+}
+
+.confirm-modal-btn-teal {
+  background: var(--teal);
+  color: white;
+}
+
+/* Add rule dropdown */
+.add-rule-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: auto;
+  padding: 0 10px;
+}
+
+.rule-dropdown {
   position: absolute;
-  top: 40px;
+  top: calc(100% + 6px);
   right: 0;
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 4px 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  z-index: 200;
-  width: auto;
-  text-align: left;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  z-index: 300;
+  overflow: hidden;
+  min-width: 170px;
+  animation: fade-in 0.12s ease;
 }
 
-.rule-menu p {
-  margin: 0 0 4px 0;
+.rule-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.12s ease;
+}
+
+.rule-dropdown-item:hover {
+  background: var(--bg);
+}
+
+.rule-dropdown-item + .rule-dropdown-item {
+  border-top: 1px solid var(--border);
+}
+
+.rule-dropdown-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+}
+
+.rule-dropdown-badge.badge-allow {
+  background: var(--teal);
+  color: white;
+}
+
+.rule-dropdown-badge.badge-block {
+  background: var(--danger);
+  color: white;
 }
 
 .search-wrapper {

@@ -41,6 +41,21 @@ const IconClearAll = () => (
   </svg>
 );
 
+const IconChevron = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
+const IconWarning = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+    fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+    <line x1="12" y1="9" x2="12" y2="13" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
+  </svg>
+);
 
 export default function HistoryView() {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
@@ -52,10 +67,12 @@ export default function HistoryView() {
   const [confirmInfo, setConfirmInfo] = useState<{
     kind: 'clear' | 'deleteRule' | 'restoreFile' | 'deleteQuarantine';
     id?: string;
+    title: string;
     message: string;
+    confirmLabel: string;
+    variant: 'danger' | 'teal';
     onConfirm: () => void;
   } | null>(null);
-  const confirmRef = useRef<HTMLDivElement | null>(null);
 
   const [ruleMenuOpen, setRuleMenuOpen] = useState(false);
   const ruleMenuRef = useRef<HTMLDivElement | null>(null);
@@ -126,17 +143,15 @@ export default function HistoryView() {
     setSearch('');
   };
 
-  const dragThreshold = 8; // pixels before we treat it as a drag
+  const dragThreshold = 8;
 
   const onPointerDown = (e: any) => {
-    // ignore interactions originating from buttons or popovers so clicks
-    // don't inadvertently start a slide gesture
     const target = e.target as HTMLElement;
-    if (target.closest('button, .confirm-popover')) {
+    if (target.closest('button, .confirm-modal')) {
       return;
     }
     startX.current = e.touches ? e.touches[0].clientX : e.clientX;
-    isDragging.current = false; // only become true once moved enough
+    isDragging.current = false;
   };
 
   const onPointerMove = (e: any) => {
@@ -145,7 +160,6 @@ export default function HistoryView() {
     const dx = clientX - startX.current;
 
     if (!isDragging.current) {
-      // only start actual dragging when threshold exceeded
       if (Math.abs(dx) < dragThreshold) return;
       isDragging.current = true;
       if (sliderRef.current) sliderRef.current.style.transition = 'none';
@@ -180,17 +194,6 @@ export default function HistoryView() {
     }
   }, [page]);
 
-  useEffect(() => {
-    if (!confirmInfo) return;
-    const handler = (e: MouseEvent) => {
-      if (confirmRef.current && !confirmRef.current.contains(e.target as Node)) {
-        setConfirmInfo(null);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [confirmInfo]);
-
   // close rule menu when clicking outside
   useEffect(() => {
     if (!ruleMenuOpen) return;
@@ -203,7 +206,6 @@ export default function HistoryView() {
     return () => document.removeEventListener('mousedown', handler);
   }, [ruleMenuOpen]);
 
-
   const clearHistory = async () => {
     try {
       await apiClearHistory();
@@ -211,7 +213,6 @@ export default function HistoryView() {
     } catch (e) { console.error(e); }
   };
 
-  // type can be 'allow' or 'block'; used for menu selection.
   const addRule = async (type: 'allow' | 'block' = 'allow') => {
     const path = await getFilePath();
     if (!path) return;
@@ -279,12 +280,9 @@ export default function HistoryView() {
 
   const pageTitles = ['History', 'Rules', 'Quarantine'];
 
-
   return (
     <div class="view-container">
-      <div
-        class="card history-card"
-      >
+      <div class="card history-card">
         <h2 class="title">{pageTitles[page]}</h2>
 
         {/* Search + action button */}
@@ -303,48 +301,52 @@ export default function HistoryView() {
               class="search-input"
             />
           </div>
+
           {page === 0 && (
-            <div style="position:relative;">
-              <button
-                onPointerDown={e => e.stopPropagation()}
-                onClick={() => setConfirmInfo({
-                  kind: 'clear',
-                  message: 'Clear all history?',
-                  onConfirm: clearHistory,
-                })}
-                title="Clear all history"
-                class="action-btn btn-danger"
-              >
-                <IconClearAll />
-              </button>
-              {confirmInfo?.kind === 'clear' && (
-                <div ref={confirmRef} class="confirm-popover">
-                  <p>{confirmInfo.message}</p>
-                  <div class="row-center-gap">
-                    <button onClick={handleConfirm} class="action-btn btn-danger">Yes</button>
-                    <button onClick={() => setConfirmInfo(null)} class="action-btn">No</button>
-                  </div>
-                </div>
-              )}
-            </div>
+            <button
+              onPointerDown={e => e.stopPropagation()}
+              onClick={() => setConfirmInfo({
+                kind: 'clear',
+                title: 'Clear all history',
+                message: 'This will permanently remove all scan history entries.',
+                confirmLabel: 'Clear all',
+                variant: 'danger',
+                onConfirm: clearHistory,
+              })}
+              title="Clear all history"
+              class="action-btn btn-danger"
+            >
+              <IconClearAll />
+            </button>
           )}
+
           {page === 1 && (
-            <div style="position:relative;">
+            <div style="position:relative;" ref={ruleMenuRef}>
               <button
                 onPointerDown={e => e.stopPropagation()}
                 onClick={() => setRuleMenuOpen(o => !o)}
                 title="Add rule"
-                class="action-btn btn-bg-teal"
+                class="action-btn btn-bg-teal add-rule-btn"
               >
                 <IconPlus />
+                <IconChevron />
               </button>
               {ruleMenuOpen && (
-                <div ref={ruleMenuRef} class="rule-menu">
-                  <p>Add rule</p>
-                  <div class="row-center-gap">
-                    <button onClick={() => { addRule('allow'); setRuleMenuOpen(false); }} class="action-btn">Allow</button>
-                    <button onClick={() => { addRule('block'); setRuleMenuOpen(false); }} class="action-btn">Block</button>
-                  </div>
+                <div class="rule-dropdown">
+                  <button
+                    class="rule-dropdown-item"
+                    onClick={() => { addRule('allow'); setRuleMenuOpen(false); }}
+                  >
+                    <span class="rule-dropdown-badge badge-allow">allow</span>
+                    Add allow rule
+                  </button>
+                  <button
+                    class="rule-dropdown-item"
+                    onClick={() => { addRule('block'); setRuleMenuOpen(false); }}
+                  >
+                    <span class="rule-dropdown-badge badge-block">block</span>
+                    Add block rule
+                  </button>
                 </div>
               )}
             </div>
@@ -398,29 +400,21 @@ export default function HistoryView() {
                     )}
                     <p class="item-path">{rule.path}</p>
                   </div>
-                  <div style="position:relative;">
-                    <button
-                      onClick={() => setConfirmInfo({
-                        kind: 'deleteRule',
-                        id: rule.id,
-                        message: 'Delete this rule?',
-                        onConfirm: () => deleteRule(rule.id),
-                      })}
-                      title="Remove rule"
-                      class="icon-btn btn-danger"
-                    >
-                      <IconTrash />
-                    </button>
-                    {confirmInfo?.kind === 'deleteRule' && confirmInfo.id === rule.id && (
-                      <div ref={confirmRef} class="confirm-popover">
-                        <p>{confirmInfo.message}</p>
-                        <div class="row-center-gap">
-                          <button onClick={handleConfirm} class="action-btn btn-danger">Yes</button>
-                          <button onClick={() => setConfirmInfo(null)} class="action-btn">No</button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <button
+                    onClick={() => setConfirmInfo({
+                      kind: 'deleteRule',
+                      id: rule.id,
+                      title: 'Remove rule',
+                      message: `Remove rule for:\n${rule.path}`,
+                      confirmLabel: 'Remove',
+                      variant: 'danger',
+                      onConfirm: () => deleteRule(rule.id),
+                    })}
+                    title="Remove rule"
+                    class="icon-btn btn-danger"
+                  >
+                    <IconTrash />
+                  </button>
                 </div>
               ))}
             </section>
@@ -442,52 +436,36 @@ export default function HistoryView() {
                     </p>
                   </div>
                   <div class="actions-row">
-                    <div style="position:relative;">
-                      <button
-                        onClick={() => setConfirmInfo({
-                          kind: 'restoreFile',
-                          id: file.id,
-                          message: 'Restore this file? ',
-                          onConfirm: () => restoreFile(file.id),
-                        })}
-                        title="Restore file"
-                        class="icon-btn btn-teal"
-                      >
-                        <IconRestore />
-                      </button>
-                      {confirmInfo?.kind === 'restoreFile' && confirmInfo.id === file.id && (
-                        <div ref={confirmRef} class="confirm-popover">
-                          <p>{confirmInfo.message}</p>
-                          <div class="row-center-gap">
-                            <button onClick={handleConfirm} class="action-btn btn-teal">Yes</button>
-                            <button onClick={() => setConfirmInfo(null)} class="action-btn">No</button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div style="position:relative;">
-                      <button
-                        onClick={() => setConfirmInfo({
-                          kind: 'deleteQuarantine',
-                          id: file.id,
-                          message: 'Permanently delete this file?',
-                          onConfirm: () => deleteQuarantine(file.id),
-                        })}
-                        title="Delete permanently"
-                        class="icon-btn btn-danger"
-                      >
-                        <IconTrash />
-                      </button>
-                      {confirmInfo?.kind === 'deleteQuarantine' && confirmInfo.id === file.id && (
-                        <div ref={confirmRef} class="confirm-popover">
-                          <p>{confirmInfo.message}</p>
-                          <div class="row-center-gap">
-                            <button onClick={handleConfirm} class="action-btn btn-danger">Yes</button>
-                            <button onClick={() => setConfirmInfo(null)} class="action-btn">No</button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    <button
+                      onClick={() => setConfirmInfo({
+                        kind: 'restoreFile',
+                        id: file.id,
+                        title: 'Restore file',
+                        message: `Restore "${file.originalFileName}" to its original location?`,
+                        confirmLabel: 'Restore',
+                        variant: 'teal',
+                        onConfirm: () => restoreFile(file.id),
+                      })}
+                      title="Restore file"
+                      class="icon-btn btn-teal"
+                    >
+                      <IconRestore />
+                    </button>
+                    <button
+                      onClick={() => setConfirmInfo({
+                        kind: 'deleteQuarantine',
+                        id: file.id,
+                        title: 'Delete permanently',
+                        message: `"${file.originalFileName}" will be permanently deleted and cannot be recovered.`,
+                        confirmLabel: 'Delete',
+                        variant: 'danger',
+                        onConfirm: () => deleteQuarantine(file.id),
+                      })}
+                      title="Delete permanently"
+                      class="icon-btn btn-danger"
+                    >
+                      <IconTrash />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -509,6 +487,30 @@ export default function HistoryView() {
           ))}
         </div>
       </div>
+
+      {/* Confirm modal */}
+      {confirmInfo && (
+        <div class="confirm-modal-backdrop" onClick={() => setConfirmInfo(null)}>
+          <div class="confirm-modal" onClick={(e: any) => e.stopPropagation()}>
+            <div class={`confirm-modal-icon confirm-modal-icon-${confirmInfo.variant}`}>
+              {confirmInfo.variant === 'teal' ? <IconRestore /> : <IconWarning />}
+            </div>
+            <p class="confirm-modal-title">{confirmInfo.title}</p>
+            <p class="confirm-modal-message">{confirmInfo.message}</p>
+            <div class="confirm-modal-actions">
+              <button class="confirm-modal-btn confirm-modal-btn-cancel" onClick={() => setConfirmInfo(null)}>
+                Cancel
+              </button>
+              <button
+                class={`confirm-modal-btn confirm-modal-btn-${confirmInfo.variant}`}
+                onClick={handleConfirm}
+              >
+                {confirmInfo.confirmLabel}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
