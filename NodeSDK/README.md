@@ -1,6 +1,6 @@
 # Xvirus Node.js SDK
 
-Xvirus SDK 5.0 — Node.js native addon built with .NET Native AOT.
+Xvirus SDK 5.1 — Node.js native addon built with .NET Native AOT.
 
 The module ships as a pre-compiled `.node` binary paired with a generated `.js` ESM wrapper. No .NET runtime is required on the target machine.
 
@@ -65,11 +65,11 @@ dotnet publish -r linux-arm64 -c Release
 
 The build produces two files in the publish output directory:
 
-| File | Description |
-|------|-------------|
-| `XvirusNodeSDK.node` | Native binary (loaded automatically) |
-| `XvirusNodeSDK.js` | Generated ESM wrapper — **import this file** |
-| `XvirusNodeSDK.d.ts` | TypeScript type definitions |
+| File                 | Description                                  |
+| -------------------- | -------------------------------------------- |
+| `XvirusNodeSDK.node` | Native binary (loaded automatically)         |
+| `XvirusNodeSDK.js`   | Generated ESM wrapper — **import this file** |
+| `XvirusNodeSDK.d.ts` | TypeScript type definitions                  |
 
 ## Get Started
 
@@ -142,10 +142,10 @@ All functions are accessed through the `XvirusNodeSDK` named export.
 
 ```ts
 interface ScanResultNode {
-  isMalware: boolean;    // true if the file is classified as malware
-  name: string;          // detection name, empty string when the file is clean
-  malwareScore: number;  // probability score [0, 1]; higher means more likely malicious
-  path: string;          // absolute path of the scanned file
+  isMalware: boolean; // true if the file is classified as malware
+  name: string; // detection name, empty string when the file is clean
+  malwareScore: number; // probability score [0, 1]; higher means more likely malicious
+  path: string; // absolute path of the scanned file
 }
 ```
 
