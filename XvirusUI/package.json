@@ -7,7 +7,8 @@
     "dev:fw": "vite build && neu build && neu run",
     "prod:am": "vite build && neu build --release",
     "prod:fw": "vite build && neu build --release",
-    "start": "neu run"
+    "start": "neu run",
+    "prod:service": "dotnet publish ../XvirusService/XvirusService.csproj /p:PublishProfile=Windows"
   },
   "dependencies": {
     "@neutralinojs/lib": "^6.5.0",
