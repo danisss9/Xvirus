@@ -1,27 +1,20 @@
 {
   "name": "xvirus-ui",
   "version": "1.0.0",
-  "description": "Electrobun app with React, Tailwind CSS, and Vite HMR",
+  "description": "Xvirus User Interface",
   "scripts": {
-    "hmr:am": "vite --port 5173 --mode am",
-    "hmr:fw": "vite --port 5173 --mode fw",
-    "dev:am": "vite build --mode am && cross-env APP_MODE=am electrobun build && electrobun dev",
-    "dev:fw": "vite build --mode fw && cross-env APP_MODE=fw electrobun build && electrobun dev",
-    "dev:hmr:am": "concurrently \"bun run hmr:am\" \"bun run dev:am\"",
-    "dev:hmr:fw": "concurrently \"bun run hmr:fw\" \"bun run dev:fw\"",
-    "build:am": "vite build --mode am && cross-env APP_MODE=am electrobun build --channel prod",
-    "build:fw": "vite build --mode fw && cross-env APP_MODE=fw electrobun build --channel prod",
-    "start": "bun run dev"
+    "dev:am": "vite build && neu build && neu run",
+    "dev:fw": "vite build && neu build && neu run",
+    "prod:am": "vite build && neu build --release",
+    "prod:fw": "vite build && neu build --release",
+    "start": "neu run"
   },
   "dependencies": {
-    "electrobun": "1.12.3",
-    "preact": "^10.28.3"
+    "@neutralinojs/lib": "^6.5.0",
+    "preact": "^10.28.4"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.3",
-    "@types/bun": "latest",
-    "concurrently": "^9.2.1",
-    "cross-env": "^10.1.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
   }

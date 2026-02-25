@@ -1,24 +1,45 @@
-# Electrobun Project
+# Neutralinojs Project
 
-This is an Electrobun desktop application.
+This is a Neutralinojs desktop application that replaced the previous
+Electrobun-based launcher. the UI runs in the system browser engine and
+communicates with the native side through the global `Neutralino` object.
 
-IMPORTANT: Electrobun is NOT Electron. Do not use Electron APIs or patterns.
+IMPORTANT: do **not** use Electron/Electrobun APIs or patterns; all native
+functionality is available via methods documented below.
 
 ## Documentation
 
-Full API reference: https://blackboard.sh/electrobun/llms.txt
-Getting started: https://blackboard.sh/electrobun/docs/
+- API reference: https://neutralino.js.org/docs/
+- Getting started / configuration: https://neutralino.js.org/docs/started
 
 ## Quick Reference
 
-Import patterns:
-- Main process (Bun): `import { BrowserWindow } from "electrobun/bun"`
-- Browser context: `import { Electroview } from "electrobun/view"`
+Common tasks you will need while maintaining XvirusUI:
 
-Use `views://` URLs to load bundled assets (e.g., `url: "views://mainview/index.html"`).
-Views must be configured in `electrobun.config.ts` to be built and copied into the bundle.
+- Show open file dialog
+  ```ts
+  const files = await Neutralino.os.showOpenDialog('Title', { filters: [...] });
+  ```
+- Window controls
+  ```ts
+  Neutralino.window.minimize();
+  Neutralino.window.hide();
+  Neutralino.window.setTitle('My app');
+  ```
+- Notifications
+  ```ts
+  Neutralino.notifications.create('Hello', { body: 'world' });
+  ```
+- System tray
+  ```ts
+  Neutralino.os.setTray();
+  Neutralino.os.setTrayMenu([{ id:'open',text:'Open' }, ...]);
+  Neutralino.events.on('trayMenuItemClicked', handler);
+  ```
 
 ## About
 
-Electrobun is built by Blackboard (https://blackboard.sh), an innovation lab building
-tools and funding teams that define the next generation of technology.
+Neutralinojs is a lightweight cross-platform framework that uses the
+operating system's native webview instead of bundling Chromium. Binaries
+are small and start quickly; many of the features previously implemented
+with Electrobun's bun process are now executed directly in the renderer.
