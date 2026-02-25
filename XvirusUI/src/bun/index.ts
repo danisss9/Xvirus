@@ -16,9 +16,9 @@ const SW_HIDE = 0;
 const SW_RESTORE = 9;
 
 const { symbols: user32 } = dlopen('user32.dll', {
-  FindWindowW:       { args: ['ptr', 'ptr'], returns: 'ptr'  },
-  ShowWindow:        { args: ['ptr', 'i32'], returns: 'bool' },
-  SetForegroundWindow: { args: ['ptr'],      returns: 'bool' },
+  FindWindowW: { args: ['ptr', 'ptr'], returns: 'ptr' },
+  ShowWindow: { args: ['ptr', 'i32'], returns: 'bool' },
+  SetForegroundWindow: { args: ['ptr'], returns: 'bool' },
 });
 
 // Encode the window title once as a UTF-16LE null-terminated string
@@ -38,6 +38,7 @@ function hideMainWindow() {
 function showMainWindow() {
   const hwnd = getHwnd();
   if (hwnd) {
+    mainWindow?.setPosition(x, y);
     user32.ShowWindow(hwnd, SW_RESTORE);
     user32.SetForegroundWindow(hwnd);
   }

@@ -10,7 +10,7 @@ export default function WindowControls() {
   };
 
   return (
-    <div class="window-controls">
+    <div class="window-controls electrobun-webkit-app-region-no-drag">
       <button 
         class="window-btn minimize-btn" 
         onClick={handleMinimize}

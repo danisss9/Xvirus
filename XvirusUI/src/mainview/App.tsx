@@ -96,7 +96,7 @@ export default function App() {
 
   return (
     <div class="app-container">
-      <div class="app-header">
+      <div class="app-header electrobun-webkit-app-region-drag">
         <h1 class="app-title">{isFirewall ? 'Xvirus Firewall' : 'Xvirus Anti-Malware'}</h1>
         <WindowControls />
       </div>
