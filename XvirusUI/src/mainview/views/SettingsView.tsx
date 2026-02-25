@@ -62,6 +62,9 @@ export default function SettingsView() {
 
   const handleAppSettingChange = (field: keyof AppSettingsDTO, value: string | boolean) => {
     setAppSettings(prev => ({ ...prev, [field]: value } as any));
+    if (field === 'darkMode') {
+      document.body.classList.toggle('dark', value as boolean);
+    }
   };
 
   const saveAllSettings = async () => {

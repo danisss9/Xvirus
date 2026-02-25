@@ -8,6 +8,7 @@ import WindowControls from './components/WindowControls';
 import { initializeWindow } from './services/bunRpc';
 import './styles/app.css';
 import { isFirewall } from './services/env';
+import { fetchSettings } from './api/settingsApi';
 
 export default function App() {
   const [currentView, setCurrentView] = useState('home');
@@ -15,8 +16,10 @@ export default function App() {
   const [isScanning, setIsScanning] = useState(false);
 
   useEffect(() => {
-    // Initialize window position on app mount
     initializeWindow();
+    fetchSettings().then(data => {
+      document.body.classList.toggle('dark', data.appSettings.darkMode);
+    }).catch(() => {});
   }, []);
 
   const handleScanStart = async () => {
