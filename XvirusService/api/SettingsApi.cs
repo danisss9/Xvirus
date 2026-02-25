@@ -21,12 +21,19 @@ namespace XvirusService.Api
                 }
             });
 
-            app.MapPut("/settings", (SettingsResponseDTO newSettings) =>
+            app.MapPut("/settings", (SettingsResponseDTO newSettings, SettingsService settingsService, WindowsStartupService startupService) =>
             {
                 try
                 {
+                    bool startWithWindowsChanged = settingsService.AppSettings.StartWithWindows != newSettings.AppSettings.StartWithWindows;
+
                     Settings.Save(newSettings.Settings);
                     Settings.SaveAppSettings(newSettings.AppSettings);
+                    settingsService.Reload();
+
+                    if (startWithWindowsChanged)
+                        startupService.Apply(newSettings.AppSettings.StartWithWindows);
+
                     return Results.Ok();
                 }
                 catch (Exception ex)

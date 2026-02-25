@@ -14,6 +14,7 @@ builder.Host.UseWindowsService(o =>
 
 // Register services
 builder.Services.AddSingleton<SettingsService>();
+builder.Services.AddSingleton<WindowsStartupService>();
 builder.Services.AddSingleton<ServerEventService>();
 builder.Services.AddSingleton<Rules>();
 builder.Services.AddSingleton<Quarantine>();
