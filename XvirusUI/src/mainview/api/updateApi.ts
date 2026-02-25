@@ -1,7 +1,4 @@
-export interface UpdateStatusDTO {
-  message: string;
-  lastUpdateCheck?: string | null;
-}
+import { UpdateStatusDTO } from '../model/UpdateStatusDTO';
 
 const baseUrl = 'http://localhost:5236';
 

@@ -1,13 +1,4 @@
-export interface NetworkConnection {
-  protocol: string;
-  localAddress: string;
-  remoteAddress: string;
-  state: string;
-  pid: number;
-  fileName: string;
-  filePath: string;
-  score: number;
-}
+import { NetworkConnection } from '../model/NetworkConnection';
 
 const baseUrl = 'http://localhost:5236';
 
