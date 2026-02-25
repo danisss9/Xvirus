@@ -1,11 +1,19 @@
 using System.Diagnostics;
 using System.Runtime.Versioning;
+using System.Security.Principal;
 using Xvirus;
 using XvirusService;
 using XvirusService.Api;
 using XvirusService.Services;
 
 [assembly: SupportedOSPlatform("windows")]
+
+// Require administrator privileges
+if (!new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
+{
+    Console.Error.WriteLine("XvirusService requires administrator privileges.");
+    return;
+}
 
 // Create the web application builder
 var builder = WebApplication.CreateSlimBuilder(args);

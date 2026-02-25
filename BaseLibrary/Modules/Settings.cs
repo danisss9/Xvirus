@@ -12,7 +12,11 @@ namespace Xvirus
         {
             var fullPath = Utils.RelativeToFullPath(path);
             if (!File.Exists(fullPath))
-                return new SettingsDTO();
+            {
+                var defaults = new SettingsDTO();
+                Save(defaults, path);
+                return defaults;
+            }
             try
             {
                 string jsonString = File.ReadAllText(fullPath);
@@ -44,7 +48,11 @@ namespace Xvirus
         {
             var fullPath = Utils.RelativeToFullPath(path);
             if (!File.Exists(fullPath))
-                return new AppSettingsDTO();
+            {
+                var defaults = new AppSettingsDTO();
+                SaveAppSettings(defaults, path);
+                return defaults;
+            }
             try
             {
                 string jsonString = File.ReadAllText(fullPath);
