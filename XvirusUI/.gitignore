@@ -5,4 +5,5 @@
 /bin
 /dist
 /build
+/browser
 node_modules
