@@ -1,7 +1,10 @@
+using System.Runtime.Versioning;
 using Xvirus;
 using XvirusService;
 using XvirusService.Api;
 using XvirusService.Services;
+
+[assembly: SupportedOSPlatform("windows")]
 
 // Create the web application builder
 var builder = WebApplication.CreateSlimBuilder(args);
@@ -19,6 +22,7 @@ builder.Services.AddSingleton<ServerEventService>();
 builder.Services.AddSingleton<Rules>();
 builder.Services.AddSingleton<Quarantine>();
 builder.Services.AddSingleton<RealTimeProtection>();
+builder.Services.AddSingleton<NetworkRealTimeProtection>();
 builder.Services.AddHostedService<AutoUpdater>();
 
 // Scanner and its dependencies
@@ -52,9 +56,11 @@ app.MapUpdateEndpoints();
 app.MapNetworkEndpoints();
 app.MapServerSentEvents();
 
-// Start the Real-Time Protection
+// Start protection services
 var protection = app.Services.GetRequiredService<RealTimeProtection>();
+var networkProtection = app.Services.GetRequiredService<NetworkRealTimeProtection>();
 protection.Start();
+networkProtection.Start();
 
 // Graceful shutdown
 var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
@@ -62,6 +68,8 @@ lifetime.ApplicationStopping.Register(() =>
 {
     protection.Stop();
     protection.Dispose();
+    networkProtection.Stop();
+    networkProtection.Dispose();
 });
 
 app.Run();
