@@ -122,29 +122,61 @@ async function subscribeToServiceEvents(): Promise<void> {
           if (!eventMatch || !dataMatch) continue;
 
           const eventType = eventMatch[1].trim();
-          let payload: { message?: string } = {};
+          const rawData = dataMatch[1].trim();
+          let payload: Record<string, any> = {};
           try {
-            payload = JSON.parse(dataMatch[1].trim());
+            payload = JSON.parse(rawData);
           } catch {
             /* ignore malformed */
           }
 
-          const message = payload.message ?? '';
-
-          // Show an OS notification for notable events
           if (eventType === 'updating') {
-            Utils.showNotification({ title: 'Xvirus', body: message || 'Checking for updates…' });
+            Utils.showNotification({
+              title: 'Xvirus',
+              body: payload.message || 'Checking for updates…',
+            });
+            try {
+              mainWindow.webview.rpc!.send.serverEvent({
+                type: eventType,
+                message: payload.message ?? '',
+              });
+            } catch {}
           } else if (eventType === 'update-complete') {
-            Utils.showNotification({ title: 'Xvirus', body: message || 'Update check complete.' });
+            Utils.showNotification({
+              title: 'Xvirus',
+              body: payload.message || 'Update check complete.',
+            });
+            try {
+              mainWindow.webview.rpc!.send.serverEvent({
+                type: eventType,
+                message: payload.message ?? '',
+              });
+            } catch {}
           } else if (eventType === 'threat') {
-            Utils.showNotification({ title: 'Xvirus – Threat Detected', body: message });
-          }
+            const isQuarantined =
+              payload.action === 'quarantined' || payload.action === 'quarantine-pending-reboot';
 
-          // Forward to the webview so UI components can react
-          try {
-            mainWindow.webview.rpc!.send.serverEvent({ type: eventType, message });
-          } catch {
-            // Window may not be ready yet; event is non-critical
+            if (payload.showNotification) {
+              if (isQuarantined) {
+                // File is handled — show OS notification only
+                const status =
+                  payload.action === 'quarantine-pending-reboot'
+                    ? 'will be quarantined on next reboot'
+                    : 'has been quarantined';
+                Utils.showNotification({
+                  title: 'Xvirus – Threat Removed',
+                  body: `${payload.fileName ?? 'A threat'} ${status}.`,
+                });
+              } else {
+                // Process is suspended and needs a user decision — forward
+                // the full JSON payload to Preact so AlertView can display it
+                try {
+                  mainWindow.webview.rpc!.send.serverEvent({ type: 'threat', message: rawData });
+                  mainWindow.show();
+                  mainWindow.focus();
+                } catch {}
+              }
+            }
           }
         }
       }

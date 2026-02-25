@@ -15,6 +15,8 @@ export default function BottomNav({ currentView, onNavigate, isScanning }: {
         return { left: { label: 'History', icon: 'history' }, right: { label: 'Home', icon: 'home' } };
       case 'network':
         return { left: { label: 'Home', icon: 'home' }, right: { label: 'Settings', icon: 'settings' } };
+      case 'alert':
+        return { left: { label: 'Home', icon: 'home' }, right: { label: 'History', icon: 'history' } };
       default:
         return { left: { label: '', icon: '' }, right: { label: '', icon: '' } };
     }

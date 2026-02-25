@@ -21,6 +21,7 @@ builder.Services.AddSingleton<WindowsStartupService>();
 builder.Services.AddSingleton<ServerEventService>();
 builder.Services.AddSingleton<Rules>();
 builder.Services.AddSingleton<Quarantine>();
+builder.Services.AddSingleton<ThreatAlertService>();
 builder.Services.AddSingleton<RealTimeProtection>();
 builder.Services.AddSingleton<NetworkRealTimeProtection>();
 builder.Services.AddHostedService<AutoUpdater>();
@@ -54,6 +55,7 @@ app.MapRulesEndpoints();
 app.MapQuarantineEndpoints();
 app.MapUpdateEndpoints();
 app.MapNetworkEndpoints();
+app.MapActionsEndpoints();
 app.MapServerSentEvents();
 
 // Start protection services

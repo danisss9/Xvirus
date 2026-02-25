@@ -8,7 +8,8 @@ public class RealTimeProtection(
     SettingsService settings,
     ScannerService scanner,
     Quarantine quarantine,
-    ServerEventService events) : IDisposable
+    ServerEventService events,
+    ThreatAlertService alertService) : IDisposable
 {
     private ManagementEventWatcher? _watcher;
     private readonly object _lock = new();
@@ -96,7 +97,7 @@ public class RealTimeProtection(
             Console.WriteLine($"RealTimeProtection: threat detected – '{executablePath}' (score {result.MalwareScore:F2})");
 
             await ProcessControl.HandleThreatAsync(
-                quarantine, settings.AppSettings, events,
+                quarantine, settings.AppSettings, events, alertService,
                 result, pid, executablePath, processName,
                 "RealTimeProtection");
         }

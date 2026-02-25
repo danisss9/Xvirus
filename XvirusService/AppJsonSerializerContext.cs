@@ -21,4 +21,6 @@ namespace XvirusService;
 [JsonSerializable(typeof(NetworkConnectionDTO))]
 [JsonSerializable(typeof(List<NetworkConnectionDTO>))]
 [JsonSerializable(typeof(ThreatEventDTO))]
+[JsonSerializable(typeof(List<ThreatEventDTO>))]
+[JsonSerializable(typeof(ThreatActionDTO))]
 internal partial class AppJsonSerializerContext : JsonSerializerContext { }

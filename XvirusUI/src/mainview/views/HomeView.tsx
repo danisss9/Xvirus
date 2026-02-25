@@ -9,9 +9,11 @@ function isWithin7Days(dateStr: string): boolean {
   return diffMs <= 7 * 24 * 60 * 60 * 1000;
 }
 
-export default function HomeView({ onScanStart, onOpenNetworkMonitor }: {
+export default function HomeView({ onScanStart, onOpenNetworkMonitor, pendingAlerts = 0, onOpenAlert }: {
   onScanStart: () => void;
   onOpenNetworkMonitor?: () => void;
+  pendingAlerts?: number;
+  onOpenAlert?: () => void;
 }) {
   const [realtimeProtection, setRealtimeProtection] = useState(true);
   const [checkingUpdates, setCheckingUpdates] = useState(false);
@@ -77,15 +79,15 @@ export default function HomeView({ onScanStart, onOpenNetworkMonitor }: {
   const updatedRecently = lastChecked !== null && isWithin7Days(lastChecked);
   const isProtected = realtimeProtection && (lastChecked !== null && updatedRecently);
   const needsUpdate = !updatedRecently;
+  const showProtected = isProtected && pendingAlerts === 0;
 
   let primaryLabel: string;
   let primaryAction: () => void;
 
-  // temp for tests
-    primaryLabel = 'Open Network Monitor';
-    primaryAction = onOpenNetworkMonitor ?? (() => {});
-
- /*  if (!realtimeProtection) {
+  if (pendingAlerts > 0) {
+    primaryLabel = 'Manage Threats Found';
+    primaryAction = onOpenAlert ?? (() => {});
+  } else if (!realtimeProtection) {
     primaryLabel = 'Enable Protection';
     primaryAction = handleEnableProtection;
   } else if (needsUpdate) {
@@ -97,13 +99,13 @@ export default function HomeView({ onScanStart, onOpenNetworkMonitor }: {
   } else {
     primaryLabel = 'Scan Now';
     primaryAction = onScanStart;
-  } */
+  }
 
   return (
     <div class="view-container home-view-container">
       <div class="card">
-        <div class={`shield-icon ${isProtected ? 'shield-protected' : 'shield-unprotected'}`}>
-          {isProtected ? (
+        <div class={`shield-icon ${showProtected ? 'shield-protected' : 'shield-unprotected'}`}>
+          {showProtected ? (
             <svg viewBox="0 0 100 100" class="shield-svg">
               <path d="M50 10 L80 25 L80 50 Q80 75 50 85 Q20 75 20 50 L20 25 Z" fill="none" stroke="currentColor" stroke-width="4"/>
               <path d="M35 50 L45 60 L65 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -115,8 +117,8 @@ export default function HomeView({ onScanStart, onOpenNetworkMonitor }: {
             </svg>
           )}
         </div>
-        <p class={`protection-text ${isProtected ? '' : 'protection-text-danger'}`}>
-          {isProtected ? 'System is Protected' : 'System is not protected'}
+        <p class={`protection-text ${showProtected ? '' : 'protection-text-danger'}`}>
+          {showProtected ? 'System is Protected' : 'System is not protected'}
         </p>
         <button class="btn-primary" onClick={primaryAction} disabled={checkingUpdates}>
           {checkingUpdates && primaryLabel === 'Check for Updates' ? 'Checking...' : primaryLabel}

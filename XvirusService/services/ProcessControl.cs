@@ -1,5 +1,5 @@
-using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Runtime.Versioning;
 using System.Text.Json;
 using Xvirus.Model;
@@ -14,17 +14,28 @@ namespace XvirusService.Services;
 [SupportedOSPlatform("windows")]
 internal static class ProcessControl
 {
-    private const uint ProcessSuspendResume = 0x0800;
+    private const uint ProcessQueryLimitedInfo = 0x1000;
+    private const uint ProcessTerminate        = 0x0001;
+    private const uint ProcessSuspendResume    = 0x0800;
     private const uint MoveFileDelayUntilReboot = 0x00000004;
 
     [DllImport("ntdll.dll")]
     private static extern int NtSuspendProcess(IntPtr processHandle);
+
+    [DllImport("ntdll.dll")]
+    private static extern int NtResumeProcess(IntPtr processHandle);
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, int dwProcessId);
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool CloseHandle(IntPtr hObject);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool TerminateProcess(IntPtr hProcess, uint uExitCode);
+
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    private static extern bool QueryFullProcessImageName(IntPtr hProcess, uint dwFlags, StringBuilder lpExeName, ref uint lpdwSize);
 
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     private static extern bool MoveFileEx(string lpExistingFileName, string lpNewFileName, uint dwFlags);
@@ -35,24 +46,36 @@ internal static class ProcessControl
 
     internal static string? ResolveProcessPath(int pid)
     {
+        IntPtr handle = OpenProcess(ProcessQueryLimitedInfo, false, pid);
+        if (handle == IntPtr.Zero) return null;
         try
         {
-            using var proc = Process.GetProcessById(pid);
-            return proc.MainModule?.FileName;
+            var sb = new StringBuilder(1024);
+            uint size = (uint)sb.Capacity;
+            return QueryFullProcessImageName(handle, 0, sb, ref size) ? sb.ToString() : null;
         }
-        catch { return null; }
+        finally
+        {
+            CloseHandle(handle);
+        }
     }
 
     internal static void Kill(int pid, string source)
     {
+        IntPtr handle = OpenProcess(ProcessTerminate, false, pid);
+        if (handle == IntPtr.Zero)
+        {
+            Console.WriteLine($"{source}: failed to open process {pid} for termination (error {Marshal.GetLastWin32Error()}).");
+            return;
+        }
         try
         {
-            using var proc = Process.GetProcessById(pid);
-            proc.Kill();
+            if (!TerminateProcess(handle, 1))
+                Console.WriteLine($"{source}: TerminateProcess failed for pid {pid} (error {Marshal.GetLastWin32Error()}).");
         }
-        catch (Exception ex)
+        finally
         {
-            Console.WriteLine($"{source}: failed to kill process {pid} – {ex.Message}");
+            CloseHandle(handle);
         }
     }
 
@@ -70,6 +93,27 @@ internal static class ProcessControl
             int status = NtSuspendProcess(handle);
             if (status != 0)
                 Console.WriteLine($"{source}: NtSuspendProcess returned 0x{status:X8} for pid {pid}.");
+        }
+        finally
+        {
+            CloseHandle(handle);
+        }
+    }
+
+    internal static void Resume(int pid, string source)
+    {
+        IntPtr handle = OpenProcess(ProcessSuspendResume, false, pid);
+        if (handle == IntPtr.Zero)
+        {
+            Console.WriteLine($"{source}: failed to open process {pid} for resume (error {Marshal.GetLastWin32Error()}).");
+            return;
+        }
+
+        try
+        {
+            int status = NtResumeProcess(handle);
+            if (status != 0)
+                Console.WriteLine($"{source}: NtResumeProcess returned 0x{status:X8} for pid {pid}.");
         }
         finally
         {
@@ -108,6 +152,7 @@ internal static class ProcessControl
         Quarantine quarantine,
         AppSettingsDTO appSettings,
         ServerEventService events,
+        ThreatAlertService alertService,
         ScanResult result,
         int pid,
         string executablePath,
@@ -154,6 +199,10 @@ internal static class ProcessControl
             ShowNotification = appSettings.ShowNotifications,
             AlreadyQuarantined = alreadyQuarantined,
         };
+
+        // Store pending alert if user needs to take action
+        if (action is "suspended" or "quarantine-failed")
+            alertService.AddPending(evt);
 
         await events.SendAsync(
             "threat",

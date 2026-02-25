@@ -9,7 +9,8 @@ public class NetworkRealTimeProtection(
     SettingsService settings,
     ScannerService scanner,
     Quarantine quarantine,
-    ServerEventService events) : IDisposable
+    ServerEventService events,
+    ThreatAlertService alertService) : IDisposable
 {
     private CancellationTokenSource? _cts;
     private Task? _monitorTask;
@@ -115,7 +116,7 @@ public class NetworkRealTimeProtection(
             catch { processName = Path.GetFileNameWithoutExtension(executablePath); }
 
             await ProcessControl.HandleThreatAsync(
-                quarantine, settings.AppSettings, events,
+                quarantine, settings.AppSettings, events, alertService,
                 result, pid, executablePath, processName,
                 "NetworkRealTimeProtection");
         }

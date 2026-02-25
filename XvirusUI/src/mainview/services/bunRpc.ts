@@ -1,4 +1,5 @@
 import { Electroview, RPCSchema } from 'electrobun/view';
+import { ThreatPayload } from '../model/ThreatPayload';
 
 // ---------------------------------------------------------------------------
 // Server-push event types (sent from C# → bun → webview)
@@ -7,7 +8,7 @@ import { Electroview, RPCSchema } from 'electrobun/view';
 export type ServerEventType =
   | { type: 'updating'; message: string }
   | { type: 'update-complete'; message: string }
-  | { type: 'threat'; message: string };
+  | { type: 'threat'; payload: ThreatPayload };
 
 type ServerEventHandler = (event: ServerEventType) => void;
 const _serverEventHandlers: ServerEventHandler[] = [];
@@ -56,8 +57,14 @@ const rpc = Electroview.defineRPC<any>({
     messages: {
       // bun calls mainWindow.rpc.send.serverEvent({ type, message })
       serverEvent: ({ type, message }: { type: string; message: string }) => {
-        if (type === 'updating' || type === 'update-complete' || type === 'threat') {
+        if (type === 'updating' || type === 'update-complete') {
           dispatchServerEvent({ type, message } as ServerEventType);
+        } else if (type === 'threat') {
+          try {
+            dispatchServerEvent({ type: 'threat', payload: JSON.parse(message) });
+          } catch {
+            /* ignore malformed */
+          }
         }
       },
     },

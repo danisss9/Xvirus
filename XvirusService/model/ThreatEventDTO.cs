@@ -2,6 +2,7 @@ namespace XvirusService.Model;
 
 public class ThreatEventDTO
 {
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string FilePath { get; set; } = string.Empty;
     public string FileName { get; set; } = string.Empty;
     public string ProcessName { get; set; } = string.Empty;
