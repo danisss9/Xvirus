@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.Versioning;
 using Xvirus;
 using XvirusService;
@@ -73,5 +74,18 @@ lifetime.ApplicationStopping.Register(() =>
     networkProtection.Stop();
     networkProtection.Dispose();
 });
+
+// Launch the UI if it is not already running
+var uiExe = Path.Combine(AppContext.BaseDirectory, "XvirusUI.exe");
+if (File.Exists(uiExe) && Process.GetProcessesByName("XvirusUI").Length == 0)
+{
+    Process.Start(new ProcessStartInfo
+    {
+        FileName = uiExe,
+        UseShellExecute = false,
+        CreateNoWindow = true,
+        WindowStyle = ProcessWindowStyle.Hidden,
+    });
+}
 
 app.Run();

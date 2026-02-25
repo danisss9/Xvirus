@@ -94,12 +94,7 @@ export default function NetworkMonitorView() {
       const data = await fetchNetworkConnections();
       setConnections(data);
     } catch {
-      // fallback demo data
-      setConnections([
-        { protocol: 'TCP', localAddress: '0.0.0.0:443', remoteAddress: '192.168.1.1:54321', state: 'ESTABLISHED', pid: 1234, fileName: 'chrome.exe', filePath: 'C:\\Program Files\\Google\\Chrome\\chrome.exe', score: 0.02 },
-        { protocol: 'TCP', localAddress: '0.0.0.0:80', remoteAddress: '10.0.0.5:49152', state: 'LISTENING', pid: 4, fileName: 'System', filePath: '', score: 0.0 },
-        { protocol: 'UDP', localAddress: '0.0.0.0:500', remoteAddress: '*:*', state: '', pid: 768, fileName: 'svchost.exe', filePath: 'C:\\Windows\\System32\\svchost.exe', score: 0.05 },
-      ]);
+      setConnections([]);
     } finally {
       setLoading(false);
     }

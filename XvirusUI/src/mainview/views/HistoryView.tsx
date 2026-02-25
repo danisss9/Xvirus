@@ -100,37 +100,6 @@ export default function HistoryView() {
         console.error('Failed to fetch data:', e);
       } finally {
         setLoading(false);
-
-           // provide example data so the UI isn't completely empty when the backend
-        // can't be reached.  This makes it easier to see the layout while
-        // developing or when offline.
-        setEntries([{
-          type: 'Error',
-          timestamp: Date.now(),
-          details: 'Unable to load scan history',
-        }]);
-        setRules([
-          { id: 'example-rule-1', path: 'C:\\path\\to\\exclude1', type: 'allow' },
-          { id: 'example-rule-2', path: 'C:\\path\\to\\exclude2', type: 'block' },
-          { id: 'example-rule-3', path: 'C:\\path\\to\\exclude3', type: 'allow' },
-          { id: 'example-rule-4', path: 'C:\\path\\to\\exclude4', type: 'block' },
-          { id: 'example-rule-5', path: 'C:\\path\\to\\exclude5', type: 'allow' },
-          { id: 'example-rule-6', path: 'C:\\path\\to\\exclude6', type: 'block' },
-          { id: 'example-rule-7', path: 'C:\\path\\to\\exclude7', type: 'allow' },
-          { id: 'example-rule-8', path: 'C:\\path\\to\\exclude8', type: 'block' },
-          { id: 'example-rule-9', path: 'C:\\path\\to\\exclude9', type: 'allow' },
-          { id: 'example-rule-10', path: 'C:\\path\\to\\exclude10', type: 'block' },
-        ]);
-        setQuarantine([{
-          id: 'example-file',
-          originalFileName: 'infected.exe',
-          originalFilePath: 'C:\\path\\to\\infected.exe',
-          quarantinedFileName: 'q123.bin',
-          originalAttributes: 'readonly',
-          originalCreationTime: new Date().toISOString(),
-          originalLastWriteTime: new Date().toISOString(),
-          originalLastAccessTime: new Date().toISOString(),
-        }]);
       }
     };
     fetchAll();
