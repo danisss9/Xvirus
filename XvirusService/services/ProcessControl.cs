@@ -15,8 +15,8 @@ namespace XvirusService.Services;
 internal static class ProcessControl
 {
     private const uint ProcessQueryLimitedInfo = 0x1000;
-    private const uint ProcessTerminate        = 0x0001;
-    private const uint ProcessSuspendResume    = 0x0800;
+    private const uint ProcessTerminate = 0x0001;
+    private const uint ProcessSuspendResume = 0x0800;
     private const uint MoveFileDelayUntilReboot = 0x00000004;
 
     [DllImport("ntdll.dll")]
@@ -164,7 +164,7 @@ internal static class ProcessControl
 
         string action;
 
-        if (appSettings.AutoQuarantine && !alreadyQuarantined)
+        if (appSettings.ThreatAction == "auto" && !alreadyQuarantined)
         {
             Kill(pid, source);
 
