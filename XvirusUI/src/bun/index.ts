@@ -1,4 +1,47 @@
-import { BrowserWindow, Updater, Utils, Screen, BrowserView, type RPCSchema } from 'electrobun/bun';
+import {
+  BrowserWindow,
+  Updater,
+  Utils,
+  Screen,
+  BrowserView,
+  Tray,
+  type RPCSchema,
+} from 'electrobun/bun';
+import { dlopen, ptr } from 'bun:ffi';
+
+// ---------------------------------------------------------------------------
+// Win32 helpers — hide/show without leaving a taskbar button
+// ---------------------------------------------------------------------------
+const SW_HIDE = 0;
+const SW_RESTORE = 9;
+
+const { symbols: user32 } = dlopen('user32.dll', {
+  FindWindowW:       { args: ['ptr', 'ptr'], returns: 'ptr'  },
+  ShowWindow:        { args: ['ptr', 'i32'], returns: 'bool' },
+  SetForegroundWindow: { args: ['ptr'],      returns: 'bool' },
+});
+
+// Encode the window title once as a UTF-16LE null-terminated string
+const _titleBuf = Buffer.alloc(('Xvirus Anti-Malware'.length + 1) * 2);
+for (let i = 0; i < 'Xvirus Anti-Malware'.length; i++)
+  _titleBuf.writeUInt16LE('Xvirus Anti-Malware'.charCodeAt(i), i * 2);
+
+function getHwnd() {
+  return user32.FindWindowW(null, ptr(_titleBuf));
+}
+
+function hideMainWindow() {
+  const hwnd = getHwnd();
+  if (hwnd) user32.ShowWindow(hwnd, SW_HIDE);
+}
+
+function showMainWindow() {
+  const hwnd = getHwnd();
+  if (hwnd) {
+    user32.ShowWindow(hwnd, SW_RESTORE);
+    user32.SetForegroundWindow(hwnd);
+  }
+}
 
 type AppRPCType = {
   bun: RPCSchema<{
@@ -44,7 +87,7 @@ const myWebviewRPC = BrowserView.defineRPC<AppRPCType>({
   handlers: {
     requests: {
       closeWindow: () => {
-        mainWindow?.close();
+        hideMainWindow();
       },
       minimizeWindow: () => {
         mainWindow?.minimize();
@@ -87,9 +130,30 @@ const mainWindow = new BrowserWindow({
   rpc: myWebviewRPC,
 });
 
-// Quit the app when the main window is closed
-mainWindow.on('close', () => {
-  Utils.quit();
+// ---------------------------------------------------------------------------
+// System tray icon
+// ---------------------------------------------------------------------------
+
+const tray = new Tray({
+  image: 'views://assets/tray-icon.ico',
+  width: 16,
+  height: 16,
+  title: 'Xvirus Anti-Malware',
+});
+
+tray.setMenu([
+  { type: 'normal', label: 'Open Xvirus', action: 'open' },
+  { type: 'separator' },
+  { type: 'normal', label: 'Quit', action: 'quit' },
+]);
+
+tray.on('tray-clicked', (event: any) => {
+  const action = (event as { data?: { action?: string } }).data?.action ?? '';
+  if (action === '' || action === 'open') {
+    showMainWindow();
+  } else if (action === 'quit') {
+    Utils.quit();
+  }
 });
 
 // ---------------------------------------------------------------------------
@@ -172,8 +236,7 @@ async function subscribeToServiceEvents(): Promise<void> {
                 // the full JSON payload to Preact so AlertView can display it
                 try {
                   mainWindow.webview.rpc!.send.serverEvent({ type: 'threat', message: rawData });
-                  mainWindow.show();
-                  mainWindow.focus();
+                  showMainWindow();
                 } catch {}
               }
             }

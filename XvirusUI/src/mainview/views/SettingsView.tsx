@@ -355,25 +355,23 @@ export default function SettingsView() {
             </section>)}
 
             <section class="settings-page">
-              {!isFirewall && (
-                <div class="setting-item">
-                  <label class="setting-label">Real-time Protection</label>
-                  <input
-                    type="checkbox"
-                    class="toggle-switch"
-                    checked={isRealTimeProtectionEnabled}
-                    onChange={(e: any) => {
-                      const enabled = e.currentTarget.checked;
-                      handleAppSettingChange('realTimeProtection', enabled);
-                      // keep engines in sync as before
-                      handleSettingChange('enableSignatures', enabled);
-                      handleSettingChange('enableHeuristics', enabled);
-                      handleSettingChange('enableAIScan', enabled);
-                      saveAllSettings();
-                    }}
-                  />
-                </div>
-              )}
+              <div class="setting-item">
+                <label class="setting-label">Process Protection</label>
+                <input
+                  type="checkbox"
+                  class="toggle-switch"
+                  checked={isRealTimeProtectionEnabled}
+                  onChange={(e: any) => {
+                    const enabled = e.currentTarget.checked;
+                    handleAppSettingChange('realTimeProtection', enabled);
+                    // keep engines in sync as before
+                    handleSettingChange('enableSignatures', enabled);
+                    handleSettingChange('enableHeuristics', enabled);
+                    handleSettingChange('enableAIScan', enabled);
+                    saveAllSettings();
+                  }}
+                />
+              </div>
 
               <div class="setting-item">
                 <label class="setting-label">If a threat is found</label>
@@ -411,17 +409,15 @@ export default function SettingsView() {
                 </div>
               )}
 
-              {!isFirewall && (
-                <div class="setting-item">
-                  <label class="setting-label">Network protection</label>
-                  <input
-                    type="checkbox"
-                    class="toggle-switch"
-                    checked={appSettings.networkProtection ?? true}
-                    onChange={(e: any) => { handleAppSettingChange('networkProtection', e.currentTarget.checked); saveAllSettings(); }}
-                  />
-                </div>
-              )}
+              <div class="setting-item">
+                <label class="setting-label">Network protection</label>
+                <input
+                  type="checkbox"
+                  class="toggle-switch"
+                  checked={appSettings.networkProtection ?? true}
+                  onChange={(e: any) => { handleAppSettingChange('networkProtection', e.currentTarget.checked); saveAllSettings(); }}
+                />
+              </div>
 
               {!isFirewall && (
                 <div class="setting-item">

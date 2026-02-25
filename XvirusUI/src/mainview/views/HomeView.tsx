@@ -16,6 +16,7 @@ export default function HomeView({ onScanStart, onOpenNetworkMonitor, pendingAle
   onOpenAlert?: () => void;
 }) {
   const [realtimeProtection, setRealtimeProtection] = useState(true);
+  const [networkProtection, setNetworkProtection] = useState(true);
   const [checkingUpdates, setCheckingUpdates] = useState(false);
   const [lastChecked, setLastChecked] = useState<string | null>(null);
 
@@ -37,8 +38,10 @@ export default function HomeView({ onScanStart, onOpenNetworkMonitor, pendingAle
     try {
       const s = await fetchSettings();
       s.appSettings.realTimeProtection = true;
+      s.appSettings.networkProtection = true;
       await saveSettings(s);
       setRealtimeProtection(true);
+      setNetworkProtection(true);
     } catch (e) {
       console.error(e);
     }
@@ -53,6 +56,7 @@ export default function HomeView({ onScanStart, onOpenNetworkMonitor, pendingAle
         ]);
         setLastChecked(updateRes.lastUpdateCheck || null);
         setRealtimeProtection(settingsRes.appSettings.realTimeProtection);
+        setNetworkProtection(settingsRes.appSettings.networkProtection);
       } catch (e) {
         console.error(e);
          setRealtimeProtection(false);
@@ -76,8 +80,9 @@ export default function HomeView({ onScanStart, onOpenNetworkMonitor, pendingAle
     });
   }, []);
 
+  const allProtected = realtimeProtection && networkProtection;
   const updatedRecently = lastChecked !== null && isWithin7Days(lastChecked);
-  const isProtected = realtimeProtection && (lastChecked !== null && updatedRecently);
+  const isProtected = allProtected && (lastChecked !== null && updatedRecently);
   const needsUpdate = !updatedRecently;
   const showProtected = isProtected && pendingAlerts === 0;
 
@@ -87,7 +92,7 @@ export default function HomeView({ onScanStart, onOpenNetworkMonitor, pendingAle
   if (pendingAlerts > 0) {
     primaryLabel = 'Manage Threats Found';
     primaryAction = onOpenAlert ?? (() => {});
-  } else if (!realtimeProtection) {
+  } else if (!allProtected) {
     primaryLabel = 'Enable Protection';
     primaryAction = handleEnableProtection;
   } else if (needsUpdate) {
@@ -158,22 +163,25 @@ export default function HomeView({ onScanStart, onOpenNetworkMonitor, pendingAle
         <div class="protection-content">
           <div class="protection-info">
             <p class="protection-info-title">Real-Time Protection</p>
-            <p class="protection-info-subtitle">{realtimeProtection ? 'Enabled' : 'Disabled'}</p>
+            <p class="protection-info-subtitle">{allProtected ? 'Enabled' : 'Disabled'}</p>
           </div>
           <input
             type="checkbox"
             class="toggle-switch"
-            checked={realtimeProtection}
+            checked={allProtected}
             onChange={async (e: any) => {
               const checked = e.currentTarget.checked;
               setRealtimeProtection(checked);
+              setNetworkProtection(checked);
               try {
                 const s = await fetchSettings();
                 s.appSettings.realTimeProtection = checked;
+                s.appSettings.networkProtection = checked;
                 await saveSettings(s);
               } catch (err) {
                 console.error(err);
                 setRealtimeProtection(!checked);
+                setNetworkProtection(!checked);
               }
             }}
             aria-label="Real-time protection"
