@@ -5,7 +5,7 @@ import { QuarantineEntry } from '../model/QuarantineEntry';
 import { fetchHistory, clearHistory as apiClearHistory } from '../api/historyApi';
 import { fetchRules, addAllowRule, addBlockRule, removeRule } from '../api/rulesApi';
 import { fetchQuarantine, deleteQuarantine as apiDeleteQuarantine, restoreQuarantine as apiRestoreQuarantine } from '../api/quarantineApi';
-import { getFilePath } from '../services/bunRpc';
+import { getFilePath } from '../services/neutralino';
 
 const IconTrash = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"

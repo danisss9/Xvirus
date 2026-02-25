@@ -39,6 +39,12 @@ body.dark {
   padding: 0;
 }
 
+html, body {
+  overflow: hidden;            /* no scrollbars */
+  touch-action: none;          /* disable track‑pad/touch gestures */
+  overscroll-behavior: none;   /* ignore swipe‑back, etc. */
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   background-color: var(--bg);

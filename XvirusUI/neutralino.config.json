@@ -1,0 +1,44 @@
+{
+  "$schema": "https://raw.githubusercontent.com/neutralinojs/neutralinojs/main/schemas/neutralino.config.schema.json",
+  "applicationId": "net.xvirus.firewall",
+  "version": "5.0.0",
+  "defaultMode": "window",
+  "port": 0,
+  "documentRoot": "/browser/",
+  "url": "/",
+  "enableServer": true,
+  "enableNativeAPI": true,
+  "tokenSecurity": "one-time",
+  "logging": {
+    "enabled": false,
+    "writeToLogFile": false
+  },
+  "nativeAllowList": ["app.*", "os.*", "window.*", "computer.*", "debug.log"],
+  "globalVariables": {
+    "IS_FIREWALL": true,
+    "IS_ANTIMALWARE": false
+  },
+  "modes": {
+    "window": {
+      "title": "Xvirus Firewall",
+      "icon": "browser/icon.png",
+      "width": 500,
+      "height": 800,
+      "center": false,
+      "fullScreen": false,
+      "alwaysOnTop": true,
+      "enableInspector": false,
+      "borderless": true,
+      "maximize": false,
+      "hidden": true,
+      "resizable": false,
+      "exitProcessOnClose": false
+    }
+  },
+  "cli": {
+    "binaryName": "xvirus-firewall",
+    "resourcesPath": "/browser/",
+    "binaryVersion": "6.5.0",
+    "clientVersion": "6.5.0"
+  }
+}

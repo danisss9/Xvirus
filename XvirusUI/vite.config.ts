@@ -3,9 +3,10 @@ import preactPreset from '@preact/preset-vite';
 
 export default defineConfig({
   plugins: [preactPreset()],
-  root: 'src/mainview',
+  root: 'src',
+  publicDir: 'assets',
   build: {
-    outDir: '../../dist',
+    outDir: '../browser',
     emptyOutDir: true,
   },
   server: {

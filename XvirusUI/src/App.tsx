@@ -7,7 +7,7 @@ import NetworkMonitorView from './views/NetworkMonitorView';
 import AlertView from './views/AlertView';
 import BottomNav from './components/BottomNav';
 import WindowControls from './components/WindowControls';
-import { initializeWindow, onServerEvent } from './services/bunRpc';
+import { initializeWindow, onServerEvent } from './services/neutralino';
 import { ThreatPayload } from './model/ThreatPayload';
 import './styles/app.css';
 import { isFirewall } from './services/env';
@@ -18,32 +18,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState('home');
   const [scanEvents, setScanEvents] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
-  const [alertQueue, setAlertQueue] = useState<ThreatPayload[]>([
-    {
-      id: '1',
-      filePath: 'C:\\temp\\malware.exe',
-      fileName: 'malware.exe',
-      processName: 'cmd.exe',
-      processId: 1234,
-      threatName: 'TestTrojan',
-      malwareScore: 0.85,
-      action: 'quarantine',
-      showNotification: true,
-      alreadyQuarantined: false,
-    },
-    {
-      id: '2',
-      filePath: 'C:\\windows\\system32\\evil.dll',
-      fileName: 'evil.dll',
-      processName: 'explorer.exe',
-      processId: 4321,
-      threatName: 'TestWorm',
-      malwareScore: 0.6,
-      action: 'deny',
-      showNotification: false,
-      alreadyQuarantined: false,
-    },
-  ]);
+  const [alertQueue, setAlertQueue] = useState<ThreatPayload[]>([]);
 
   // Navigate back to home when the alert queue is cleared
   useEffect(() => {
@@ -96,7 +71,7 @@ export default function App() {
 
   return (
     <div class="app-container">
-      <div class="app-header electrobun-webkit-app-region-drag">
+      <div id="app-header" class="app-header">
         <h1 class="app-title">{isFirewall ? 'Xvirus Firewall' : 'Xvirus Anti-Malware'}</h1>
         <WindowControls />
       </div>

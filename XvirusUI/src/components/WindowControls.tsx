@@ -1,4 +1,4 @@
-import { minimizeWindow, closeWindow } from '../services/bunRpc';
+import { minimizeWindow, closeWindow } from '../services/neutralino';
 
 export default function WindowControls() {
   const handleMinimize = async () => {
@@ -10,7 +10,7 @@ export default function WindowControls() {
   };
 
   return (
-    <div class="window-controls electrobun-webkit-app-region-no-drag">
+    <div id="window-controls" class="window-controls">
       <button 
         class="window-btn minimize-btn" 
         onClick={handleMinimize}

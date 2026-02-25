@@ -2,11 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Xvirus AntiMalware</title>
+    <link rel="icon" href="/icon.png">
 </head>
 <body>
     <div id="app"></div>
+    <script>
+      document.addEventListener('wheel', (e) => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
+    </script>
     <script src="%PUBLIC_URL%/__neutralino_globals.js"></script>
     <script type="module" src="/main.jsx"></script>
 </body>
