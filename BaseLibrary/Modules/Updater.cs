@@ -60,7 +60,7 @@ namespace Xvirus
                 SetDatabaseInfoVersion = (DatabaseDTO info, long value) => info.AIModel = value,
             },
         };
-        private static readonly string updateUrl = "https://cloud.xvirus.net/api/updateinfo?app=sdk5";
+        private static readonly string updateUrl = "https://cloud.xvirus.net/api/updateinfo?app=sdkBeta";
 
         public static string CheckUpdates(SettingsDTO settings)
         {

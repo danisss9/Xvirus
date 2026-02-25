@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Runtime.Versioning;
 using System.Text.Json;
+using Xvirus;
 using Xvirus.Model;
 using XvirusService.Model;
 
@@ -199,6 +200,8 @@ internal static class ProcessControl
             ShowNotification = appSettings.ShowNotifications,
             AlreadyQuarantined = alreadyQuarantined,
         };
+
+        Logger.LogHistory("threat", $"{source}: {result.Name} detected in '{executablePath}' (score: {result.MalwareScore:P0}) – action: {action}");
 
         // Store pending alert if user needs to take action
         if (action is "suspended" or "quarantine-failed")
