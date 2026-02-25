@@ -1,12 +1,13 @@
 using System.Management;
 using System.Runtime.Versioning;
+using Xvirus;
 
 namespace XvirusService.Services;
 
 [SupportedOSPlatform("windows")]
 public class RealTimeProtection(
     SettingsService settings,
-    ScannerService scanner,
+    Scanner scanner,
     Quarantine quarantine,
     ServerEventService events,
     ThreatAlertService alertService) : IDisposable

@@ -9,19 +9,24 @@ namespace Xvirus
 {
     public class DB
     {
-        internal readonly HashSet<string> safeHashList = new();
-        internal readonly HashSet<string> malHashList = new();
-        internal readonly Dictionary<string, string> heurList = new();
-        internal readonly Dictionary<string, string[]> heurListDeps = new();
-        internal readonly AhoCorasickTree heurListPatterns;
-        internal readonly Dictionary<string, string> heurScriptList = new();
-        internal readonly Dictionary<string, string[]> heurScriptListDeps = new();
-        internal readonly AhoCorasickTree heurScriptListPatterns;
-        internal readonly Dictionary<string, string> malVendorList = new();
-        
-        private readonly string databaseFolder;
+        internal HashSet<string> safeHashList = new();
+        internal HashSet<string> malHashList = new();
+        internal Dictionary<string, string> heurList = new();
+        internal Dictionary<string, string[]> heurListDeps = new();
+        internal AhoCorasickTree heurListPatterns = new(Array.Empty<string>());
+        internal Dictionary<string, string> heurScriptList = new();
+        internal Dictionary<string, string[]> heurScriptListDeps = new();
+        internal AhoCorasickTree heurScriptListPatterns = new(Array.Empty<string>());
+        internal Dictionary<string, string> malVendorList = new();
+
+        private string databaseFolder;
 
         public DB(SettingsDTO settings)
+        {
+            Load(settings);
+        }
+
+        public void Load(SettingsDTO settings)
         {
             databaseFolder = settings.DatabaseFolder;
 
@@ -48,6 +53,10 @@ namespace Xvirus
             foreach (var path in paths)
             {
                 var fullPath = Utils.RelativeToFullPath(databaseFolder, path);
+
+                if (!File.Exists(fullPath))
+                    continue;
+
                 try
                 {
                     var file = File.ReadAllLines(fullPath);
@@ -65,6 +74,10 @@ namespace Xvirus
         private Dictionary<string, string> LoadDictionary(string path, char splitChar)
         {
             var fullPath = Utils.RelativeToFullPath(databaseFolder, path);
+
+            if (!File.Exists(fullPath))
+                return new Dictionary<string, string>();
+
             try
             {
                 var file = File.ReadAllLines(fullPath);
@@ -90,6 +103,10 @@ namespace Xvirus
         private (Dictionary<string, string>, Dictionary<string, string[]>) LoadDictionary(string path, char splitChar, char andChar)
         {
             var fullPath = Utils.RelativeToFullPath(databaseFolder, path);
+
+            if (!File.Exists(fullPath))
+                return (new Dictionary<string, string>(), new Dictionary<string, string[]>());
+
             try
             {
                 var file = File.ReadAllLines(fullPath);
@@ -122,6 +139,9 @@ namespace Xvirus
         private AhoCorasickTree LoadAhoCorasick(string path, char splitChar, char andChar)
         {
             var fullPath = Utils.RelativeToFullPath(databaseFolder, path);
+            if (!File.Exists(fullPath))
+                return new AhoCorasickTree(Array.Empty<string>());
+
             try
             {
                 var patterns = File.ReadAllLines(fullPath)

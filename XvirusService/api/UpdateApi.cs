@@ -22,12 +22,13 @@ namespace XvirusService.Api
                 }
             });
 
-            app.MapPost("/update/check", (SettingsService settingsService) =>
+            app.MapPost("/update/check", (SettingsService settingsService, DB db) =>
             {
                 try
                 {
                     var message = Updater.CheckUpdates(settingsService.Settings);
                     settingsService.Reload();
+                    db.Load(settingsService.Settings);
 
                     var dto = new UpdateStatusDTO
                     {

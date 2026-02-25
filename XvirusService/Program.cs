@@ -31,23 +31,22 @@ builder.Services.AddSingleton<ServerEventService>();
 builder.Services.AddSingleton<Rules>();
 builder.Services.AddSingleton<Quarantine>();
 builder.Services.AddSingleton<ThreatAlertService>();
+builder.Services.AddSingleton<NetworkService>();
 builder.Services.AddSingleton<RealTimeProtection>();
 builder.Services.AddSingleton<NetworkRealTimeProtection>();
 builder.Services.AddHostedService<AutoUpdater>();
 
 // Scanner and its dependencies
-builder.Services.AddSingleton<DB>(sp =>
+builder.Services.AddSingleton(sp =>
     new DB(sp.GetRequiredService<SettingsService>().Settings));
-builder.Services.AddSingleton<AI>(sp =>
+builder.Services.AddSingleton(sp =>
     new AI(sp.GetRequiredService<SettingsService>().Settings));
-builder.Services.AddSingleton<Scanner>(sp =>
+builder.Services.AddSingleton(sp =>
     new Scanner(
         sp.GetRequiredService<SettingsService>().Settings,
         sp.GetRequiredService<DB>(),
         sp.GetRequiredService<AI>(),
         sp.GetRequiredService<Rules>()));
-builder.Services.AddSingleton<ScannerService>();
-builder.Services.AddSingleton<NetworkService>();
 
 // Configure JSON serialization for Native AOT
 builder.Services.ConfigureHttpJsonOptions(options =>

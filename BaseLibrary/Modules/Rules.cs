@@ -14,9 +14,9 @@ namespace Xvirus
         private static readonly ReaderWriterLock rwl = new ReaderWriterLock();
         private Dictionary<string, Rule> _rules = new Dictionary<string, Rule>();
 
-        public Rules(string rulesFilePath = "rules.json")
+        public Rules()
         {
-            _rules = GetRules(rulesFilePath);
+            _rules = GetRules("rules.json");
         }
 
         public Rule AddAllowRule(string path, string rulesFilePath = "rules.json")

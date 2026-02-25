@@ -1,14 +1,15 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Xvirus;
 using XvirusService.Model;
 
 namespace XvirusService.Services;
 
 public class NetworkService
 {
-    private readonly ScannerService _scanner;
+    private readonly Scanner _scanner;
 
-    public NetworkService(ScannerService scanner)
+    public NetworkService(Scanner scanner)
     {
         _scanner = scanner;
     }
