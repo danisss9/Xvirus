@@ -22,6 +22,37 @@ public sealed class Quarantine
         return _entries;
     }
 
+    /// <summary>
+    /// Registers a quarantine entry in the metadata without moving the file.
+    /// Used when the actual file move has been scheduled to occur on the next
+    /// system restart (e.g. via MoveFileEx MOVEFILE_DELAY_UNTIL_REBOOT).
+    /// Returns the entry so the caller can derive the quarantine destination path.
+    /// </summary>
+    public QuarantineEntry RegisterPendingEntry(string sourceFilePath)
+    {
+        var info = new FileInfo(sourceFilePath);
+        var entry = new QuarantineEntry
+        {
+            OriginalFileName = info.Name,
+            OriginalFilePath = info.FullName,
+            QuarantinedFileName = BuildQuarantinedName(info.Name),
+        };
+
+        try
+        {
+            entry.OriginalAttributes = info.Attributes.ToString();
+            entry.OriginalCreationTime = info.CreationTimeUtc;
+            entry.OriginalLastWriteTime = info.LastWriteTimeUtc;
+            entry.OriginalLastAccessTime = info.LastAccessTimeUtc;
+        }
+        catch { /* metadata is best-effort; file may still be locked */ }
+
+        _entries.Add(entry);
+        SaveMetadata();
+
+        return entry;
+    }
+
     public QuarantineEntry AddFile(string sourceFilePath)
     {
         if (!File.Exists(sourceFilePath))
