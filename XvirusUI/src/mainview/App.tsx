@@ -3,6 +3,7 @@ import HomeView from './views/HomeView';
 import ScanningView from './views/ScanningView';
 import SettingsView from './views/SettingsView';
 import HistoryView from './views/HistoryView';
+import NetworkMonitorView from './views/NetworkMonitorView';
 import BottomNav from './components/BottomNav';
 import WindowControls from './components/WindowControls';
 import { initializeWindow } from './services/bunRpc';
@@ -49,6 +50,7 @@ export default function App() {
         {currentView === 'scanning' && <ScanningView onComplete={handleScanComplete} scanEvents={scanEvents} />}
         {currentView === 'settings' && <SettingsView />}
         {currentView === 'history' && <HistoryView />}
+        {currentView === 'network' && <NetworkMonitorView />}
       </div>
       <BottomNav currentView={currentView} onNavigate={handleNavigate} isScanning={isScanning} />
     </div>

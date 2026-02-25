@@ -80,7 +80,12 @@ export default function HomeView({ onScanStart, onOpenNetworkMonitor }: {
 
   let primaryLabel: string;
   let primaryAction: () => void;
-  if (!realtimeProtection) {
+
+  // temp for tests
+    primaryLabel = 'Open Network Monitor';
+    primaryAction = onOpenNetworkMonitor ?? (() => {});
+
+ /*  if (!realtimeProtection) {
     primaryLabel = 'Enable Protection';
     primaryAction = handleEnableProtection;
   } else if (needsUpdate) {
@@ -92,7 +97,7 @@ export default function HomeView({ onScanStart, onOpenNetworkMonitor }: {
   } else {
     primaryLabel = 'Scan Now';
     primaryAction = onScanStart;
-  }
+  } */
 
   return (
     <div class="view-container home-view-container">

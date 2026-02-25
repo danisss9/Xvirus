@@ -355,23 +355,25 @@ export default function SettingsView() {
             </section>)}
 
             <section class="settings-page">
-              <div class="setting-item">
-                <label class="setting-label">Real-time Protection</label>
-                <input
-                  type="checkbox"
-                  class="toggle-switch"
-                  checked={isRealTimeProtectionEnabled}
-                  onChange={(e: any) => {
-                    const enabled = e.currentTarget.checked;
-                    handleAppSettingChange('realTimeProtection', enabled);
-                    // keep engines in sync as before
-                    handleSettingChange('enableSignatures', enabled);
-                    handleSettingChange('enableHeuristics', enabled);
-                    handleSettingChange('enableAIScan', enabled);
-                    saveAllSettings();
-                  }}
-                />
-              </div>
+              {!isFirewall && (
+                <div class="setting-item">
+                  <label class="setting-label">Real-time Protection</label>
+                  <input
+                    type="checkbox"
+                    class="toggle-switch"
+                    checked={isRealTimeProtectionEnabled}
+                    onChange={(e: any) => {
+                      const enabled = e.currentTarget.checked;
+                      handleAppSettingChange('realTimeProtection', enabled);
+                      // keep engines in sync as before
+                      handleSettingChange('enableSignatures', enabled);
+                      handleSettingChange('enableHeuristics', enabled);
+                      handleSettingChange('enableAIScan', enabled);
+                      saveAllSettings();
+                    }}
+                  />
+                </div>
+              )}
 
               <div class="setting-item">
                 <label class="setting-label">If a threat is found</label>
@@ -397,15 +399,17 @@ export default function SettingsView() {
                 </div>
               )}
 
-              <div class="setting-item">
-                <label class="setting-label">Scan files in the cloud</label>
-                <input
-                  type="checkbox"
-                  class="toggle-switch"
-                  checked={appSettings.cloudScan ?? false}
-                  onChange={(e: any) => { handleAppSettingChange('cloudScan', e.currentTarget.checked); saveAllSettings(); }}
-                />
-              </div>
+              {!isFirewall && (
+                <div class="setting-item">
+                  <label class="setting-label">Scan files in the cloud</label>
+                  <input
+                    type="checkbox"
+                    class="toggle-switch"
+                    checked={appSettings.cloudScan ?? false}
+                    onChange={(e: any) => { handleAppSettingChange('cloudScan', e.currentTarget.checked); saveAllSettings(); }}
+                  />
+                </div>
+              )}
 
               {!isFirewall && (
                 <div class="setting-item">

@@ -1098,6 +1098,172 @@ body {
   transform: translateY(0) scale(0.96);
 }
 
+/* ── Network Monitor View ───────────────────────────────────────────────── */
+
+.nm-card {
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 16px;
+}
+
+.nm-list {
+  overflow-y: auto;
+  max-height: 380px;
+  margin-top: 4px;
+}
+
+/* Collapsed row */
+.nm-row-collapsed {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.nm-row-collapsed .nm-filename {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nm-row-collapsed .nm-remote {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+  font-family: 'Consolas', 'Menlo', monospace;
+}
+
+/* Expanded row */
+.nm-row-expanded {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.nm-row-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.nm-row-header .nm-filename {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nm-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+
+.nm-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.nm-field-full {
+  width: 100%;
+}
+
+.nm-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.nm-field-value {
+  font-size: 12px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nm-mono {
+  font-family: 'Consolas', 'Menlo', monospace;
+  font-size: 11px;
+}
+
+.nm-path {
+  word-break: break-all;
+  white-space: normal;
+  font-size: 11px;
+}
+
+.nm-unknown {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Protocol badge */
+.nm-proto {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.nm-proto-tcp {
+  background: rgba(58, 191, 160, 0.15);
+  color: var(--teal);
+}
+
+.nm-proto-udp {
+  background: rgba(99, 132, 220, 0.15);
+  color: #6384dc;
+}
+
+/* Score badge */
+.score-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+.score-clean {
+  background: rgba(58, 191, 160, 0.15);
+  color: var(--teal);
+}
+
+.score-warn {
+  background: rgba(240, 180, 50, 0.18);
+  color: #c89a10;
+}
+
+.score-danger {
+  background: rgba(224, 82, 82, 0.15);
+  color: var(--red);
+}
+
+body.dark .score-warn {
+  color: #e8b530;
+}
+
 /* custom scrollbar - modern thin style */
 
 /* WebKit browsers */
