@@ -5,12 +5,12 @@
   "scripts": {
     "hmr:am": "vite --port 5173 --mode am",
     "hmr:fw": "vite --port 5173 --mode fw",
-    "dev:am": "vite build --mode am && electrobun build && electrobun dev",
-    "dev:fw": "vite build --mode fw && electrobun build && electrobun dev",
+    "dev:am": "vite build --mode am && APP_MODE=am electrobun build && electrobun dev",
+    "dev:fw": "vite build --mode fw && APP_MODE=fw electrobun build && electrobun dev",
     "dev:hmr:am": "concurrently \"bun run hmr:am\" \"bun run dev:am\"",
     "dev:hmr:fw": "concurrently \"bun run hmr:fw\" \"bun run dev:fw\"",
-    "build:am": "vite build --mode am && electrobun build --channel prod",
-    "build:fw": "vite build --mode fw && electrobun build --channel prod",
+    "build:am": "vite build --mode am && APP_MODE=am electrobun build --channel prod",
+    "build:fw": "vite build --mode fw && APP_MODE=fw electrobun build --channel prod",
     "start": "bun run dev"
   },
   "dependencies": {

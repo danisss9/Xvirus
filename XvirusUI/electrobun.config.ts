@@ -1,13 +1,17 @@
 import type { ElectrobunConfig } from 'electrobun';
 
+const mode = process.env.APP_MODE ?? 'am';
+const isFirewall = mode === 'fw';
+
 export default {
   app: {
-    name: 'Xvirus Anti-Malware',
-    identifier: 'xvirus-anti-malware.xvirus.net',
+    name: isFirewall ? 'Xvirus Firewall' : 'Xvirus Anti-Malware',
+    identifier: isFirewall ? 'xvirus-firewall.xvirus.net' : 'xvirus-anti-malware.xvirus.net',
     version: '0.0.1',
   },
   runtime: {
     exitOnLastWindowClosed: false,
+    mode,
   },
   build: {
     // Vite builds to dist/, we copy from there
@@ -24,6 +28,7 @@ export default {
     },
     win: {
       bundleCEF: false,
+      icon: 'src/assets/tray-icon.ico',
     },
   },
 } satisfies ElectrobunConfig;

@@ -5,6 +5,7 @@ import {
   Screen,
   BrowserView,
   Tray,
+  BuildConfig,
   type RPCSchema,
 } from 'electrobun/bun';
 import { dlopen, ptr } from 'bun:ffi';
@@ -21,10 +22,8 @@ const { symbols: user32 } = dlopen('user32.dll', {
   SetForegroundWindow: { args: ['ptr'], returns: 'bool' },
 });
 
-// Encode the window title once as a UTF-16LE null-terminated string
-const _titleBuf = Buffer.alloc(('Xvirus Anti-Malware'.length + 1) * 2);
-for (let i = 0; i < 'Xvirus Anti-Malware'.length; i++)
-  _titleBuf.writeUInt16LE('Xvirus Anti-Malware'.charCodeAt(i), i * 2);
+// Resolved after BuildConfig is read (top-level await below)
+let _titleBuf!: Buffer;
 
 function getHwnd() {
   return user32.FindWindowW(null, ptr(_titleBuf));
@@ -79,6 +78,16 @@ async function getMainViewUrl(): Promise<string> {
   return 'views://mainview/index.html';
 }
 
+// Read build-time mode (set via APP_MODE env during electrobun build)
+const buildConfig = await BuildConfig.get();
+const isFirewall = (buildConfig.runtime?.mode as string) === 'fw';
+const appTitle = isFirewall ? 'Xvirus Firewall' : 'Xvirus Anti-Malware';
+
+// Encode window title as UTF-16LE for FindWindowW
+_titleBuf = Buffer.alloc((appTitle.length + 1) * 2);
+for (let i = 0; i < appTitle.length; i++)
+  _titleBuf.writeUInt16LE(appTitle.charCodeAt(i), i * 2);
+
 // Create the main application window
 const url = await getMainViewUrl();
 
@@ -119,7 +128,7 @@ const x = screenWidth - windowWidth;
 const y = screenHeight - windowHeight;
 
 const mainWindow = new BrowserWindow({
-  title: 'Xvirus Anti-Malware',
+  title: appTitle,
   url,
   frame: {
     width: windowWidth,
@@ -139,7 +148,7 @@ const tray = new Tray({
   image: 'views://assets/tray-icon.ico',
   width: 16,
   height: 16,
-  title: 'Xvirus Anti-Malware',
+  title: appTitle,
 });
 
 tray.setMenu([
