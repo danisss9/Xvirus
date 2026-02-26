@@ -11,11 +11,13 @@
 		<Nullable>enable</Nullable>
 		<InvariantGlobalization>true</InvariantGlobalization>
 		<AssemblyName>XvirusNodeSDK</AssemblyName>
-		<Version>5.0.0.0</Version>
+		<Version>5.1.0.0</Version>
 		<Authors>Xvirus</Authors>
 		<Company>Xvirus</Company>
 		<Product>XvirusNodeSDK</Product>
 		<Copyright>Copyright $([System.DateTime]::Now.Year) $(Company)</Copyright>
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
 
 	<ItemGroup>

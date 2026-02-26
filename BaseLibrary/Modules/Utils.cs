@@ -7,7 +7,7 @@ namespace Xvirus
     public class Utils
     {
         public static string CurrentDir = AppContext.BaseDirectory;
-  
+
         internal static string RelativeToFullPath(string fileName)
         {
             return Path.Combine(CurrentDir, fileName);
@@ -33,9 +33,9 @@ namespace Xvirus
 
         public static string GetVersion()
         {
-            return "5.0.0.0";   
+            return "5.1.0.0";
         }
-    
+
         public static FileStream ReadFile(string filePath, long fileSize)
         {
             return fileSize >= 16777216 // 16MBs
