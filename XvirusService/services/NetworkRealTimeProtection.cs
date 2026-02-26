@@ -80,6 +80,27 @@ public class NetworkRealTimeProtection(
                     _scannedPaths.Add(path);
                 }
             }
+
+            // also add service & UI executables directly
+            try
+            {
+                string? self = Process.GetCurrentProcess().MainModule?.FileName;
+                if (!string.IsNullOrEmpty(self))
+                {
+                    lock (_scannedLock) { _scannedPaths.Add(self); }
+                }
+            }
+            catch { }
+
+            try
+            {
+                string ui = Path.Combine(AppContext.BaseDirectory, "XvirusUI.exe");
+                if (File.Exists(ui))
+                {
+                    lock (_scannedLock) { _scannedPaths.Add(ui); }
+                }
+            }
+            catch { }
         }
         catch (Exception ex)
         {

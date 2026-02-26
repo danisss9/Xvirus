@@ -86,6 +86,8 @@ public class RealTimeProtection(
     {
         try
         {
+            // enumerate existing processes first; this will pick up both the
+            // service and any running UI instance if they're active.
             foreach (var proc in Process.GetProcesses())
             {
                 try
@@ -105,6 +107,30 @@ public class RealTimeProtection(
                     // or refuse access by the time we inspect them.
                 }
             }
+
+            // explicitly add service executable (should already be covered but
+            // just in case enumeration failed) and the UI binary – the latter
+            // may not be running yet but we don't want the scanner to trigger
+            // on it if it later starts.
+            try
+            {
+                string? self = Process.GetCurrentProcess().MainModule?.FileName;
+                if (!string.IsNullOrEmpty(self))
+                {
+                    lock (_scannedLock) { _scannedPaths.Add(self); }
+                }
+            }
+            catch { /* ignore */ }
+
+            try
+            {
+                string ui = Path.Combine(AppContext.BaseDirectory, "XvirusUI.exe");
+                if (File.Exists(ui))
+                {
+                    lock (_scannedLock) { _scannedPaths.Add(ui); }
+                }
+            }
+            catch { /* ignore */ }
         }
         catch (Exception ex)
         {
