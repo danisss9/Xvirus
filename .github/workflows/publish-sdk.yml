@@ -144,6 +144,9 @@ jobs:
           /p:Version=${{ steps.version.outputs.VERSION }}
           -o dist/XvirusCLI-Linux
 
+      - name: Remove debug symbol files
+        run: find dist -name "*.dbg" -delete
+
       - name: Zip artifacts
         run: |
           (cd dist/NativeSDK-Linux  && zip -r ../../NativeSDK-Linux.zip .)
