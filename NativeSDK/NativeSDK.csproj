@@ -15,6 +15,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Remove="example/**" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <ProjectReference Include="..\BaseLibrary\BaseLibrary.csproj" />
 	</ItemGroup>
 
