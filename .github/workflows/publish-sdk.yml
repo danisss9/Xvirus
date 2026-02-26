@@ -188,6 +188,8 @@ jobs:
           body: |
             ## XvirusSDK ${{ steps.version.outputs.VERSION }}
 
+            See the [Changelog](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md) for what's new in this release.
+
             ### Release Assets
 
             | Asset | Platform | Description |
