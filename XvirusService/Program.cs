@@ -84,14 +84,13 @@ lifetime.ApplicationStopping.Register(() =>
 
 // Launch the UI if it is not already running
 var uiExe = Path.Combine(AppContext.BaseDirectory, "XvirusUI.exe");
-if (File.Exists(uiExe) && Process.GetProcessesByName("XvirusUI").Length == 0)
+Console.WriteLine($"Checking for UI at: {uiExe} and processes exists? {File.Exists(uiExe)}");
+if (File.Exists(uiExe))
 {
     Process.Start(new ProcessStartInfo
     {
         FileName = uiExe,
-        UseShellExecute = false,
-        CreateNoWindow = true,
-        WindowStyle = ProcessWindowStyle.Hidden,
+        UseShellExecute = true,
     });
 }
 
