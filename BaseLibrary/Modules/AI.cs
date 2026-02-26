@@ -14,9 +14,14 @@ namespace Xvirus
 {
     public class AI
     {
-        private readonly InferenceSession? model;
+        private InferenceSession? model;
 
         public AI(SettingsDTO settings)
+        {
+            Load(settings);
+        }
+
+        public void Load(SettingsDTO settings)
         {
             var path = Utils.RelativeToFullPath(settings.DatabaseFolder, "model.ai");
 

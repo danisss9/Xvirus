@@ -83,7 +83,7 @@ namespace Xvirus
 
                 if (settings.EnableHeuristics)
                 {
-                    if (isExecutable && (settings.MaxHeuristicsPeScanLength == null || fileInfo.Length <= settings.MaxHeuristicsPeScanLength))
+                    if (isExecutable && database.heurListPatterns != null && (settings.MaxHeuristicsPeScanLength == null || fileInfo.Length <= settings.MaxHeuristicsPeScanLength))
                     {
                         using var stream = Utils.ReadFile(filePath, fileInfo.Length);
                         var matches = database.heurListPatterns.Search(stream);
@@ -112,7 +112,7 @@ namespace Xvirus
                             }
                         }
                     }
-                    else if (!isExecutable && (settings.MaxHeuristicsOthersScanLength == null || fileInfo.Length <= settings.MaxHeuristicsOthersScanLength)) // 10MBs
+                    else if (!isExecutable && database.heurScriptListPatterns != null && (settings.MaxHeuristicsOthersScanLength == null || fileInfo.Length <= settings.MaxHeuristicsOthersScanLength)) // 10MBs
                     {
                         using var stream = Utils.ReadFile(filePath, fileInfo.Length);
                         var matches = database.heurScriptListPatterns.Search(stream);

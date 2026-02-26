@@ -14,12 +14,14 @@ public class AutoUpdater : IHostedService
     private readonly SettingsService _settings;
     private readonly ServerEventService _events;
     private readonly DB _db;
+    private readonly AI _ai;
 
-    public AutoUpdater(SettingsService settings, DB db, ServerEventService events)
+    public AutoUpdater(SettingsService settings, DB db, AI ai, ServerEventService events)
     {
         _settings = settings;
         _events = events;
         _db = db;
+        _ai = ai;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -49,6 +51,7 @@ public class AutoUpdater : IHostedService
 
             _settings.Reload();
             _db.Load(_settings.Settings);
+            _ai.Load(_settings.Settings);
 
             Console.WriteLine($"AutoUpdater: complete – {message}");
 

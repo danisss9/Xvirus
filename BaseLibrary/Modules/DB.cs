@@ -13,10 +13,10 @@ namespace Xvirus
         internal HashSet<string> malHashList = new();
         internal Dictionary<string, string> heurList = new();
         internal Dictionary<string, string[]> heurListDeps = new();
-        internal AhoCorasickTree heurListPatterns = new(Array.Empty<string>());
+        internal AhoCorasickTree? heurListPatterns;
         internal Dictionary<string, string> heurScriptList = new();
         internal Dictionary<string, string[]> heurScriptListDeps = new();
-        internal AhoCorasickTree heurScriptListPatterns = new(Array.Empty<string>());
+        internal AhoCorasickTree? heurScriptListPatterns;
         internal Dictionary<string, string> malVendorList = new();
 
         private string databaseFolder;
@@ -136,11 +136,11 @@ namespace Xvirus
             }
         }
 
-        private AhoCorasickTree LoadAhoCorasick(string path, char splitChar, char andChar)
+        private AhoCorasickTree? LoadAhoCorasick(string path, char splitChar, char andChar)
         {
             var fullPath = Utils.RelativeToFullPath(databaseFolder, path);
             if (!File.Exists(fullPath))
-                return new AhoCorasickTree(Array.Empty<string>());
+                return null;
 
             try
             {
