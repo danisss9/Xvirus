@@ -1,0 +1,9 @@
+{
+  "name": "xvirus-nodesdk-example",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Usage example for XvirusNodeSDK",
+  "scripts": {
+    "start": "node example.mjs"
+  }
+}

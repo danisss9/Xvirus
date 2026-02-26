@@ -1,0 +1,10 @@
+*.suo
+*.user
+*.sln.docstates
+
+.vs/
+bin/
+obj/
+x64/
+debug/
+release/

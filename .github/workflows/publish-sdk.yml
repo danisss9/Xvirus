@@ -1,0 +1,202 @@
+name: Publish XvirusSDK Release
+
+on:
+  push:
+    tags:
+      - 'XvirusSDK_*'
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  build-windows:
+    name: Build Windows Artifacts
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Extract version from tag
+        id: version
+        shell: bash
+        run: echo "VERSION=${GITHUB_REF_NAME#XvirusSDK_}" >> "$GITHUB_OUTPUT"
+
+      - name: Pack CSharpSDK (NuGet)
+        run: >
+          dotnet pack CSharpSDK/CSharpSDK.csproj
+          -c Release
+          /p:Version=${{ steps.version.outputs.VERSION }}
+          -o dist/nuget
+
+      - name: Publish CSharpSDK
+        run: >
+          dotnet publish CSharpSDK/CSharpSDK.csproj
+          -c Release
+          /p:Version=${{ steps.version.outputs.VERSION }}
+          -o dist/CSharpSDK
+
+      - name: Copy CSharpSDK example
+        shell: pwsh
+        run: Copy-Item -Recurse -Path "CSharpSDK/example" -Destination "dist/CSharpSDK/example"
+
+      - name: Publish NativeSDK (win-x64)
+        run: >
+          dotnet publish NativeSDK/NativeSDK.csproj
+          -c Release -r win-x64
+          /p:Version=${{ steps.version.outputs.VERSION }}
+          -o dist/NativeSDK-Windows
+
+      - name: Copy NativeSDK example (Windows)
+        shell: pwsh
+        run: Copy-Item -Recurse -Path "NativeSDK/example" -Destination "dist/NativeSDK-Windows/example"
+
+      - name: Publish NodeSDK (win-x64)
+        run: >
+          dotnet publish NodeSDK/NodeSDK.csproj
+          -c Release -r win-x64
+          /p:Version=${{ steps.version.outputs.VERSION }}
+          -o dist/NodeSDK-Windows
+
+      - name: Copy NodeSDK example (Windows)
+        shell: pwsh
+        run: |
+          Copy-Item -Recurse -Path "NodeSDK/example"  -Destination "dist/NodeSDK-Windows/example"
+
+      - name: Publish XvirusCLI (win-x64)
+        run: >
+          dotnet publish XvirusCLI/XvirusCLI.csproj
+          -c Release -r win-x64 --self-contained true
+          /p:Version=${{ steps.version.outputs.VERSION }}
+          -o dist/XvirusCLI-Windows
+
+      - name: Zip artifacts
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "dist/CSharpSDK/*"        -DestinationPath "CSharpSDK.zip"
+          Compress-Archive -Path "dist/NativeSDK-Windows/*" -DestinationPath "NativeSDK-Windows.zip"
+          Compress-Archive -Path "dist/NodeSDK-Windows/*"  -DestinationPath "NodeSDK-Windows.zip"
+          Compress-Archive -Path "dist/XvirusCLI-Windows/*" -DestinationPath "XvirusCLI-Windows.zip"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-artifacts
+          path: |
+            CSharpSDK.zip
+            NativeSDK-Windows.zip
+            NodeSDK-Windows.zip
+            XvirusCLI-Windows.zip
+            dist/nuget/*.nupkg
+          if-no-files-found: error
+          retention-days: 1
+
+  build-linux:
+    name: Build Linux Artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install Native AOT prerequisites
+        run: sudo apt-get update -q && sudo apt-get install -y clang zlib1g-dev
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#XvirusSDK_}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish NativeSDK (linux-x64)
+        run: >
+          dotnet publish NativeSDK/NativeSDK.csproj
+          -c Release -r linux-x64
+          /p:Version=${{ steps.version.outputs.VERSION }}
+          -o dist/NativeSDK-Linux
+
+      - name: Copy NativeSDK example (Linux)
+        run: cp -r NativeSDK/example dist/NativeSDK-Linux/example
+
+      - name: Publish NodeSDK (linux-x64)
+        run: >
+          dotnet publish NodeSDK/NodeSDK.csproj
+          -c Release -r linux-x64
+          /p:Version=${{ steps.version.outputs.VERSION }}
+          -o dist/NodeSDK-Linux
+
+      - name: Copy NodeSDK example (Linux)
+        run: |
+          cp -r NodeSDK/example  dist/NodeSDK-Linux/example
+
+      - name: Publish XvirusCLI (linux-x64)
+        run: >
+          dotnet publish XvirusCLI/XvirusCLI.csproj
+          -c Release -r linux-x64 --self-contained true
+          /p:Version=${{ steps.version.outputs.VERSION }}
+          -o dist/XvirusCLI-Linux
+
+      - name: Zip artifacts
+        run: |
+          (cd dist/NativeSDK-Linux  && zip -r ../../NativeSDK-Linux.zip .)
+          (cd dist/NodeSDK-Linux    && zip -r ../../NodeSDK-Linux.zip .)
+          (cd dist/XvirusCLI-Linux  && zip -r ../../XvirusCLI-Linux.zip .)
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-artifacts
+          path: |
+            NativeSDK-Linux.zip
+            NodeSDK-Linux.zip
+            XvirusCLI-Linux.zip
+          if-no-files-found: error
+          retention-days: 1
+
+  release:
+    name: Create GitHub Release
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#XvirusSDK_}" >> "$GITHUB_OUTPUT"
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: XvirusSDK ${{ steps.version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          files: release-assets/*
+          body: |
+            ## XvirusSDK ${{ steps.version.outputs.VERSION }}
+
+            ### Release Assets
+
+            | Asset | Platform | Description |
+            |-------|----------|-------------|
+            | `XvirusSDK.${{ steps.version.outputs.VERSION }}.nupkg` | Any | C# NuGet package |
+            | `CSharpSDK.zip` | Any | C# SDK managed library + example |
+            | `NativeSDK-Windows.zip` | Windows x64 | Native AOT shared library + example |
+            | `NativeSDK-Linux.zip` | Linux x64 | Native AOT shared library + example |
+            | `NodeSDK-Windows.zip` | Windows x64 | Node.js native bindings (.cjs / .mjs / .d.ts) + example |
+            | `NodeSDK-Linux.zip` | Linux x64 | Node.js native bindings (.cjs / .mjs / .d.ts) + example |
+            | `XvirusCLI-Windows.zip` | Windows x64 | CLI tool (self-contained) |
+            | `XvirusCLI-Linux.zip` | Linux x64 | CLI tool (self-contained) |
