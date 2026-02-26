@@ -1,6 +1,9 @@
 [submodule "Cloud"]
 	path = Cloud
 	url = ./Cloud
+[submodule "Login"]
+	path = Login
+	url = ./Login
 [submodule "Portal"]
 	path = Portal
 	url = ./Portal
