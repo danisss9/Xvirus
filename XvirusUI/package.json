@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Xvirus User Interface",
   "scripts": {
-    "dev:am": "vite build && neu build && neu run",
-    "dev:fw": "vite build && neu build && neu run",
-    "prod:am": "vite build && neu build --release",
-    "prod:fw": "vite build && neu build --release",
+    "dev:am": "vite build && neu run",
+    "dev:fw": "vite build && neu run",
+    "prod:am": "vite build && neu build --release --embed-resources",
+    "prod:fw": "vite build && neu build --release --embed-resources",
     "start": "neu run",
     "prod:service": "dotnet publish ../XvirusService/XvirusService.csproj /p:PublishProfile=Windows"
   },

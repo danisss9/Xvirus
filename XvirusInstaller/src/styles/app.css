@@ -1,0 +1,316 @@
+:root {
+  --primary: #2e7d32;
+  --primary-hover: #1b5e20;
+  --secondary: #f5f5f5;
+  --border: #e0e0e0;
+  --text-primary: #212121;
+  --text-secondary: #757575;
+  --error: #d32f2f;
+  --success: #388e3c;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  color: var(--text-primary);
+  background: white;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.installer-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.installer-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--border);
+  background: white;
+}
+
+.installer-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.installer-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.installer-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.installer-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--secondary);
+}
+
+/* Welcome View */
+.welcome-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  text-align: center;
+}
+
+.welcome-icon {
+  font-size: 64px;
+  opacity: 0.8;
+}
+
+.welcome-title {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.welcome-description {
+  color: var(--text-secondary);
+  max-width: 400px;
+}
+
+/* Config View */
+.config-view {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.config-label {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.config-input {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.config-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1);
+}
+
+.config-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.config-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.config-checkbox input {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+/* Progress View */
+.progress-view {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  justify-content: center;
+}
+
+.progress-step {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: var(--secondary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.progress-percentage {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+/* Done View */
+.done-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  text-align: center;
+}
+
+.done-icon {
+  font-size: 64px;
+  color: var(--success);
+}
+
+.done-error-icon {
+  color: var(--error);
+}
+
+.done-title {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.done-message {
+  color: var(--text-secondary);
+  max-width: 400px;
+}
+
+.done-error {
+  background: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 4px;
+  padding: 12px;
+  margin-top: 12px;
+  color: var(--error);
+  font-family: monospace;
+  font-size: 12px;
+  text-align: left;
+  max-width: 400px;
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.btn-secondary {
+  background: var(--secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #eeeeee;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn.btn-block {
+  width: 100%;
+}
+
+/* Scrollbar styling */
+.installer-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.installer-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.installer-content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.installer-content::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .installer-container {
+    min-width: 500px;
+  }
+
+  .installer-header {
+    padding: 16px;
+  }
+
+  .installer-content {
+    padding: 16px;
+  }
+
+  .installer-footer {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}

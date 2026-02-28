@@ -70,7 +70,7 @@ public sealed class Quarantine
             OriginalLastAccessTime = info.LastAccessTimeUtc,
         };
 
-        string dest = Utils.RelativeToFullPath("quarantine", entry.QuarantinedFileName);
+        string dest = Utils.RelativeToFullPath("Quarantine", entry.QuarantinedFileName);
         File.Move(sourceFilePath, dest, false);
 
         // Strip any special attributes so the file sits quietly in the vault
@@ -85,7 +85,7 @@ public sealed class Quarantine
     public void DeleteFile(string entryId)
     {
         var entry = _entries.Find(e => e.Id == entryId) ?? throw new KeyNotFoundException("Quarantine entry not found.");
-        string path = Utils.RelativeToFullPath("quarantine", entry.QuarantinedFileName);
+        string path = Utils.RelativeToFullPath("Quarantine", entry.QuarantinedFileName);
 
         if (File.Exists(path))
         {
@@ -99,7 +99,7 @@ public sealed class Quarantine
     public string RestoreFile(string entryId)
     {
         var entry = _entries.Find(e => e.Id == entryId) ?? throw new KeyNotFoundException("Quarantine entry not found.");
-        string src = Utils.RelativeToFullPath("quarantine", entry.QuarantinedFileName);
+        string src = Utils.RelativeToFullPath("Quarantine", entry.QuarantinedFileName);
 
         if (!File.Exists(src))
             throw new FileNotFoundException(
@@ -140,7 +140,7 @@ public sealed class Quarantine
 
     private void LoadQuarantine()
     {
-        var quarantinePath = Utils.RelativeToFullPath("quarantine");
+        var quarantinePath = Utils.RelativeToFullPath("Quarantine");
         var metadataFile = Utils.RelativeToFullPath("quarantine.json");
 
         if (!Directory.Exists(quarantinePath))

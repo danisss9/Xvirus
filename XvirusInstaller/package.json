@@ -1,0 +1,23 @@
+{
+  "name": "xvirus-installer",
+  "version": "5.0.0",
+  "description": "Xvirus Installer - Preact + Neutralino.js",
+  "scripts": {
+    "prepare:am": "node scripts/prebuild.mjs am",
+    "prepare:fw": "node scripts/prebuild.mjs fw",
+    "build:am": "node scripts/build-resources.mjs am && vite build && neu build --release --embed-resources",
+    "build:fw": "node scripts/build-resources.mjs fw && vite build && neu build --release --embed-resources",
+    "release:am": "npm run prepare:am && npm run build:am",
+    "release:fw": "npm run prepare:fw && npm run build:fw",
+    "dev": "vite build && neu build && neu run"
+  },
+  "dependencies": {
+    "@neutralinojs/lib": "^6.5.0",
+    "preact": "^10.28.4"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.3",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  }
+}

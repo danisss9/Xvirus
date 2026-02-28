@@ -127,7 +127,7 @@ internal static class ProcessControl
         try
         {
             var entry = quarantine.RegisterPendingEntry(sourceFilePath);
-            string dest = Path.Combine(AppContext.BaseDirectory, "quarantine", entry.QuarantinedFileName);
+            string dest = Path.Combine(AppContext.BaseDirectory, "Quarantine", entry.QuarantinedFileName);
 
             if (!MoveFileEx(sourceFilePath, dest, MoveFileDelayUntilReboot))
             {

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/neutralinojs/neutralinojs/main/schemas/neutralino.config.schema.json",
+  "applicationId": "net.xvirus.installer",
+  "version": "5.0.0",
+  "defaultMode": "window",
+  "port": 0,
+  "documentRoot": "/browser/",
+  "url": "/",
+  "enableServer": true,
+  "enableNativeAPI": true,
+  "tokenSecurity": "one-time",
+  "logging": {
+    "enabled": false,
+    "writeToLogFile": false
+  },
+  "nativeAllowList": ["app.*", "os.*", "filesystem.*", "computer.*"],
+  "modes": {
+    "window": {
+      "title": "Xvirus Installer",
+      "icon": "browser/icon.png",
+      "width": 1000,
+      "height": 650,
+      "center": true,
+      "fullScreen": false,
+      "alwaysOnTop": true,
+      "enableInspector": false,
+      "borderless": false,
+      "maximize": false,
+      "resizable": false,
+      "exitProcessOnClose": false
+    }
+  },
+  "cli": {
+    "binaryName": "xvirus-installer",
+    "resourcesPath": "/browser/",
+    "binaryVersion": "6.5.0",
+    "clientVersion": "6.5.0"
+  }
+}
