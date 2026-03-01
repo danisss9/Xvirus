@@ -27,7 +27,14 @@ namespace Xvirus
 
             if (settings.EnableAIScan && File.Exists(path))
             {
-                model = new InferenceSession(path);
+                try
+                {
+                    model = new InferenceSession(path);
+                }
+                catch
+                {
+                    model = null;
+                }
             }
         }
 
