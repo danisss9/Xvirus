@@ -32,7 +32,7 @@ jobs:
           node-version: '20'
 
       - name: Install Neutralino CLI
-        run: npm install -g @neutralinojs/neu
+        run: npm install -g @neutralinojs/neu@11.7.0
 
       - name: Extract version from tag
         id: version
