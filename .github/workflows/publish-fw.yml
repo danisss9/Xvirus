@@ -1,0 +1,77 @@
+name: Publish Xvirus Firewall
+
+on:
+  push:
+    tags:
+      - 'XvirusFw_*'
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Neutralino CLI
+        run: npm install -g @neutralinojs/neu
+
+      - name: Extract version from tag
+        id: version
+        shell: bash
+        run: echo "VERSION=${GITHUB_REF_NAME#XvirusFw_}" >> "$GITHUB_OUTPUT"
+
+      - name: Install XvirusUI dependencies
+        working-directory: XvirusUI
+        run: npm install
+
+      - name: Install XvirusInstaller dependencies
+        working-directory: XvirusInstaller
+        run: npm install
+
+      - name: Build installer (FW)
+        working-directory: XvirusInstaller
+        run: npm run release:fw
+
+      - name: Rename installer artifact
+        shell: pwsh
+        run: >
+          Copy-Item
+          "XvirusInstaller\dist\xvirus-installer\xvirus-installer-win_x64.exe"
+          "XvirusFW-Installer-${{ steps.version.outputs.VERSION }}.exe"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Xvirus Firewall ${{ steps.version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          files: XvirusFW-Installer-${{ steps.version.outputs.VERSION }}.exe
+          body: |
+            ## Xvirus Firewall ${{ steps.version.outputs.VERSION }}
+
+            See the [Changelog](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md) for what's new in this release.
+
+            ### Installation
+
+            Download and run `XvirusFW-Installer-${{ steps.version.outputs.VERSION }}.exe` to install Xvirus Firewall.
+
+            > **Note:** Administrator privileges are required during installation.
