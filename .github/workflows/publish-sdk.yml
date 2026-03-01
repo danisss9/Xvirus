@@ -126,20 +126,22 @@ jobs:
 
               curl -fsSL https://dot.net/v1/dotnet-install.sh \
                 | bash -s -- --channel 8.0 --install-dir /opt/dotnet
+              export DOTNET_ROOT=/opt/dotnet
+              export PATH=/opt/dotnet:\$PATH
 
-              /opt/dotnet/dotnet publish NativeSDK/NativeSDK.csproj \
+              dotnet publish NativeSDK/NativeSDK.csproj \
                 -c Release -r linux-x64 \
                 /p:Version=${{ steps.version.outputs.VERSION }} \
                 -o dist/NativeSDK-Linux-glibc
               cp -r NativeSDK/example dist/NativeSDK-Linux-glibc/example
 
-              /opt/dotnet/dotnet publish NodeSDK/NodeSDK.csproj \
+              dotnet publish NodeSDK/NodeSDK.csproj \
                 -c Release -r linux-x64 \
                 /p:Version=${{ steps.version.outputs.VERSION }} \
                 -o dist/NodeSDK-Linux-glibc
               cp -r NodeSDK/example dist/NodeSDK-Linux-glibc/example
 
-              /opt/dotnet/dotnet publish XvirusCLI/XvirusCLI.csproj \
+              dotnet publish XvirusCLI/XvirusCLI.csproj \
                 -c Release -r linux-x64 --self-contained true \
                 /p:Version=${{ steps.version.outputs.VERSION }} \
                 -o dist/XvirusCLI-Linux-glibc
@@ -185,20 +187,22 @@ jobs:
 
               curl -fsSL https://dot.net/v1/dotnet-install.sh \
                 | bash -s -- --channel 8.0 --install-dir /opt/dotnet
+              export DOTNET_ROOT=/opt/dotnet
+              export PATH=/opt/dotnet:\$PATH
 
-              /opt/dotnet/dotnet publish NativeSDK/NativeSDK.csproj \
+              dotnet publish NativeSDK/NativeSDK.csproj \
                 -c Release -r linux-musl-x64 \
                 /p:Version=${{ steps.version.outputs.VERSION }} \
                 -o dist/NativeSDK-Linux-musl
               cp -r NativeSDK/example dist/NativeSDK-Linux-musl/example
 
-              /opt/dotnet/dotnet publish NodeSDK/NodeSDK.csproj \
+              dotnet publish NodeSDK/NodeSDK.csproj \
                 -c Release -r linux-musl-x64 \
                 /p:Version=${{ steps.version.outputs.VERSION }} \
                 -o dist/NodeSDK-Linux-musl
               cp -r NodeSDK/example dist/NodeSDK-Linux-musl/example
 
-              /opt/dotnet/dotnet publish XvirusCLI/XvirusCLI.csproj \
+              dotnet publish XvirusCLI/XvirusCLI.csproj \
                 -c Release -r linux-musl-x64 --self-contained true \
                 /p:Version=${{ steps.version.outputs.VERSION }} \
                 -o dist/XvirusCLI-Linux-musl
