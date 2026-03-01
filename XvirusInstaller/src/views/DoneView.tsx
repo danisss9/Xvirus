@@ -11,7 +11,7 @@ const DoneView: FunctionComponent<DoneViewProps> = ({ success, error }) => {
   const handleLaunch = async () => {
     try {
       const installPath = `C:\\Program Files\\${PRODUCT_INFO.installFolder}`;
-      await Neutralino.os.execCommand(`start "" "${installPath}\\${PRODUCT_INFO.uiExeName}"`);
+      await Neutralino.os.execCommand(`cmd /c timeout /t 3 /nobreak >nul && start "" "${installPath}\\${PRODUCT_INFO.uiExeName}"`,  { background: true },);
     } catch (e) {
       console.error('Failed to launch app:', e);
     }

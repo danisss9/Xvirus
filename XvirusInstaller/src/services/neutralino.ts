@@ -1,4 +1,4 @@
-import NeutralinoJs from '@neutralinojs/lib';
+import NeutralinoJs, { ExecCommandOptions } from '@neutralinojs/lib';
 
 declare const NL_PATH: string;
 
@@ -9,8 +9,11 @@ export const Neutralino = (() => {
 
   return {
     os: {
-      execCommand(command: string): Promise<{ stdOut: string; stdErr: string; exitCode: number }> {
-        return getNeutralino().os.execCommand(command);
+      execCommand(
+        command: string,
+        options?: ExecCommandOptions,
+      ): Promise<{ stdOut: string; stdErr: string; exitCode: number }> {
+        return getNeutralino().os.execCommand(command, options);
       },
     },
     filesystem: {
@@ -29,11 +32,13 @@ export const Neutralino = (() => {
         try {
           const tmpDir = NL_PATH.replace(/\//g, '\\') + '\\.tmp';
           await getNeutralino().os.execCommand(
-            `powershell -WindowStyle Hidden -Command "Start-Sleep 2; Remove-Item -LiteralPath '${tmpDir}' -Recurse -Force -ErrorAction SilentlyContinue"`,
-            { background: true }
+            `powershell -WindowStyle Hidden -Command "Start-Sleep 1; Remove-Item -LiteralPath '${tmpDir}' -Recurse -Force -ErrorAction SilentlyContinue; exit"`,
+            { background: true },
           );
-        } catch { /* ignore cleanup errors */ }
-        return getNeutralino().app.exit();
+        } catch {
+          /* ignore cleanup errors */
+        }
+        NeutralinoJs.app.exit();
       },
     },
   };

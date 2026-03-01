@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'preact';
 import { PRODUCT_INFO } from '../services/installer';
-import Neutralino from '@neutralinojs/lib';
+import { Neutralino } from '../services/neutralino';
 
 interface WelcomeViewProps {
   onNext: () => void;
