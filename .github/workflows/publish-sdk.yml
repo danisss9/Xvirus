@@ -66,8 +66,7 @@ jobs:
 
       - name: Copy NodeSDK example (Windows)
         shell: pwsh
-        run: |
-          Copy-Item -Recurse -Path "NodeSDK/example"  -Destination "dist/NodeSDK-Windows/example"
+        run: Copy-Item -Recurse -Path "NodeSDK/example" -Destination "dist/NodeSDK-Windows/example"
 
       - name: Publish XvirusCLI (win-x64)
         run: >
@@ -79,9 +78,9 @@ jobs:
       - name: Zip artifacts
         shell: pwsh
         run: |
-          Compress-Archive -Path "dist/CSharpSDK/*"        -DestinationPath "CSharpSDK.zip"
+          Compress-Archive -Path "dist/CSharpSDK/*"         -DestinationPath "CSharpSDK.zip"
           Compress-Archive -Path "dist/NativeSDK-Windows/*" -DestinationPath "NativeSDK-Windows.zip"
-          Compress-Archive -Path "dist/NodeSDK-Windows/*"  -DestinationPath "NodeSDK-Windows.zip"
+          Compress-Archive -Path "dist/NodeSDK-Windows/*"   -DestinationPath "NodeSDK-Windows.zip"
           Compress-Archive -Path "dist/XvirusCLI-Windows/*" -DestinationPath "XvirusCLI-Windows.zip"
 
       - name: Upload artifacts
@@ -97,20 +96,32 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  build-linux:
-    name: Build Linux Artifacts
+  build-linux-glibc:
+    name: Build Linux glibc Artifacts (Ubuntu 16.04 / glibc 2.23)
     runs-on: ubuntu-latest
+    container:
+      image: ubuntu:16.04
     steps:
+      - name: Install dependencies
+        run: |
+          apt-get update -q
+          apt-get install -y curl wget git zip ca-certificates gnupg software-properties-common
+          wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+          echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main" \
+            >> /etc/apt/sources.list.d/llvm.list
+          apt-get update -q
+          apt-get install -y clang-9 zlib1g-dev
+          ln -sf /usr/bin/clang-9 /usr/bin/clang
+
+      - name: Install .NET 8 SDK
+        run: |
+          curl -fsSL https://dot.net/v1/dotnet-install.sh \
+            | bash -s -- --channel 8.0 --install-dir /opt/dotnet
+          echo "DOTNET_ROOT=/opt/dotnet" >> "$GITHUB_ENV"
+          echo "/opt/dotnet"             >> "$GITHUB_PATH"
+
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Install Native AOT prerequisites
-        run: sudo apt-get update -q && sudo apt-get install -y clang zlib1g-dev
 
       - name: Extract version from tag
         id: version
@@ -118,55 +129,125 @@ jobs:
 
       - name: Publish NativeSDK (linux-x64)
         run: >
-          dotnet publish NativeSDK/NativeSDK.csproj
+          /opt/dotnet/dotnet publish NativeSDK/NativeSDK.csproj
           -c Release -r linux-x64
           /p:Version=${{ steps.version.outputs.VERSION }}
-          -o dist/NativeSDK-Linux
+          -o dist/NativeSDK-Linux-glibc
 
-      - name: Copy NativeSDK example (Linux)
-        run: cp -r NativeSDK/example dist/NativeSDK-Linux/example
+      - name: Copy NativeSDK example
+        run: cp -r NativeSDK/example dist/NativeSDK-Linux-glibc/example
 
       - name: Publish NodeSDK (linux-x64)
         run: >
-          dotnet publish NodeSDK/NodeSDK.csproj
+          /opt/dotnet/dotnet publish NodeSDK/NodeSDK.csproj
           -c Release -r linux-x64
           /p:Version=${{ steps.version.outputs.VERSION }}
-          -o dist/NodeSDK-Linux
+          -o dist/NodeSDK-Linux-glibc
 
-      - name: Copy NodeSDK example (Linux)
-        run: |
-          cp -r NodeSDK/example  dist/NodeSDK-Linux/example
+      - name: Copy NodeSDK example
+        run: cp -r NodeSDK/example dist/NodeSDK-Linux-glibc/example
 
       - name: Publish XvirusCLI (linux-x64)
         run: >
-          dotnet publish XvirusCLI/XvirusCLI.csproj
+          /opt/dotnet/dotnet publish XvirusCLI/XvirusCLI.csproj
           -c Release -r linux-x64 --self-contained true
           /p:Version=${{ steps.version.outputs.VERSION }}
-          -o dist/XvirusCLI-Linux
+          -o dist/XvirusCLI-Linux-glibc
 
       - name: Remove debug symbol files
         run: find dist -name "*.dbg" -delete
 
       - name: Zip artifacts
         run: |
-          (cd dist/NativeSDK-Linux  && zip -r ../../NativeSDK-Linux.zip .)
-          (cd dist/NodeSDK-Linux    && zip -r ../../NodeSDK-Linux.zip .)
-          (cd dist/XvirusCLI-Linux  && zip -r ../../XvirusCLI-Linux.zip .)
+          (cd dist/NativeSDK-Linux-glibc && zip -r ../../NativeSDK-Linux-glibc.zip .)
+          (cd dist/NodeSDK-Linux-glibc   && zip -r ../../NodeSDK-Linux-glibc.zip .)
+          (cd dist/XvirusCLI-Linux-glibc && zip -r ../../XvirusCLI-Linux-glibc.zip .)
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-artifacts
+          name: linux-glibc-artifacts
           path: |
-            NativeSDK-Linux.zip
-            NodeSDK-Linux.zip
-            XvirusCLI-Linux.zip
+            NativeSDK-Linux-glibc.zip
+            NodeSDK-Linux-glibc.zip
+            XvirusCLI-Linux-glibc.zip
+          if-no-files-found: error
+          retention-days: 1
+
+  build-linux-musl:
+    name: Build Linux musl Artifacts (Alpine 3.13 / musl 1.2.2)
+    runs-on: ubuntu-latest
+    container:
+      image: alpine:3.13
+    steps:
+      - name: Install dependencies
+        run: |
+          apk add --no-cache bash curl git zip clang build-base zlib-dev icu-libs openssl-dev
+
+      - name: Install .NET 8 SDK
+        run: |
+          curl -fsSL https://dot.net/v1/dotnet-install.sh \
+            | bash -s -- --channel 8.0 --install-dir /opt/dotnet
+          echo "DOTNET_ROOT=/opt/dotnet" >> "$GITHUB_ENV"
+          echo "/opt/dotnet"             >> "$GITHUB_PATH"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#XvirusSDK_}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish NativeSDK (linux-musl-x64)
+        run: >
+          /opt/dotnet/dotnet publish NativeSDK/NativeSDK.csproj
+          -c Release -r linux-musl-x64
+          /p:Version=${{ steps.version.outputs.VERSION }}
+          -o dist/NativeSDK-Linux-musl
+
+      - name: Copy NativeSDK example
+        run: cp -r NativeSDK/example dist/NativeSDK-Linux-musl/example
+
+      - name: Publish NodeSDK (linux-musl-x64)
+        run: >
+          /opt/dotnet/dotnet publish NodeSDK/NodeSDK.csproj
+          -c Release -r linux-musl-x64
+          /p:Version=${{ steps.version.outputs.VERSION }}
+          -o dist/NodeSDK-Linux-musl
+
+      - name: Copy NodeSDK example
+        run: cp -r NodeSDK/example dist/NodeSDK-Linux-musl/example
+
+      - name: Publish XvirusCLI (linux-musl-x64)
+        run: >
+          /opt/dotnet/dotnet publish XvirusCLI/XvirusCLI.csproj
+          -c Release -r linux-musl-x64 --self-contained true
+          /p:Version=${{ steps.version.outputs.VERSION }}
+          -o dist/XvirusCLI-Linux-musl
+
+      - name: Remove debug symbol files
+        run: find dist -name "*.dbg" -delete
+
+      - name: Zip artifacts
+        run: |
+          (cd dist/NativeSDK-Linux-musl && zip -r ../../NativeSDK-Linux-musl.zip .)
+          (cd dist/NodeSDK-Linux-musl   && zip -r ../../NodeSDK-Linux-musl.zip .)
+          (cd dist/XvirusCLI-Linux-musl && zip -r ../../XvirusCLI-Linux-musl.zip .)
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-musl-artifacts
+          path: |
+            NativeSDK-Linux-musl.zip
+            NodeSDK-Linux-musl.zip
+            XvirusCLI-Linux-musl.zip
           if-no-files-found: error
           retention-days: 1
 
   release:
     name: Create GitHub Release
-    needs: [build-windows, build-linux]
+    needs: [build-windows, build-linux-glibc, build-linux-musl]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -200,8 +281,11 @@ jobs:
             | `XvirusSDK.${{ steps.version.outputs.VERSION }}.nupkg` | Any | C# NuGet package |
             | `CSharpSDK.zip` | Any | C# SDK managed library + example |
             | `NativeSDK-Windows.zip` | Windows x64 | Native AOT shared library + example |
-            | `NativeSDK-Linux.zip` | Linux x64 | Native AOT shared library + example |
-            | `NodeSDK-Windows.zip` | Windows x64 | Node.js native bindings (.cjs / .mjs / .d.ts) + example |
-            | `NodeSDK-Linux.zip` | Linux x64 | Node.js native bindings (.cjs / .mjs / .d.ts) + example |
+            | `NativeSDK-Linux-glibc.zip` | Linux x64 (glibc ≥ 2.23) | Native AOT shared library + example |
+            | `NativeSDK-Linux-musl.zip` | Linux x64 (musl ≥ 1.2.2) | Native AOT shared library + example |
+            | `NodeSDK-Windows.zip` | Windows x64 | Node.js native addon (.cjs / .mjs / .d.ts) + example |
+            | `NodeSDK-Linux-glibc.zip` | Linux x64 (glibc ≥ 2.23) | Node.js native addon + example |
+            | `NodeSDK-Linux-musl.zip` | Linux x64 (musl ≥ 1.2.2) | Node.js native addon + example |
             | `XvirusCLI-Windows.zip` | Windows x64 | CLI tool (self-contained) |
-            | `XvirusCLI-Linux.zip` | Linux x64 | CLI tool (self-contained) |
+            | `XvirusCLI-Linux-glibc.zip` | Linux x64 (glibc ≥ 2.23) | CLI tool (self-contained) |
+            | `XvirusCLI-Linux-musl.zip` | Linux x64 (musl ≥ 1.2.2) | CLI tool (self-contained) |
