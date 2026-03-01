@@ -32,7 +32,7 @@ jobs:
           node-version: '20'
 
       - name: Install Neutralino CLI
-        run: npm install -g @neutralinojs/neu@11.7.0
+        run: npm install -g @neutralinojs/neu
 
       - name: Extract version from tag
         id: version
@@ -43,9 +43,17 @@ jobs:
         working-directory: XvirusUI
         run: npm install
 
+      - name: Update XvirusUI Neutralino Bin
+        working-directory: XvirusUI
+        run: neu update
+
       - name: Install XvirusInstaller dependencies
         working-directory: XvirusInstaller
         run: npm install
+
+      - name: Update XvirusInstaller Neutralino Bin
+        working-directory: XvirusInstaller
+        run: neu update
 
       - name: Build installer (FW)
         working-directory: XvirusInstaller
