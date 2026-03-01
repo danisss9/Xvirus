@@ -185,15 +185,28 @@ internal class Program
     {
         try
         {
-            using var baseKey = Registry.LocalMachine.OpenSubKey(
+            using var uninstallKey = Registry.LocalMachine.OpenSubKey(
                 @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
                 writable: true);
 
-            baseKey?.DeleteSubKeyTree(config.RegistryKey, throwOnMissingSubKey: false);
+            uninstallKey?.DeleteSubKeyTree(config.RegistryKey, throwOnMissingSubKey: false);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Could not remove registry entries: {ex.Message}");
+            Console.WriteLine($"Warning: Could not remove uninstall registry entries: {ex.Message}");
+        }
+
+        try
+        {
+            using var runKey = Registry.LocalMachine.OpenSubKey(
+                @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run",
+                writable: true);
+
+            runKey?.DeleteValue(config.ProductName, throwOnMissingValue: false);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Could not remove startup registry entry: {ex.Message}");
         }
     }
 

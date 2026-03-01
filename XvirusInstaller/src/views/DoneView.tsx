@@ -11,7 +11,7 @@ const DoneView: FunctionComponent<DoneViewProps> = ({ success, error }) => {
   const handleLaunch = async () => {
     try {
       const installPath = `C:\\Program Files\\${PRODUCT_INFO.installFolder}`;
-      await Neutralino.os.execCommand(`start "" "${installPath}\\Xvirus.exe"`);
+      await Neutralino.os.execCommand(`start "" "${installPath}\\${PRODUCT_INFO.uiExeName}"`);
     } catch (e) {
       console.error('Failed to launch app:', e);
     }

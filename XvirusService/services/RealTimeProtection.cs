@@ -48,15 +48,6 @@ public class RealTimeProtection(
         try
         {
             _current = this;
-
-            // seed the scanned-path set with executables for processes
-            // already running when RTP starts.  ETW only gives us future
-            // start events, so without this an existing process would be
-            // scanned later if it restarted using the same path.  the set
-            // is only used as a de‑duplication cache, we don't perform the
-            // initial scan here.
-            SeedScannedPaths();
-
             StartEtw();
             Console.WriteLine("RealTimeProtection: process monitor active.");
         }
@@ -74,70 +65,6 @@ public class RealTimeProtection(
 
     // -----------------------------------------------------------------------
     // ETW session lifecycle
-    // -----------------------------------------------------------------------
-
-    /// <summary>
-    /// Add paths of any processes already running to the scan cache.  The
-    /// caller holds <see cref="_current"/> but the set is guarded by
-    /// <see cref="_scannedLock"/> so this method can be called from any
-    /// thread (we call it synchronously from <see cref="Start"/>).
-    /// </summary>
-    private void SeedScannedPaths()
-    {
-        try
-        {
-            // enumerate existing processes first; this will pick up both the
-            // service and any running UI instance if they're active.
-            foreach (var proc in Process.GetProcesses())
-            {
-                try
-                {
-                    string? exe = ProcessControl.ResolveProcessPath(proc.Id);
-                    if (!string.IsNullOrEmpty(exe))
-                    {
-                        lock (_scannedLock)
-                        {
-                            _scannedPaths.Add(exe);
-                        }
-                    }
-                }
-                catch
-                {
-                    // ignore individual failures; some processes may vanish
-                    // or refuse access by the time we inspect them.
-                }
-            }
-
-            // explicitly add service executable (should already be covered but
-            // just in case enumeration failed) and the UI binary – the latter
-            // may not be running yet but we don't want the scanner to trigger
-            // on it if it later starts.
-            try
-            {
-                string? self = Process.GetCurrentProcess().MainModule?.FileName;
-                if (!string.IsNullOrEmpty(self))
-                {
-                    lock (_scannedLock) { _scannedPaths.Add(self); }
-                }
-            }
-            catch { /* ignore */ }
-
-            try
-            {
-                string ui = Path.Combine(AppContext.BaseDirectory, "XvirusUI.exe");
-                if (File.Exists(ui))
-                {
-                    lock (_scannedLock) { _scannedPaths.Add(ui); }
-                }
-            }
-            catch { /* ignore */ }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"RealTimeProtection: failed to enumerate processes – {ex.Message}");
-        }
-    }
-
     // -----------------------------------------------------------------------
 
     private unsafe void StartEtw()

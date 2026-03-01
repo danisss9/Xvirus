@@ -1,10 +1,11 @@
 import { render } from 'preact';
 import App from './App';
 import './styles/app.css';
-import { init, events, app } from '@neutralinojs/lib';
+import { init, events } from '@neutralinojs/lib';
+import { Neutralino } from './services/neutralino';
 
 init();
-events.on('windowClose', () => app.exit(0));
+events.on('windowClose', () => Neutralino.app.exit());
 
 const root = document.getElementById('root');
 if (root) {

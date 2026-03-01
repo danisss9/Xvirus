@@ -1,5 +1,7 @@
 import NeutralinoJs from '@neutralinojs/lib';
 
+declare const NL_PATH: string;
+
 export const Neutralino = (() => {
   const getNeutralino = () => {
     return NeutralinoJs;
@@ -23,7 +25,14 @@ export const Neutralino = (() => {
       },
     },
     app: {
-      exit(): Promise<void> {
+      async exit(): Promise<void> {
+        try {
+          const tmpDir = NL_PATH.replace(/\//g, '\\') + '\\.tmp';
+          await getNeutralino().os.execCommand(
+            `powershell -WindowStyle Hidden -Command "Start-Sleep 2; Remove-Item -LiteralPath '${tmpDir}' -Recurse -Force -ErrorAction SilentlyContinue"`,
+            { background: true }
+          );
+        } catch { /* ignore cleanup errors */ }
         return getNeutralino().app.exit();
       },
     },

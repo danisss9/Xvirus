@@ -40,12 +40,6 @@ public class NetworkRealTimeProtection(
 
         Console.WriteLine("NetworkRealTimeProtection: starting network connection monitor...");
 
-        // warm the cache with processes that already have active
-        // connections.  without this the first poll tick would attempt to
-        // scan every PID returned by netstat, which tends to be a lot of
-        // noise and duplicates.
-        SeedScannedPaths();
-
         _cts = new CancellationTokenSource();
         _monitorTask = Task.Run(() => MonitorLoopAsync(_cts.Token));
     }
@@ -54,58 +48,6 @@ public class NetworkRealTimeProtection(
     {
         _cts?.Cancel();
         Console.WriteLine("NetworkRealTimeProtection: stopped.");
-    }
-
-    // -----------------------------------------------------------------------
-    // Cache seeding
-    // -----------------------------------------------------------------------
-
-    /// <summary>
-    /// Run netstat once and record every process path found.  the monitor
-    /// loop performs the same enumeration on each tick, but we don't need
-    /// to scan the initial set again.
-    /// </summary>
-    private void SeedScannedPaths()
-    {
-        try
-        {
-            string output = RunNetstatAsync(CancellationToken.None).GetAwaiter().GetResult();
-            foreach (int pid in ParsePids(output))
-            {
-                string? path = ProcessControl.ResolveProcessPath(pid);
-                if (string.IsNullOrEmpty(path)) continue;
-
-                lock (_scannedLock)
-                {
-                    _scannedPaths.Add(path);
-                }
-            }
-
-            // also add service & UI executables directly
-            try
-            {
-                string? self = Process.GetCurrentProcess().MainModule?.FileName;
-                if (!string.IsNullOrEmpty(self))
-                {
-                    lock (_scannedLock) { _scannedPaths.Add(self); }
-                }
-            }
-            catch { }
-
-            try
-            {
-                string ui = Path.Combine(AppContext.BaseDirectory, "XvirusUI.exe");
-                if (File.Exists(ui))
-                {
-                    lock (_scannedLock) { _scannedPaths.Add(ui); }
-                }
-            }
-            catch { }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"NetworkRealTimeProtection: failed to seed connections – {ex.Message}");
-        }
     }
 
     // -----------------------------------------------------------------------

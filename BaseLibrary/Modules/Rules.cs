@@ -97,6 +97,29 @@ namespace Xvirus
                         catch { /* ignore parse errors */ }
                     }
                 }
+                else
+                {
+                    var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    var lines = new List<string>();
+
+                    foreach (var process in System.Diagnostics.Process.GetProcesses())
+                    {
+                        try
+                        {
+                            var exePath = process.MainModule?.FileName;
+                            if (string.IsNullOrEmpty(exePath) || !seen.Add(exePath))
+                                continue;
+
+                            var rule = new Rule { Path = exePath, Type = RuleType.Allow };
+                            lines.Add(JsonSerializer.Serialize(rule, SourceGenerationContext.Default.Rule));
+                            result.Add(rule.Id, rule);
+                        }
+                        catch { /* some processes deny access to MainModule */ }
+                        finally { process.Dispose(); }
+                    }
+
+                    File.WriteAllText(path, string.Join(Environment.NewLine, lines) + Environment.NewLine);
+                }
             }
             catch { /* swallow any I/O errors */ }
             return result;
