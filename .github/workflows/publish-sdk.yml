@@ -99,27 +99,7 @@ jobs:
   build-linux-glibc:
     name: Build Linux glibc Artifacts (Ubuntu 16.04 / glibc 2.23)
     runs-on: ubuntu-latest
-    container:
-      image: ubuntu:16.04
     steps:
-      - name: Install dependencies
-        run: |
-          apt-get update -q
-          apt-get install -y curl wget git zip ca-certificates gnupg software-properties-common
-          wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
-          echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main" \
-            >> /etc/apt/sources.list.d/llvm.list
-          apt-get update -q
-          apt-get install -y clang-9 zlib1g-dev
-          ln -sf /usr/bin/clang-9 /usr/bin/clang
-
-      - name: Install .NET 8 SDK
-        run: |
-          curl -fsSL https://dot.net/v1/dotnet-install.sh \
-            | bash -s -- --channel 8.0 --install-dir /opt/dotnet
-          echo "DOTNET_ROOT=/opt/dotnet" >> "$GITHUB_ENV"
-          echo "/opt/dotnet"             >> "$GITHUB_PATH"
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -127,41 +107,49 @@ jobs:
         id: version
         run: echo "VERSION=${GITHUB_REF_NAME#XvirusSDK_}" >> "$GITHUB_OUTPUT"
 
-      - name: Publish NativeSDK (linux-x64)
-        run: >
-          /opt/dotnet/dotnet publish NativeSDK/NativeSDK.csproj
-          -c Release -r linux-x64
-          /p:Version=${{ steps.version.outputs.VERSION }}
-          -o dist/NativeSDK-Linux-glibc
-
-      - name: Copy NativeSDK example
-        run: cp -r NativeSDK/example dist/NativeSDK-Linux-glibc/example
-
-      - name: Publish NodeSDK (linux-x64)
-        run: >
-          /opt/dotnet/dotnet publish NodeSDK/NodeSDK.csproj
-          -c Release -r linux-x64
-          /p:Version=${{ steps.version.outputs.VERSION }}
-          -o dist/NodeSDK-Linux-glibc
-
-      - name: Copy NodeSDK example
-        run: cp -r NodeSDK/example dist/NodeSDK-Linux-glibc/example
-
-      - name: Publish XvirusCLI (linux-x64)
-        run: >
-          /opt/dotnet/dotnet publish XvirusCLI/XvirusCLI.csproj
-          -c Release -r linux-x64 --self-contained true
-          /p:Version=${{ steps.version.outputs.VERSION }}
-          -o dist/XvirusCLI-Linux-glibc
-
-      - name: Remove debug symbol files
-        run: find dist -name "*.dbg" -delete
-
-      - name: Zip artifacts
+      - name: Build inside Ubuntu 16.04 container
         run: |
-          (cd dist/NativeSDK-Linux-glibc && zip -r ../../NativeSDK-Linux-glibc.zip .)
-          (cd dist/NodeSDK-Linux-glibc   && zip -r ../../NodeSDK-Linux-glibc.zip .)
-          (cd dist/XvirusCLI-Linux-glibc && zip -r ../../XvirusCLI-Linux-glibc.zip .)
+          docker run --rm \
+            -v "${{ github.workspace }}:/workspace" \
+            -w /workspace \
+            ubuntu:16.04 \
+            bash -c "
+              set -e
+              apt-get update -q
+              apt-get install -y curl wget git zip ca-certificates gnupg software-properties-common
+              wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+              echo 'deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main' \
+                >> /etc/apt/sources.list.d/llvm.list
+              apt-get update -q
+              apt-get install -y clang-9 zlib1g-dev
+              ln -sf /usr/bin/clang-9 /usr/bin/clang
+
+              curl -fsSL https://dot.net/v1/dotnet-install.sh \
+                | bash -s -- --channel 8.0 --install-dir /opt/dotnet
+
+              /opt/dotnet/dotnet publish NativeSDK/NativeSDK.csproj \
+                -c Release -r linux-x64 \
+                /p:Version=${{ steps.version.outputs.VERSION }} \
+                -o dist/NativeSDK-Linux-glibc
+              cp -r NativeSDK/example dist/NativeSDK-Linux-glibc/example
+
+              /opt/dotnet/dotnet publish NodeSDK/NodeSDK.csproj \
+                -c Release -r linux-x64 \
+                /p:Version=${{ steps.version.outputs.VERSION }} \
+                -o dist/NodeSDK-Linux-glibc
+              cp -r NodeSDK/example dist/NodeSDK-Linux-glibc/example
+
+              /opt/dotnet/dotnet publish XvirusCLI/XvirusCLI.csproj \
+                -c Release -r linux-x64 --self-contained true \
+                /p:Version=${{ steps.version.outputs.VERSION }} \
+                -o dist/XvirusCLI-Linux-glibc
+
+              find dist -name '*.dbg' -delete
+
+              (cd dist/NativeSDK-Linux-glibc && zip -r /workspace/NativeSDK-Linux-glibc.zip .)
+              (cd dist/NodeSDK-Linux-glibc   && zip -r /workspace/NodeSDK-Linux-glibc.zip .)
+              (cd dist/XvirusCLI-Linux-glibc && zip -r /workspace/XvirusCLI-Linux-glibc.zip .)
+            "
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -177,20 +165,7 @@ jobs:
   build-linux-musl:
     name: Build Linux musl Artifacts (Alpine 3.13 / musl 1.2.2)
     runs-on: ubuntu-latest
-    container:
-      image: alpine:3.13
     steps:
-      - name: Install dependencies
-        run: |
-          apk add --no-cache bash curl git zip clang build-base zlib-dev icu-libs openssl-dev
-
-      - name: Install .NET 8 SDK
-        run: |
-          curl -fsSL https://dot.net/v1/dotnet-install.sh \
-            | bash -s -- --channel 8.0 --install-dir /opt/dotnet
-          echo "DOTNET_ROOT=/opt/dotnet" >> "$GITHUB_ENV"
-          echo "/opt/dotnet"             >> "$GITHUB_PATH"
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -198,41 +173,42 @@ jobs:
         id: version
         run: echo "VERSION=${GITHUB_REF_NAME#XvirusSDK_}" >> "$GITHUB_OUTPUT"
 
-      - name: Publish NativeSDK (linux-musl-x64)
-        run: >
-          /opt/dotnet/dotnet publish NativeSDK/NativeSDK.csproj
-          -c Release -r linux-musl-x64
-          /p:Version=${{ steps.version.outputs.VERSION }}
-          -o dist/NativeSDK-Linux-musl
-
-      - name: Copy NativeSDK example
-        run: cp -r NativeSDK/example dist/NativeSDK-Linux-musl/example
-
-      - name: Publish NodeSDK (linux-musl-x64)
-        run: >
-          /opt/dotnet/dotnet publish NodeSDK/NodeSDK.csproj
-          -c Release -r linux-musl-x64
-          /p:Version=${{ steps.version.outputs.VERSION }}
-          -o dist/NodeSDK-Linux-musl
-
-      - name: Copy NodeSDK example
-        run: cp -r NodeSDK/example dist/NodeSDK-Linux-musl/example
-
-      - name: Publish XvirusCLI (linux-musl-x64)
-        run: >
-          /opt/dotnet/dotnet publish XvirusCLI/XvirusCLI.csproj
-          -c Release -r linux-musl-x64 --self-contained true
-          /p:Version=${{ steps.version.outputs.VERSION }}
-          -o dist/XvirusCLI-Linux-musl
-
-      - name: Remove debug symbol files
-        run: find dist -name "*.dbg" -delete
-
-      - name: Zip artifacts
+      - name: Build inside Alpine 3.13 container
         run: |
-          (cd dist/NativeSDK-Linux-musl && zip -r ../../NativeSDK-Linux-musl.zip .)
-          (cd dist/NodeSDK-Linux-musl   && zip -r ../../NodeSDK-Linux-musl.zip .)
-          (cd dist/XvirusCLI-Linux-musl && zip -r ../../XvirusCLI-Linux-musl.zip .)
+          docker run --rm \
+            -v "${{ github.workspace }}:/workspace" \
+            -w /workspace \
+            alpine:3.13 \
+            sh -c "
+              set -e
+              apk add --no-cache bash curl git zip clang build-base zlib-dev icu-libs openssl-dev
+
+              curl -fsSL https://dot.net/v1/dotnet-install.sh \
+                | bash -s -- --channel 8.0 --install-dir /opt/dotnet
+
+              /opt/dotnet/dotnet publish NativeSDK/NativeSDK.csproj \
+                -c Release -r linux-musl-x64 \
+                /p:Version=${{ steps.version.outputs.VERSION }} \
+                -o dist/NativeSDK-Linux-musl
+              cp -r NativeSDK/example dist/NativeSDK-Linux-musl/example
+
+              /opt/dotnet/dotnet publish NodeSDK/NodeSDK.csproj \
+                -c Release -r linux-musl-x64 \
+                /p:Version=${{ steps.version.outputs.VERSION }} \
+                -o dist/NodeSDK-Linux-musl
+              cp -r NodeSDK/example dist/NodeSDK-Linux-musl/example
+
+              /opt/dotnet/dotnet publish XvirusCLI/XvirusCLI.csproj \
+                -c Release -r linux-musl-x64 --self-contained true \
+                /p:Version=${{ steps.version.outputs.VERSION }} \
+                -o dist/XvirusCLI-Linux-musl
+
+              find dist -name '*.dbg' -delete
+
+              (cd dist/NativeSDK-Linux-musl && zip -r /workspace/NativeSDK-Linux-musl.zip .)
+              (cd dist/NodeSDK-Linux-musl   && zip -r /workspace/NodeSDK-Linux-musl.zip .)
+              (cd dist/XvirusCLI-Linux-musl && zip -r /workspace/XvirusCLI-Linux-musl.zip .)
+            "
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
