@@ -2,6 +2,7 @@ import { execSync } from 'child_process';
 import { copyFileSync, mkdirSync, existsSync, readdirSync, rmSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import rcedit from 'rcedit';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const installerRoot = join(__dirname, '..'); // XvirusInstaller/
@@ -15,6 +16,8 @@ if (mode !== 'am' && mode !== 'fw') {
 }
 
 const uiExeName = mode === 'am' ? 'XvirusAM.exe' : 'XvirusFW.exe';
+const uiProductName = mode === 'am' ? 'Xvirus Anti-Malware' : 'Xvirus Firewall';
+const uiVersion = mode === 'am' ? '8.0.0.0' : '5.0.0.0';
 
 function run(cmd, cwd) {
   console.log(`> ${cmd}`);
@@ -60,8 +63,23 @@ if (neuBinaryFiles.length === 0) {
   console.error(`Error: No *-win_x64.exe found in ${distDir}`);
   process.exit(1);
 }
-copyFileSync(join(distDir, neuBinaryFiles[0]), join(resourcesDir, uiExeName));
+const uiExePath = join(resourcesDir, uiExeName);
+copyFileSync(join(distDir, neuBinaryFiles[0]), uiExePath);
 console.log(`  ${neuBinaryFiles[0]} → resources/${uiExeName}`);
+
+// ── 5. Patch XvirusUI exe metadata ───────────────────────────────────────────
+console.log('\n── Patching XvirusUI exe metadata ──');
+await rcedit(uiExePath, {
+  'version-string': {
+    FileDescription: uiProductName,
+    ProductName: uiProductName,
+    CompanyName: 'Xvirus',
+    LegalCopyright: '© 2026 Xvirus',
+  },
+  'file-version': uiVersion,
+  'product-version': uiVersion,
+});
+console.log(`  FileDescription: ${uiProductName}`);
 
 // XvirusService.exe
 copyFileSync(join(servicePublishDir, 'XvirusService.exe'), join(resourcesDir, 'XvirusService.exe'));

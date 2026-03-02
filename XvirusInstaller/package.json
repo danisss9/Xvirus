@@ -5,8 +5,8 @@
   "scripts": {
     "prepare:am": "node scripts/prebuild.mjs am",
     "prepare:fw": "node scripts/prebuild.mjs fw",
-    "build:am": "node scripts/build-resources.mjs am && vite build && neu build --release --embed-resources",
-    "build:fw": "node scripts/build-resources.mjs fw && vite build && neu build --release --embed-resources",
+    "build:am": "node scripts/build-resources.mjs am && vite build && neu build --release --embed-resources && node scripts/patch-installer.mjs am",
+    "build:fw": "node scripts/build-resources.mjs fw && vite build && neu build --release --embed-resources && node scripts/patch-installer.mjs fw",
     "release:am": "npm run prepare:am && npm run build:am",
     "release:fw": "npm run prepare:fw && npm run build:fw",
     "dev": "vite build && neu build && neu run"
@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.3",
+    "rcedit": "^2.0.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
   }
