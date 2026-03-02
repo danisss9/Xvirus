@@ -12,7 +12,7 @@ namespace Xvirus
     public class Rules
     {
         private static readonly ReaderWriterLock rwl = new ReaderWriterLock();
-        private Dictionary<string, Rule> _rules = new Dictionary<string, Rule>();
+        private Dictionary<string, Rule> _rules = new Dictionary<string, Rule>(StringComparer.OrdinalIgnoreCase);
 
         public Rules()
         {
@@ -37,7 +37,7 @@ namespace Xvirus
             rwl.AcquireWriterLock(2000);
             try
             {
-                _rules.Add(rule.Id, rule);
+                _rules.Add(rule.Path, rule);
                 var json = JsonSerializer.Serialize(rule, SourceGenerationContext.Default.Rule);
                 File.AppendAllText(rulesPath, json + Environment.NewLine);
             }
@@ -54,7 +54,8 @@ namespace Xvirus
             rwl.AcquireWriterLock(2000);
             try
             {
-                if (_rules.Remove(id))
+                var path = _rules.First(r => r.Value.Id == id).Key;
+                if (path != null && _rules.Remove(path))
                 {
                     // Rewrite the entire file without the removed rule
                     var allRulesJson = string.Join(Environment.NewLine, _rules.Values.Select(r => JsonSerializer.Serialize(r, SourceGenerationContext.Default.Rule)));
@@ -80,7 +81,7 @@ namespace Xvirus
 
         private static Dictionary<string, Rule> GetRules(string rulesFilePath = "rules.json")
         {
-            var result = new Dictionary<string, Rule>();
+            var result = new Dictionary<string, Rule>(StringComparer.OrdinalIgnoreCase);
             var path = Utils.RelativeToFullPath(rulesFilePath);
             try
             {
@@ -92,7 +93,7 @@ namespace Xvirus
                         {
                             var e = JsonSerializer.Deserialize(line, SourceGenerationContext.Default.Rule);
                             if (e != null)
-                                result.Add(e.Id, e);
+                                result.Add(e.Path, e);
                         }
                         catch { /* ignore parse errors */ }
                     }
@@ -112,7 +113,7 @@ namespace Xvirus
 
                             var rule = new Rule { Path = exePath, Type = RuleType.Allow };
                             lines.Add(JsonSerializer.Serialize(rule, SourceGenerationContext.Default.Rule));
-                            result.Add(rule.Id, rule);
+                            result.Add(rule.Path, rule);
                         }
                         catch { /* some processes deny access to MainModule */ }
                         finally { process.Dispose(); }
