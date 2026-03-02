@@ -67,6 +67,12 @@ console.log(`  ${neuBinaryFiles[0]} → resources/${uiExeName}`);
 copyFileSync(join(servicePublishDir, 'XvirusService.exe'), join(resourcesDir, 'XvirusService.exe'));
 console.log(`  XvirusService.exe → resources/XvirusService.exe`);
 
+// ONNX Runtime DLLs
+copyFileSync(join(servicePublishDir, 'onnxruntime.dll'), join(resourcesDir, 'onnxruntime.dll'));
+console.log(`  onnxruntime.dll → resources/onnxruntime.dll`);
+copyFileSync(join(servicePublishDir, 'onnxruntime_providers_shared.dll'), join(resourcesDir, 'onnxruntime_providers_shared.dll'));
+console.log(`  onnxruntime_providers_shared.dll → resources/onnxruntime_providers_shared.dll`);
+
 // XvirusUnin.exe → unin.exe
 copyFileSync(
   join(sdkRoot, 'XvirusUnin', 'publish', 'XvirusUnin.exe'),
