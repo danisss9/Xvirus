@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Xvirus Portal — Coming Soon</title>
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0f;
+      color: #fff;
+    }
+
+    /* ── Animated background ── */
+    .bg {
+      position: fixed; inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse at 50% 50%, rgba(56, 182, 255, .12) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(120, 50, 255, .10) 0%, transparent 50%),
+        radial-gradient(ellipse at 20% 80%, rgba(0, 220, 130, .08) 0%, transparent 50%);
+      background-size: 200% 200%;
+      transition: background-position 0.15s ease-out;
+    }
+
+    /* Grid overlay */
+    .bg::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    /* Floating particles */
+    .particles {
+      position: fixed; inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .particles span {
+      position: absolute;
+      display: block;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: rgba(56, 182, 255, .5);
+      animation: float linear infinite;
+    }
+    @keyframes float {
+      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 1; }
+      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+    }
+
+    /* Glow orb that follows the mouse */
+    .glow {
+      position: fixed;
+      width: 420px; height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(56,182,255,.18) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 2;
+      transform: translate(-50%, -50%);
+      transition: left 0.25s ease-out, top 0.25s ease-out;
+      mix-blend-mode: screen;
+    }
+
+    /* ── Content ── */
+    .content {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%; height: 100vh;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    /* Logo */
+    .logo {
+      width: 134px; height: 100px;
+      object-fit: contain;
+      margin-bottom: 2rem;
+      animation: pulse 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 24px rgba(56,182,255,.4));
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 24px rgba(56,182,255,.4)); }
+      50%      { transform: scale(1.06); filter: drop-shadow(0 0 36px rgba(56,182,255,.6)); }
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: .6rem;
+      background: linear-gradient(135deg, #fff 30%, #38b6ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: clamp(1rem, 2.2vw, 1.35rem);
+      font-weight: 300;
+      color: rgba(255,255,255,.55);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .divider {
+      width: 60px; height: 3px;
+      margin: 1.8rem 0;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #38b6ff, #7832ff);
+    }
+
+    .tagline {
+      font-size: clamp(.85rem, 1.5vw, 1rem);
+      color: rgba(255,255,255,.35);
+      max-width: 420px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Animated background -->
+  <div class="bg" id="bg"></div>
+
+  <!-- Floating particles -->
+  <div class="particles" id="particles"></div>
+
+  <!-- Mouse-following glow -->
+  <div class="glow" id="glow"></div>
+
+  <!-- Main content -->
+  <div class="content">
+    <!-- Xvirus logo -->
+    <img class="logo" src="/logo.png" alt="Xvirus Logo" />
+
+    <h1>Xvirus Portal</h1>
+    <p class="subtitle">Coming Soon</p>
+    <div class="divider"></div>
+    <p class="tagline">We're building something great. Stay tuned for the launch of the Xvirus management portal.</p>
+  </div>
+
+  <script>
+    // ── Mouse-following glow & background parallax ──
+    const bg   = document.getElementById('bg');
+    const glow = document.getElementById('glow');
+
+    document.addEventListener('mousemove', (e) => {
+      const x = e.clientX;
+      const y = e.clientY;
+      const px = (x / window.innerWidth  * 100).toFixed(1);
+      const py = (y / window.innerHeight * 100).toFixed(1);
+
+      // Move glow orb
+      glow.style.left = x + 'px';
+      glow.style.top  = y + 'px';
+
+      // Shift background gradients
+      bg.style.backgroundPosition = `${px}% ${py}%`;
+    });
+
+    // ── Generate floating particles ──
+    const container = document.getElementById('particles');
+    const count = 35;
+
+    for (let i = 0; i < count; i++) {
+      const span = document.createElement('span');
+      const size = Math.random() * 3 + 2;
+      span.style.width  = size + 'px';
+      span.style.height = size + 'px';
+      span.style.left   = Math.random() * 100 + '%';
+      span.style.animationDuration = (Math.random() * 12 + 8) + 's';
+      span.style.animationDelay    = (Math.random() * 10) + 's';
+      span.style.opacity = Math.random() * 0.5 + 0.2;
+
+      // Random color variation
+      const colors = ['rgba(56,182,255,.5)', 'rgba(120,50,255,.4)', 'rgba(0,220,130,.4)'];
+      span.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+      container.appendChild(span);
+    }
+  </script>
+</body>
+</html>

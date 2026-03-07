@@ -1,5 +1,5 @@
 {
-  "name": "website",
+  "name": "portal",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
@@ -7,19 +7,14 @@
   "scripts": {
     "start": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "caprover deploy -n xvirus -a www"
+    "deploy": "caprover deploy -n xvirus -a portal -b master"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "altcha-lib": "^1.4.1",
     "compression": "^1.8.1",
     "express": "^5.2.1",
-    "express-rate-limit": "^8.2.1",
-    "helmet": "^8.1.0",
-    "mongodb": "^6.13.1",
-    "multer": "^2.0.2",
-    "nodemailer": "^8.0.1"
+    "helmet": "^8.1.0"
   },
   "devDependencies": {
     "caprover": "^2.3.1"

@@ -4,6 +4,3 @@
 [submodule "Login"]
 	path = Login
 	url = ./Login
-[submodule "Portal"]
-	path = Portal
-	url = ./Portal
