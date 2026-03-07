@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "powershell -ExecutionPolicy Bypass -File ../deploy.ps1 -Target Portal"
+    "deploy": "powershell -File ../deploy.ps1 -AppName portal"
   },
   "author": "",
   "license": "ISC",
