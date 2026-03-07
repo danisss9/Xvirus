@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("Portal", "Website", "Login", "Cloud")]
+    [ValidateSet("Portal", "Website", "Cloud")]
     [Parameter(Mandatory = $true)]
     [string]$Target
 )
@@ -8,7 +8,6 @@ param(
 $AppNameMap = @{
     "Portal"  = "portal"
     "Website" = "www"
-    "Login"   = "login"
     "Cloud"   = "cloud"
 }
 $AppName = $AppNameMap[$Target]

@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "caprover deploy -n xvirus -a www"
+    "deploy": "powershell -ExecutionPolicy Bypass -File ../deploy.ps1 -Target Website"
   },
   "author": "",
   "license": "ISC",
