@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us – Xvirus</title>
+  <meta name="description" content="Get in touch with the Xvirus team for support, feedback, or inquiries.">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script async defer src="https://cdn.jsdelivr.net/npm/altcha/dist/altcha.min.js" type="module"></script>
+</head>
+<body>
+
+  <!-- ═══ NAVIGATION ═══ -->
+  <nav class="nav">
+    <div class="container">
+      <a href="/" class="nav__logo">
+        <img src="/logo.png" alt="Xvirus" width="48" height="36">
+      </a>
+      <div class="nav__links">
+        <a href="/">Home</a>
+        <a href="/#products">Products</a>
+        <a href="/#pricing">Pricing</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <button class="nav__toggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ═══ CONTACT FORM ═══ -->
+  <main class="form-page">
+    <div class="container">
+      <h1 class="reveal">Contact Us</h1>
+      <form id="contact-form" class="reveal" autocomplete="on">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" class="form-control" placeholder="Your name" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" class="form-control" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="subject">Subject</label>
+          <input type="text" id="subject" name="subject" class="form-control" placeholder="Subject of your message" required>
+        </div>
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" class="form-control" placeholder="How can we help you?" required></textarea>
+        </div>
+        <div class="form-group">
+          <altcha-widget challengeurl="/altcha-challenge" hideFooter></altcha-widget>
+        </div>
+        <button type="submit" class="btn btn--primary btn--block">
+          <span class="spinner"></span>
+          Send Message
+        </button>
+        <div id="contact-status" class="form-status"></div>
+      </form>
+    </div>
+  </main>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <img src="/logo.png" alt="Xvirus" width="67" height="50">
+          <p>Simple and powerful cybersecurity tools trusted by millions of users worldwide since 2010.</p>
+        </div>
+        <div class="footer__col">
+          <h4>About Xvirus</h4>
+          <a href="about">About Us</a>
+          <a href="terms">Terms of Use</a>
+          <a href="privacy">Privacy Policy</a>
+          <a href="awards">Awards</a>
+        </div>
+        <div class="footer__col">
+          <h4>Support</h4>
+          <a href="partner">Partner</a>
+          <a href="https://portal.xvirus.net/" target="_blank" rel="noopener">Login to Portal</a>
+          <a href="contact">Contact Us</a>
+          <a href="submit">Submit File or URL</a>
+        </div>
+        <div class="footer__col" id="contact"><h4>Contact Us</h4>
+          <p>General support:<br>support(at)xvirus(dot)net</p>
+          <p style="margin-top:10px">Samples &amp; false positives:<br>samples(at)xvirus(dot)net</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <div class="container">Copyright &copy; 2010–2026 Xvirus. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit File or URL – Xvirus</title>
+  <meta name="description" content="Submit suspicious files or URLs to the Xvirus team for analysis.">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script async defer src="https://cdn.jsdelivr.net/npm/altcha/dist/altcha.min.js" type="module"></script>
+</head>
+<body>
+
+  <!-- ═══ NAVIGATION ═══ -->
+  <nav class="nav">
+    <div class="container">
+      <a href="/" class="nav__logo">
+        <img src="/logo.png" alt="Xvirus" width="48" height="36">
+      </a>
+      <div class="nav__links">
+        <a href="/">Home</a>
+        <a href="/#products">Products</a>
+        <a href="/#pricing">Pricing</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <button class="nav__toggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ═══ SUBMIT FORM ═══ -->
+  <main class="form-page">
+    <div class="container">
+      <h1 class="reveal">Submit File or URL</h1>
+      <form id="submit-form" class="reveal" autocomplete="on">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" class="form-control" placeholder="Your name" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" class="form-control" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="rating">Rating</label>
+          <select id="rating" name="rating" class="form-control" required>
+            <option value="" disabled selected>How do you rate this sample?</option>
+            <option value="suspicious">Suspicious</option>
+            <option value="safe">Safe</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="kind">Submission Kind</label>
+          <select id="kind" name="kind" class="form-control" required>
+            <option value="" disabled selected>Select the submission type</option>
+            <option value="file">File</option>
+            <option value="url">URL</option>
+          </select>
+        </div>
+        <div class="form-group" id="file-group" style="display:none">
+          <label for="file">
+            File
+            <span class="tooltip-icon" title="File must be a .zip archive and no larger than 20 MB">&#9432;</span>
+          </label>
+          <input type="file" id="file" name="file" class="form-control form-control--file" accept=".zip">
+          <small class="form-hint">Only .zip files up to 20 MB are accepted.</small>
+        </div>
+        <div class="form-group" id="url-group" style="display:none">
+          <label for="url">URL</label>
+          <input type="text" id="url" name="url" class="form-control" placeholder="https://example.com/suspicious-page">
+        </div>
+        <div class="form-group">
+          <altcha-widget challengeurl="/altcha-challenge" hideFooter></altcha-widget>
+        </div>
+        <button type="submit" class="btn btn--primary btn--block">
+          <span class="spinner"></span>
+          Send Submission
+        </button>
+        <div id="submit-status" class="form-status"></div>
+      </form>
+    </div>
+  </main>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <img src="/logo.png" alt="Xvirus" width="67" height="50">
+          <p>Simple and powerful cybersecurity tools trusted by millions of users worldwide since 2010.</p>
+        </div>
+        <div class="footer__col">
+          <h4>About Xvirus</h4>
+          <a href="about">About Us</a>
+          <a href="terms">Terms of Use</a>
+          <a href="privacy">Privacy Policy</a>
+          <a href="awards">Awards</a>
+        </div>
+        <div class="footer__col">
+          <h4>Support</h4>
+          <a href="partner">Partner</a>
+          <a href="https://portal.xvirus.net/" target="_blank" rel="noopener">Login to Portal</a>
+          <a href="contact">Contact Us</a>
+          <a href="submit">Submit File or URL</a>
+        </div>
+        <div class="footer__col" id="contact"><h4>Contact Us</h4>
+          <p>General support:<br>support(at)xvirus(dot)net</p>
+          <p style="margin-top:10px">Samples &amp; false positives:<br>samples(at)xvirus(dot)net</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <div class="container">Copyright &copy; 2010–2026 Xvirus. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
