@@ -1,6 +1,0 @@
-[submodule "Cloud"]
-	path = Cloud
-	url = ./Cloud
-[submodule "Login"]
-	path = Login
-	url = ./Login

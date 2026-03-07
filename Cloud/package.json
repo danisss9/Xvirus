@@ -1,0 +1,23 @@
+{
+  "name": "cloud",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "caprover deploy -n xvirus -a cloud -b master",
+    "build:sdk": "dotnet publish ../NodeSDK -r linux-x64 -c Release && cp ../NodeSDK/bin/Release/net8.0/linux-x64/publish/XvirusNodeSDK.node sdk/ && cp ../NodeSDK/bin/Release/net8.0/linux-x64/publish/XvirusNodeSDK.mjs sdk/ && cp ../NodeSDK/bin/Release/net8.0/linux-x64/publish/import.cjs sdk/ && cp ../NodeSDK/bin/Release/net8.0/linux-x64/publish/*.so sdk/"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "mongoose": "^9.2.3",
+    "multer": "^2.1.0"
+  },
+  "devDependencies": {
+    "caprover": "^2.3.1"
+  }
+}
