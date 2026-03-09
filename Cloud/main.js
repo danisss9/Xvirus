@@ -86,13 +86,16 @@ const ipVoteSchema = new mongoose.Schema({
 ipVoteSchema.index({ hash: 1, ip: 1 }, { unique: true });
 mongoose.model('ipvotes', ipVoteSchema);
 
-mongoose.model('scanResults', new mongoose.Schema({
-  md5: { type: String, required: true, unique: true },
-  isMalware: { type: Boolean, required: true },
-  name: { type: String },
-  malwareScore: { type: Number, required: true },
-  scannedAt: { type: Date, required: true, default: Date.now },
-}));
+mongoose.model(
+  'scanResults',
+  new mongoose.Schema({
+    md5: { type: String, required: true, unique: true },
+    isMalware: { type: Boolean, required: true },
+    name: { type: String },
+    malwareScore: { type: Number, required: true },
+    scannedAt: { type: Date, required: true, default: Date.now },
+  }),
+);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -181,7 +184,12 @@ app.post('/api/scan', scanLimiter, upload.single('file'), async (req, res) => {
     // Upsert scan result
     await ScanResults.findOneAndUpdate(
       { md5 },
-      { isMalware: result.isMalware, name: result.name ?? null, malwareScore: result.malwareScore, scannedAt },
+      {
+        isMalware: result.isMalware,
+        name: result.name ?? null,
+        malwareScore: result.malwareScore,
+        scannedAt,
+      },
       { upsert: true },
     );
 
@@ -314,20 +322,13 @@ app.get('/api/updateInfo', (req, res) => {
         description: 'Xvirus Personal Firewall',
       };
       break;
-    case 'sdkbeta':
-    case 'clibeta':
+    case 'sdk':
+    case 'cli':
+    default:
       result.aimodel.downloadUrl = 'https://cloud.xvirus.net/database/model.new.ai';
       result.app = {
-        version: '5.1.0.0',
+        version: '5.1.1.0',
         downloadUrl: 'https://github.com/danisss9/Xvirus/releases/tag/XvirusSDK_5.1',
-        description: 'Xvirus Anti-Malware SDK/CLI',
-      };
-      break;
-    case 'sdk5':
-    case 'cli5':
-      result.app = {
-        version: '5.0.0.0',
-        downloadUrl: 'https://github.com/danisss9/Xvirus/releases/tag/XvirusSDK_5.0',
         description: 'Xvirus Anti-Malware SDK/CLI',
       };
       break;
