@@ -183,7 +183,7 @@ namespace Xvirus
         [UnmanagedCallersOnly(EntryPoint = "version")]
         public static IntPtr Version()
         {
-            return Marshal.StringToHGlobalUni(Utils.GetVersion());
+            return Marshal.StringToHGlobalUni(AppInfo.GetVersion());
         }
 
         private static Model.ScanResult ScanAux(string filePath)

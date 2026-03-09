@@ -328,7 +328,7 @@ app.get('/api/updateInfo', (req, res) => {
       result.aimodel.downloadUrl = 'https://cloud.xvirus.net/database/model.new.ai';
       result.app = {
         version: '5.1.1.0',
-        downloadUrl: 'https://github.com/danisss9/Xvirus/releases/tag/XvirusSDK_5.1',
+        downloadUrl: 'https://github.com/danisss9/Xvirus/releases',
         description: 'Xvirus Anti-Malware SDK/CLI',
       };
       break;

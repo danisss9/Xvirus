@@ -102,11 +102,6 @@ namespace Xvirus
             return dataLength > 0 ? br.ReadBytes(dataLength) : null;
         }
 
-        public static string GetVersion()
-        {
-            return "5.1.1.0";
-        }
-
         public static FileStream ReadFile(string filePath, long fileSize)
         {
             return fileSize >= 16777216 // 16MBs

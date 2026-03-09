@@ -93,7 +93,7 @@ namespace Xvirus
 
         public static string Version()
         {
-            return Utils.GetVersion();
+            return AppInfo.GetVersion();
         }
     }
 }

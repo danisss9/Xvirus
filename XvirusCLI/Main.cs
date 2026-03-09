@@ -7,12 +7,13 @@ namespace XvirusCLI
     {
         public static void Main(string[] args)
         {
-            if(args.Length < 1)
+            if (args.Length < 1)
             {
                 Console.WriteLine("Invalid command");
                 return;
             }
-                
+
+            Xvirus.AppInfo.AppCode = "cli";
             var isInteractive = false;
             do
             {

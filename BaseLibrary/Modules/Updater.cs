@@ -60,13 +60,13 @@ namespace Xvirus
                 SetDatabaseInfoVersion = (DatabaseDTO info, long value) => info.AIModel = value,
             },
         };
-        private static readonly string updateUrl = "https://cloud.xvirus.net/api/updateinfo?app=sdkbeta";
 
         public static string CheckUpdates(SettingsDTO settings)
         {
             using var wc = new HttpClient();
             try
             {
+                var updateUrl = $"https://cloud.xvirus.net/api/updateinfo?app={AppInfo.AppCode}";
                 var updateInfoStr = wc.GetStringAsync(updateUrl).GetAwaiter().GetResult();
                 var updateInfo = JsonSerializer.Deserialize(updateInfoStr, SourceGenerationContextCamelCase.Default.UpdateInfo);
                 var newUpdates = false;
@@ -99,9 +99,9 @@ namespace Xvirus
                 settings.LastUpdateCheck = DateTime.UtcNow;
                 Settings.Save(settings);
 
-                if (settings.CheckSDKUpdates && updateInfo.App.Version != Utils.GetVersion())
+                if (settings.CheckSDKUpdates && updateInfo.App.Version != AppInfo.GetVersion())
                 {
-                    return "There is a new SDK version available!";
+                    return "There is a new version available!";
                 }
 
                 return newUpdates ? "Database was updated!" : "Database is up-to-date!";
