@@ -1,6 +1,6 @@
 # Xvirus Node.js SDK
 
-Xvirus SDK 5.1 — Node.js native addon built with .NET Native AOT.
+Xvirus SDK 5.1.1 — Node.js native addon built with .NET Native AOT.
 
 The module ships as a pre-compiled `.node` binary paired with a generated `.js` ESM wrapper. No .NET runtime is required on the target machine.
 

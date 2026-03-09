@@ -1,6 +1,6 @@
 # Xvirus
 
-Xvirus SDK 5.1 — Anti-malware scanning engine and desktop protection suite.
+Xvirus SDK 5.1.1 — Anti-malware scanning engine and desktop protection suite.
 
 ## Repository Overview
 
@@ -16,6 +16,9 @@ Xvirus SDK 5.1 — Anti-malware scanning engine and desktop protection suite.
 | [XvirusUI](XvirusUI/README.md)               | Desktop UI (Preact + Neutralino.js). Connects to XvirusService and supports both antimalware and firewall modes.                                                                                      |
 | [XvirusInstaller](XvirusInstaller/README.md) | Installer wizard (Preact + Neutralino.js). Bundles all product resources as base64, runs an elevated PowerShell install script, and shows real-time progress. Builds in antimalware or firewall mode. |
 | [XvirusUnin](XvirusUnin/README.md)           | .NET 8 Native AOT uninstaller. Stops and removes the Windows service, deletes registry entries and shortcuts, and schedules self-deletion. Accepts `am` or `fw` as a runtime argument.                |
+| [Cloud](Cloud/README.md)                     | Node.js/Express cloud scanner backend (`cloud.xvirus.net`). Integrates NodeSDK to scan uploaded files, caches results in MongoDB, and serves community voting and update-info endpoints.              |
+| [Website](Website/README.md)                 | Node.js/Express server for `xvirus.net`. Handles the contact form and file/URL submission endpoints with ALTCHA PoW protection, GridFS file storage, and email notifications.                        |
+| [Portal](Portal/README.md)                   | Node.js/Express static file server for the Xvirus web portal.                                                                                                                                        |
 
 ## Minimum Requirements
 
@@ -39,6 +42,9 @@ Supported operating systems:
 | Install the desktop product on an end-user machine     | [XvirusInstaller](XvirusInstaller/README.md) |
 | Uninstall the desktop product                          | [XvirusUnin](XvirusUnin/README.md)           |
 | Train or retrain the AI model                          | [AITrainer](AITrainer/README.md)             |
+| Run the cloud scanner API and web UI                   | [Cloud](Cloud/README.md)                     |
+| Serve the Xvirus website                               | [Website](Website/README.md)                 |
+| Serve the Xvirus web portal                            | [Portal](Portal/README.md)                   |
 
 ## Known Issues
 
