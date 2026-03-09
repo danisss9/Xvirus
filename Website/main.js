@@ -108,7 +108,7 @@ const esc = (s) =>
 
 // ── POST /contact (rate‑limited) ──
 app.post('/contact', contactLimiter, async (req, res) => {
-  const { name, email, subject, message, altcha } = req.body;
+  const { name, email, subject, message, altcha } = req.body ?? {};
 
   if (!name || !email || !subject || !message) {
     return res.status(400).json({ error: 'All fields are required.' });
@@ -185,7 +185,7 @@ app.post(
     });
   },
   async (req, res) => {
-    const { name, email, rating, kind, url, altcha } = req.body;
+    const { name, email, rating, kind, url, altcha } = req.body ?? {};
 
     if (!name || !email || !rating || !kind) {
       return res
