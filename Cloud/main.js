@@ -271,7 +271,7 @@ app.get('/api/updateInfo', (req, res) => {
       description: 'Main malware database',
     },
     dailydb: {
-      version: 15180,
+      version: 15181,
       downloadUrl: 'https://cloud.xvirus.net/database/dailylist.db',
       description: 'Malware database updated daily',
     },
@@ -281,7 +281,7 @@ app.get('/api/updateInfo', (req, res) => {
       description: 'Main whitelist database',
     },
     dailywldb: {
-      version: 2908,
+      version: 2910,
       downloadUrl: 'https://cloud.xvirus.net/database/dailywl.db',
       description: 'Whitelist database updated daily',
     },
