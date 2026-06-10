@@ -271,7 +271,7 @@ app.get('/api/updateInfo', (req, res) => {
       description: 'Main malware database',
     },
     dailydb: {
-      version: 15192,
+      version: 15193,
       downloadUrl: 'https://cloud.xvirus.net/database/dailylist.db',
       description: 'Malware database updated daily',
     },
@@ -281,7 +281,7 @@ app.get('/api/updateInfo', (req, res) => {
       description: 'Main whitelist database',
     },
     dailywldb: {
-      version: 2922,
+      version: 2923,
       downloadUrl: 'https://cloud.xvirus.net/database/dailywl.db',
       description: 'Whitelist database updated daily',
     },
@@ -327,7 +327,7 @@ app.get('/api/updateInfo', (req, res) => {
     default:
       result.aimodel.downloadUrl = 'https://cloud.xvirus.net/database/model.new.ai';
       result.app = {
-        version: '5.1.1.0',
+        version: '5.1.2.0',
         downloadUrl: 'https://github.com/danisss9/Xvirus/releases',
         description: 'Xvirus Anti-Malware SDK/CLI',
       };
