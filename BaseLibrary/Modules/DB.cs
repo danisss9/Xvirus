@@ -11,6 +11,8 @@ namespace Xvirus
     {
         internal HashSet<string> safeHashList = new();
         internal HashSet<string> malHashList = new();
+        internal BloomFilter? safeBloom = null;
+        internal BloomFilter? malBloom = null;
         internal Dictionary<string, string> heurList = new();
         internal Dictionary<string, string[]> heurListDeps = new();
         internal AhoCorasickTree? heurListPatterns;
@@ -31,11 +33,13 @@ namespace Xvirus
             databaseFolder = settings.DatabaseFolder;
 
             safeHashList = LoadList("whitelist.db", "dailywl.db");
+            safeBloom = BloomFilter.Build(safeHashList);
             malVendorList = LoadDictionary("malvendor.db", '|');
 
             if (settings.EnableSignatures)
             {
                 malHashList = LoadList("viruslist.db", "dailylist.db");
+                malBloom = BloomFilter.Build(malHashList);
             }
 
             if (settings.EnableHeuristics)

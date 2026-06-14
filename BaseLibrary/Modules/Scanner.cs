@@ -122,10 +122,10 @@ namespace Xvirus
             if (hash == null)
                 return new ScanResult(-1, "Could not get file hash!", filePath);
 
-            if (database.safeHashList.Contains(hash))
+            if (database.safeBloom?.MightContain(hash) != false && database.safeHashList.Contains(hash))
                 return new ScanResult(0, "Safe", filePath);
 
-            if (settings.EnableSignatures && database.malHashList.Contains(hash))
+            if (settings.EnableSignatures && database.malBloom?.MightContain(hash) != false && database.malHashList.Contains(hash))
                 return new ScanResult(1, "Malware", filePath);
 
             ct.ThrowIfCancellationRequested();
