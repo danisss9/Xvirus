@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - NativeSDK: new `cancelScan(path)` and `cancelAllScans` C exports
   - NodeSDK: new `cancelScan(path)` and `cancelAllScans()` functions
   - XvirusCLI: <kbd>Ctrl</kbd>+<kbd>C</kbd> cancels a running scan and still prints partial results
+- Bloom filter pre-scan to speed up signature checks: the engine now consults a compact BloomFilter built from the safe and malware hash sets before performing exact hash lookups, allowing known-clean files to skip costly I/O and full-hash verification. The BloomFilter is used across SDKs to improve common-case scanning performance.
 
 ### Changed
 
