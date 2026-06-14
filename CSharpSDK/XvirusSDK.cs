@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Threading;
 using Xvirus.Model;
 
 namespace Xvirus
@@ -9,6 +10,16 @@ namespace Xvirus
     public class XvirusSDK
     {
         private static Scanner? Scanner;
+
+        public static bool CancelAllScans()
+        {
+            return (Scanner?.CancelAllScans() ?? 0) > 0;
+        }
+
+        public static bool CancelScan(string path)
+        {
+            return Scanner?.CancelScan(path) ?? false;
+        }
 
         public static void Load(bool force = false)
         {
@@ -39,6 +50,14 @@ namespace Xvirus
             return Scanner!.ScanFile(filePath);
         }
 
+        public static ScanResult Scan(string filePath, CancellationToken ct)
+        {
+            if (Scanner == null)
+                Load();
+
+            return Scanner!.ScanFile(filePath, ct);
+        }
+
         public static string ScanString(string filePath)
         {
             return JsonSerializer.Serialize(Scan(filePath), SourceGenerationContext.Default.ScanResult);
@@ -50,6 +69,14 @@ namespace Xvirus
                 Load();
 
             return Scanner!.ScanFolder(folderPath);
+        }
+
+        public static IEnumerable<ScanResult> ScanFolder(string folderPath, CancellationToken ct)
+        {
+            if (Scanner == null)
+                Load();
+
+            return Scanner!.ScanFolder(folderPath, ct);
         }
 
         public static string ScanFolderString(string folderPath)

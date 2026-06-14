@@ -37,6 +37,29 @@ public static class XvirusNodeSDK
     private static Scanner? Scanner;
 
     /// <summary>
+    /// Cancels the in-progress scan of the file or folder at <paramref name="path"/>.
+    /// Returns <c>true</c> if a matching scan was signalled to cancel, <c>false</c> otherwise.
+    /// Note: scans block the calling thread, so run concurrent scans on worker threads and call
+    /// this from another thread for it to take effect while a scan is in flight.
+    /// </summary>
+    /// <param name="path">The file or folder path passed to <c>scan</c>/<c>scanFolder</c>.</param>
+    public static bool CancelScan(string path)
+    {
+        return Scanner?.CancelScan(path) ?? false;
+    }
+
+    /// <summary>
+    /// Cancels every scan currently in progress. Returns <c>true</c> if at least one scan was
+    /// signalled to cancel, <c>false</c> otherwise.
+    /// Note: scans block the calling thread, so run concurrent scans on worker threads and call
+    /// this from another thread for it to take effect while a scan is in flight.
+    /// </summary>
+    public static bool CancelAllScans()
+    {
+        return (Scanner?.CancelAllScans() ?? 0) > 0;
+    }
+
+    /// <summary>
     /// Loads the Xvirus engine and all detection databases.
     /// Call this once before scanning. Pass <c>force=true</c> to reload.
     /// </summary>
@@ -67,7 +90,7 @@ public static class XvirusNodeSDK
     /// <summary>
     /// Scans a single file and returns a typed result object.
     /// </summary>
-    /// <param name="filePath">Absolute path to the file to scan.</param>
+    /// <param name="filePath">Absolute path to the file to scan. Also serves as the id for <c>cancelScan(filePath)</c>.</param>
     /// <returns>A <see cref="ScanResultNode"/> with detection details.</returns>
     /// <exception cref="Exception">Thrown when the file cannot be scanned.</exception>
     public static ScanResultNode Scan(string filePath)
@@ -92,7 +115,7 @@ public static class XvirusNodeSDK
     /// <summary>
     /// Scans a single file and returns the result as a JSON string.
     /// </summary>
-    /// <param name="filePath">Absolute path to the file to scan.</param>
+    /// <param name="filePath">Absolute path to the file to scan. Also serves as the id for <c>cancelScan(filePath)</c>.</param>
     public static string ScanAsString(string filePath)
     {
         var result = Scan(filePath);
@@ -102,7 +125,7 @@ public static class XvirusNodeSDK
     /// <summary>
     /// Scans all files in a folder and returns an array of result objects.
     /// </summary>
-    /// <param name="folderPath">Absolute path to the folder to scan.</param>
+    /// <param name="folderPath">Absolute path to the folder to scan. Also serves as the id for <c>cancelScan(folderPath)</c>.</param>
     public static ScanResultNode[] ScanFolder(string folderPath)
     {
         if (Scanner == null)
@@ -122,7 +145,7 @@ public static class XvirusNodeSDK
     /// <summary>
     /// Scans all files in a folder and returns the results as a JSON string.
     /// </summary>
-    /// <param name="folderPath">Absolute path to the folder to scan.</param>
+    /// <param name="folderPath">Absolute path to the folder to scan. Also serves as the id for <c>cancelScan(folderPath)</c>.</param>
     public static string ScanFolderAsString(string folderPath)
     {
         var results = ScanFolder(folderPath);

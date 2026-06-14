@@ -1,6 +1,6 @@
 # CSharpSDK
 
-Xvirus C# SDK 5.1.1
+Xvirus C# SDK 5.1.2
 
 ## Table of Contents
 
@@ -67,6 +67,8 @@ XvirusSDK.Unload();
 - **ScanString** - Scans the file at `filePath`. Returns a JSON string representation of [`ScanResult`](#model).
 - **ScanFolder** - Scans all files inside `folderPath` recursively. Returns an `IEnumerable<ScanResult>`.
 - **ScanFolderString** - Scans all files inside `folderPath` recursively. Returns a JSON string with all scan results.
+- **CancelScan** - `CancelScan(path)` cancels the in-progress scan of the file or folder at `path` (the same path passed to `Scan`/`ScanFolder`). Returns `true` if a matching scan was signalled to cancel, `false` if none was active. Call from another thread while a scan is running.
+- **CancelAllScans** - Cancels every scan currently in progress. Returns `true` if at least one scan was signalled to cancel. Call from another thread while a scan is running.
 - **CheckUpdates** - Checks and downloads the latest databases and AI model. If `loadDBAfterUpdate`=true it reloads the engine after the update. Returns one of:
   - `"There is a new SDK version available!"`
   - `"Database was updated!"`
@@ -92,6 +94,7 @@ public class ScanResult
 ```
 
 `Name` can be one of:
+
 - `"Safe"` — no malware detected
 - `"Malware"` — malware detected but family unknown
 - _Malware family name_ — e.g. `"Trojan.Downloader"`

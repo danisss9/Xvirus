@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [5.1.2]
+
+### Added
+
+- Scan cancellation support across the engine, all SDKs, and the CLI. A scan is identified by the
+  file/folder path being scanned — cancel an in-progress scan by passing that same path:
+  - `Scanner.ScanFile` and `Scanner.ScanFolder` register the scan under its path; new `CancelScan(string path)` cancels it. Both also accept an optional `CancellationToken`.
+  - CSharpSDK: new `CancelScan(path)` and `CancelAllScans()` plus `Scan`/`ScanFolder` overloads that accept a `CancellationToken`
+  - NativeSDK: new `cancelScan(path)` and `cancelAllScans` C exports
+  - NodeSDK: new `cancelScan(path)` and `cancelAllScans()` functions
+  - XvirusCLI: <kbd>Ctrl</kbd>+<kbd>C</kbd> cancels a running scan and still prints partial results
+
+### Changed
+
+- A cancelled folder scan returns the results gathered so far instead of discarding them
+
 ## [5.1.1]
 
 ### Fixed

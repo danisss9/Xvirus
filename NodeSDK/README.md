@@ -1,6 +1,6 @@
 # Xvirus Node.js SDK
 
-Xvirus SDK 5.1.1 — Node.js native addon built with .NET Native AOT.
+Xvirus SDK 5.1.2 — Node.js native addon built with .NET Native AOT.
 
 The module ships as a pre-compiled `.node` binary paired with a generated `.js` ESM wrapper. No .NET runtime is required on the target machine.
 
@@ -122,6 +122,10 @@ All functions are accessed through the `XvirusNodeSDK` named export.
 - **`scanFolder(folderPath: string): ScanResultNode[]`** — Scans all files inside the folder at `folderPath`. Returns an array of [`ScanResultNode`](#model) objects.
 
 - **`scanFolderAsString(folderPath: string): string`** — Scans all files inside the folder at `folderPath`. Returns the results as a JSON string.
+
+- **`cancelScan(path: string): boolean`** — Cancels the in-progress scan of the file or folder at `path` — the same path passed to `scan`/`scanFolder`. Returns `true` if a matching scan was signalled to cancel, `false` if none was active. Scans block the calling thread, so call this from a worker thread (e.g. via `worker_threads`) for it to take effect while a scan is in flight. A cancelled folder scan returns the results gathered so far.
+
+- **`cancelAllScans(): boolean`** — Cancels every scan currently in progress, regardless of path. Returns `true` if at least one scan was signalled to cancel, `false` if none was active. As with `cancelScan`, call this from a worker thread for it to take effect while a scan is in flight.
 
 - **`checkUpdates(loadDBAfterUpdate?: boolean): string`** — Checks for database and SDK updates. If `loadDBAfterUpdate` is `true`, reloads the engine after a successful update. Returns one of the following strings:
   - `"There is a new SDK version available!"`

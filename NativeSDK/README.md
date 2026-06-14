@@ -1,6 +1,6 @@
 # NativeSDK
 
-Xvirus Native SDK 5.1.1
+Xvirus Native SDK 5.1.2
 
 ## Table of Contents
 
@@ -76,21 +76,24 @@ int main() {
 
 All functions use C-compatible calling conventions. Strings are passed and returned as UTF-16 (`wchar_t*` / `IntPtr` to Unicode).
 
-| Entry point        | Parameters                     | Returns        | Description                                                                 |
-|--------------------|--------------------------------|----------------|-----------------------------------------------------------------------------|
-| `load`             | `bool force`                   | `ActionResult` | Loads the scan engine. If `force`=true reloads even if already loaded.      |
-| `unload`           | —                              | `ActionResult` | Unloads the scan engine from memory.                                        |
-| `scan`             | `wchar_t* filePath`            | `ScanResult`   | Scans a single file. Returns a `ScanResult` struct.                         |
-| `scanAsString`     | `wchar_t* filePath`            | `ActionResult` | Scans a single file. Returns result as a JSON string in `ActionResult`.     |
-| `scanFolder`       | `wchar_t* folderPath`          | `ScanResult*`  | Scans all files in a folder. Returns a pointer to an array of `ScanResult`. |
-| `scanFolderAsString` | `wchar_t* folderPath`        | `ActionResult` | Scans all files in a folder. Returns results as a JSON string.              |
-| `checkUpdates`     | `bool loadDBAfterUpdate`       | `ActionResult` | Checks and downloads the latest databases and AI model.                     |
-| `getSettings`      | —                              | `ActionResult` | Returns the current settings as a JSON string.                              |
-| `logging`          | `bool? enableLogging`          | `bool`         | Gets or sets logging state.                                                 |
-| `baseFolder`       | `wchar_t* baseFolder`          | `wchar_t*`     | Gets or sets the base folder used to resolve relative paths.                |
-| `version`          | —                              | `wchar_t*`     | Returns the SDK version string.                                             |
+| Entry point          | Parameters               | Returns        | Description                                                                           |
+| -------------------- | ------------------------ | -------------- | ------------------------------------------------------------------------------------- |
+| `load`               | `bool force`             | `ActionResult` | Loads the scan engine. If `force`=true reloads even if already loaded.                |
+| `unload`             | —                        | `ActionResult` | Unloads the scan engine from memory.                                                  |
+| `scan`               | `wchar_t* filePath`      | `ScanResult`   | Scans a single file. Returns a `ScanResult` struct.                                   |
+| `scanAsString`       | `wchar_t* filePath`      | `ActionResult` | Scans a single file. Returns result as a JSON string in `ActionResult`.               |
+| `scanFolder`         | `wchar_t* folderPath`    | `ScanResult*`  | Scans all files in a folder. Returns a pointer to an array of `ScanResult`.           |
+| `scanFolderAsString` | `wchar_t* folderPath`    | `ActionResult` | Scans all files in a folder. Returns results as a JSON string.                        |
+| `cancelScan`         | `wchar_t* path`          | `ActionResult` | Cancels the in-progress scan of the given file/folder path. Call from another thread. |
+| `cancelAllScans`     | —                        | `ActionResult` | Cancels every scan currently in progress. Call from another thread.                   |
+| `checkUpdates`       | `bool loadDBAfterUpdate` | `ActionResult` | Checks and downloads the latest databases and AI model.                               |
+| `getSettings`        | —                        | `ActionResult` | Returns the current settings as a JSON string.                                        |
+| `logging`            | `bool? enableLogging`    | `bool`         | Gets or sets logging state.                                                           |
+| `baseFolder`         | `wchar_t* baseFolder`    | `wchar_t*`     | Gets or sets the base folder used to resolve relative paths.                          |
+| `version`            | —                        | `wchar_t*`     | Returns the SDK version string.                                                       |
 
 `checkUpdates` result string is one of:
+
 - `"There is a new SDK version available!"`
 - `"Database was updated!"`
 - `"Database is up-to-date!"`
@@ -125,6 +128,7 @@ typedef struct {
 ```
 
 `Name` can be one of:
+
 - `"Safe"` — no malware detected
 - `"Malware"` — malware detected but family unknown
 - _Malware family name_ — e.g. `"Trojan.Downloader"`

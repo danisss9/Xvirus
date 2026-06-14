@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading;
 using Xvirus.Model;
 
 namespace Xvirus
@@ -14,6 +16,12 @@ namespace Xvirus
         private readonly AI ai;
         private readonly Rules rules;
 
+        // Registry of in-progress scans, keyed by the file or folder path being scanned, so
+        // concurrent scans of different paths each have an independent CancellationTokenSource and
+        // can be cancelled individually via CancelScan(path). Starting a new scan of a path that is
+        // already being scanned cancels and replaces the in-progress one.
+        private readonly ConcurrentDictionary<string, CancellationTokenSource> _activeScans = new();
+
         public Scanner(SettingsDTO settings, DB database, AI ai, Rules rules)
         {
             this.settings = settings;
@@ -22,8 +30,72 @@ namespace Xvirus
             this.rules = rules;
         }
 
+        private CancellationTokenSource RegisterScan(string path)
+        {
+            var cts = new CancellationTokenSource();
+            _activeScans.AddOrUpdate(path, cts, (_, existing) =>
+            {
+                // A scan of this path is already running; cancel and replace it.
+                try { existing.Cancel(); } catch (ObjectDisposedException) { }
+                existing.Dispose();
+                return cts;
+            });
+            return cts;
+        }
+
+        private void UnregisterScan(string path, CancellationTokenSource owned)
+        {
+            // Only remove if the registered cts is still ours (not replaced by a newer same-path scan).
+            _activeScans.TryRemove(new KeyValuePair<string, CancellationTokenSource>(path, owned));
+            owned.Dispose();
+        }
+
+        /// <summary>
+        /// Cancels the in-progress scan of the file or folder at <paramref name="path"/>.
+        /// Returns <c>true</c> if a matching scan was signalled to cancel, <c>false</c> otherwise.
+        /// Safe to call from another thread while a scan is running.
+        /// </summary>
+        public bool CancelScan(string path)
+        {
+            if (path != null && _activeScans.TryGetValue(path, out var cts))
+            {
+                try { cts.Cancel(); return true; }
+                catch (ObjectDisposedException) { return false; }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Cancels every in-progress scan on this scanner. Returns the number of scans signalled
+        /// to cancel. Safe to call from another thread.
+        /// </summary>
+        public int CancelAllScans()
+        {
+            int count = 0;
+            foreach (var kvp in _activeScans)
+            {
+                try { kvp.Value.Cancel(); count++; }
+                catch (ObjectDisposedException) { }
+            }
+            return count;
+        }
+
+        /// <summary>
+        /// Scans a single file. The scan is registered under <paramref name="filePath"/> and can be
+        /// cancelled while in progress via <see cref="CancelScan(string)"/>. Starting another scan of
+        /// the same path cancels and replaces the in-progress one.
+        /// </summary>
         public ScanResult ScanFile(string filePath)
         {
+            var cts = RegisterScan(filePath);
+            try { return ScanFile(filePath, cts.Token); }
+            finally { UnregisterScan(filePath, cts); }
+        }
+
+        public ScanResult ScanFile(string filePath, CancellationToken ct)
+        {
+            ct.ThrowIfCancellationRequested();
+
             var fileInfo = new FileInfo(filePath);
             if (!fileInfo.Exists)
                 return new ScanResult(-1, "File not found!", filePath);
@@ -36,6 +108,8 @@ namespace Xvirus
                 return new ScanResult(1, "Blocked", filePath);
             else if (rule == RuleType.Allow)
                 return new ScanResult(0, "Safe", filePath);
+
+            ct.ThrowIfCancellationRequested();
 
             string? hash = null;
             using (var md5 = MD5.Create())
@@ -54,6 +128,8 @@ namespace Xvirus
             if (settings.EnableSignatures && database.malHashList.Contains(hash))
                 return new ScanResult(1, "Malware", filePath);
 
+            ct.ThrowIfCancellationRequested();
+
             var certName = Utils.GetCertificateSubjectName(filePath);
             if (certName != null)
             {
@@ -69,6 +145,8 @@ namespace Xvirus
 
             if (settings.EnableHeuristics || settings.EnableAIScan)
             {
+                ct.ThrowIfCancellationRequested();
+
                 bool isExecutable = false;
                 using (var stream = File.OpenRead(filePath))
                 {
@@ -86,7 +164,7 @@ namespace Xvirus
                     if (isExecutable && database.heurListPatterns != null && (settings.MaxHeuristicsPeScanLength == null || fileInfo.Length <= settings.MaxHeuristicsPeScanLength))
                     {
                         using var stream = Utils.ReadFile(filePath, fileInfo.Length);
-                        var matches = database.heurListPatterns.Search(stream);
+                        var matches = database.heurListPatterns.Search(stream, ct);
                         int score = 0;
                         foreach (var match in matches)
                         {
@@ -115,7 +193,7 @@ namespace Xvirus
                     else if (!isExecutable && database.heurScriptListPatterns != null && (settings.MaxHeuristicsOthersScanLength == null || fileInfo.Length <= settings.MaxHeuristicsOthersScanLength)) // 10MBs
                     {
                         using var stream = Utils.ReadFile(filePath, fileInfo.Length);
-                        var matches = database.heurScriptListPatterns.Search(stream);
+                        var matches = database.heurScriptListPatterns.Search(stream, ct);
                         int score = 0;
                         foreach (var match in matches)
                         {
@@ -145,6 +223,8 @@ namespace Xvirus
 
                 if (settings.EnableAIScan && isExecutable && (settings.MaxAIScanLength == null || fileInfo.Length <= settings.MaxAIScanLength))
                 {
+                    ct.ThrowIfCancellationRequested();
+
                     var aiScore = ai.ScanFile(filePath);
                     return new ScanResult(aiScore, $"AI.{aiScore * 100:00.00}", filePath, (100 - (double)settings.AILevel) / 100);
                 }
@@ -152,7 +232,23 @@ namespace Xvirus
             return new ScanResult(0, "Safe", filePath);
         }
 
+        /// <summary>
+        /// Scans a folder. The scan is registered under <paramref name="folderPath"/> and can be
+        /// cancelled while in progress via <see cref="CancelScan(string)"/>. A cancelled scan stops
+        /// gracefully and yields the results gathered so far.
+        /// </summary>
         public IEnumerable<ScanResult> ScanFolder(string folderPath)
+        {
+            var cts = RegisterScan(folderPath);
+            try
+            {
+                foreach (var result in ScanFolder(folderPath, cts.Token))
+                    yield return result;
+            }
+            finally { UnregisterScan(folderPath, cts); }
+        }
+
+        public IEnumerable<ScanResult> ScanFolder(string folderPath, CancellationToken ct)
         {
             if (!Directory.Exists(folderPath))
                 yield break;
@@ -161,7 +257,20 @@ namespace Xvirus
 
             foreach (var filePath in filePaths)
             {
-                yield return ScanFile(filePath);
+                if (ct.IsCancellationRequested)
+                    yield break;
+
+                ScanResult result;
+                try
+                {
+                    result = ScanFile(filePath, ct);
+                }
+                catch (OperationCanceledException)
+                {
+                    yield break;
+                }
+
+                yield return result;
             }
         }
     }

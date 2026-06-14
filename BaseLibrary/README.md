@@ -1,6 +1,6 @@
 # BaseLibrary
 
-Xvirus SDK Core Library 5.1.1
+Xvirus SDK Core Library 5.1.2
 
 ## Table of Contents
 
@@ -20,7 +20,7 @@ Xvirus SDK Core Library 5.1.1
 
 `BaseLibrary` is the shared core used by all Xvirus SDK bindings (C#, Native, Node). It provides the scanning engine, AI inference, database management, updater, settings, quarantine, and logging.
 
-**Version:** 5.1.1
+**Version:** 5.1.2
 **Target:** .NET 8 (AOT compatible)
 **Dependencies:** `Microsoft.ML.OnnxRuntime`, `SixLabors.ImageSharp`
 
@@ -50,9 +50,15 @@ var scanner = new Scanner(settings, database, ai, rules);
 
 ScanResult result = scanner.ScanFile(filePath);
 IEnumerable<ScanResult> results = scanner.ScanFolder(folderPath);
+
+// Cancellation: both methods accept an optional CancellationToken
+using var cts = new CancellationTokenSource();
+IEnumerable<ScanResult> partial = scanner.ScanFolder(folderPath, cts.Token);
 ```
 
 `ScanFile` applies rules, then runs signature → heuristics → AI checks in order, returning early as soon as a verdict is reached.
+
+Both `ScanFile` and `ScanFolder` accept an optional `CancellationToken`. `ScanFile` throws `OperationCanceledException` if cancelled (checked between phases and inside the heuristics byte-scan). `ScanFolder` stops gracefully between files and returns the results gathered so far — it does not throw — so partial results are preserved. The ONNX AI inference itself is a single bounded call and is not interrupted once started.
 
 ### AI
 

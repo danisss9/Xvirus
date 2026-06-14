@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace AhoCorasick.Net
 {
@@ -100,13 +101,16 @@ namespace AhoCorasick.Net
 
         // todo copy paste from Contains method: Refactor!
         // todo check performance 
-        public IEnumerable<KeyValuePair<string, int>> Search(FileStream stream)
+        public IEnumerable<KeyValuePair<string, int>> Search(FileStream stream, CancellationToken ct = default)
         {
             var currentNode = _rootNode;
             var length = stream.Length;
             using var reader = new BinaryReader(stream);
             for (var i = 0; i < length; i++)
             {
+                if ((i & 0xFFFF) == 0)
+                    ct.ThrowIfCancellationRequested();
+
                 var current = BitConverter.ToString(reader.ReadBytes(1));
                 for (var j = 0; j < current.Length; j++)
                 {

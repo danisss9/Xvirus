@@ -14,6 +14,13 @@ namespace XvirusCLI
             }
 
             Xvirus.AppInfo.AppCode = "cli";
+
+            Console.CancelKeyPress += (s, e) =>
+            {
+                e.Cancel = true;
+                CancelAllScans();
+            };
+
             var isInteractive = false;
             do
             {

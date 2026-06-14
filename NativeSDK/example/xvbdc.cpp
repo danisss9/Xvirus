@@ -56,7 +56,7 @@ int main()
     const wchar_t* targetFile = L"/usr/bin/bash"; // change to the file you want to scan
 #endif
 
-    ScanResult result = scan(targetFile);
+    ScanResult result = scan(targetFile); // cancel an in-progress scan from another thread with cancelScan(targetFile)
     if (!result.sucess)
     {
         wcerr << L"Scan error: " << result.error << endl;

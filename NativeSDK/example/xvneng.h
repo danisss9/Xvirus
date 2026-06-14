@@ -8,6 +8,8 @@
 #define ScanAsStringFnKey "scanAsString"
 #define ScanFolderFnKey "scanFolder"
 #define ScanFolderAsStringFnKey "scanFolderAsString"
+#define CancelScanFnKey "cancelScan"
+#define CancelAllScansFnKey "cancelAllScans"
 #define CheckUpdatesFnKey "checkUpdates"
 #define GetSettingsFnKey "getSettings"
 #define LoggingFnKey "logging"
@@ -37,6 +39,8 @@ typedef ScanResult (*ScanFn)(const wchar_t *filepath);
 typedef ActionResult (*ScanAsStringFn)(const wchar_t *filepath);
 typedef ScanResult *(*ScanFolderFn)(const wchar_t *folderPath);
 typedef ActionResult (*ScanFolderAsStringFn)(const wchar_t *folderPath);
+typedef ActionResult (*CancelScanFn)(const wchar_t *path);
+typedef ActionResult (*CancelAllScansFn)();
 typedef ActionResult (*CheckUpdatesFn)(bool loadDBAfterUpdate);
 typedef ActionResult (*GetSettingsFn)();
 typedef bool (*LoggingFn)(bool enableLogging);

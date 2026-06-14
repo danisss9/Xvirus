@@ -1,6 +1,6 @@
 # XvirusCLI
 
-Xvirus Command Line Interface 5.1.1
+Xvirus Command Line Interface 5.1.2
 
 ## Table of Contents
 
@@ -10,6 +10,7 @@ Xvirus Command Line Interface 5.1.1
   - [Get Started](#get-started)
   - [Commands](#commands)
   - [Interactive Mode](#interactive-mode)
+  - [Cancelling a Scan](#cancelling-a-scan)
   - [Settings](#settings)
     - [Engine Settings](#engine-settings)
     - [Scan Levels](#scan-levels)
@@ -52,19 +53,19 @@ XvirusCLI scan "C:\path\to\file.exe"
 
 ## Commands
 
-| Command                   | Alias     | Description                                                                                      |
-|---------------------------|-----------|--------------------------------------------------------------------------------------------------|
-| `load [true]`             | `l`       | Loads the scan engine into memory. Pass `true` to force a reload.                               |
-| `unload`                  | `u`       | Unloads the scan engine from memory.                                                             |
-| `scan <path>`             | `s`       | Scans the file at `<path>` and prints the result as JSON.                                        |
-| `scanfolder <path>`       | `sf`      | Scans all files in `<path>` recursively and prints results as JSON.                              |
-| `update [true]`           | `up`      | Checks and downloads the latest databases and AI model. Pass `true` to reload the engine after. |
-| `settings`                | `st`      | Prints the current `settings.json` as JSON.                                                     |
-| `logging [true\|false]`   | `log`     | Gets or sets logging. Omit the argument to only print the current state.                        |
-| `basefolder [path]`       | `bf`      | Gets or sets the base folder path. Omit the argument to only print the current path.            |
-| `version`                 | `v`       | Prints the CLI version.                                                                          |
-| `interactive`             | `i`       | Enters interactive mode (see below).                                                             |
-| `quit`                    | `q`       | Exits interactive mode.                                                                          |
+| Command                 | Alias | Description                                                                                     |
+| ----------------------- | ----- | ----------------------------------------------------------------------------------------------- |
+| `load [true]`           | `l`   | Loads the scan engine into memory. Pass `true` to force a reload.                               |
+| `unload`                | `u`   | Unloads the scan engine from memory.                                                            |
+| `scan <path>`           | `s`   | Scans the file at `<path>` and prints the result as JSON.                                       |
+| `scanfolder <path>`     | `sf`  | Scans all files in `<path>` recursively and prints results as JSON.                             |
+| `update [true]`         | `up`  | Checks and downloads the latest databases and AI model. Pass `true` to reload the engine after. |
+| `settings`              | `st`  | Prints the current `settings.json` as JSON.                                                     |
+| `logging [true\|false]` | `log` | Gets or sets logging. Omit the argument to only print the current state.                        |
+| `basefolder [path]`     | `bf`  | Gets or sets the base folder path. Omit the argument to only print the current path.            |
+| `version`               | `v`   | Prints the CLI version.                                                                         |
+| `interactive`           | `i`   | Enters interactive mode (see below).                                                            |
+| `quit`                  | `q`   | Exits interactive mode.                                                                         |
 
 ### Examples
 
@@ -104,6 +105,10 @@ scan C:\path\to\file1.exe
 scan C:\path\to\file2.exe
 quit
 ```
+
+## Cancelling a Scan
+
+Press <kbd>Ctrl</kbd>+<kbd>C</kbd> during a `scan` or `scanfolder` to cancel it. The CLI cancels the running scan gracefully instead of terminating the process, so a folder scan still prints the results gathered before cancellation.
 
 ## Settings
 

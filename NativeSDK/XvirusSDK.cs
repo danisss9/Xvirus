@@ -132,6 +132,23 @@ namespace Xvirus
             }
         }
 
+        [UnmanagedCallersOnly(EntryPoint = "cancelScan")]
+        public static ActionResult CancelScan(IntPtr path)
+        {
+            var pathAux = Marshal.PtrToStringUni(path);
+            return Scanner?.CancelScan(pathAux!) == true
+                ? new ActionResult() { Sucess = true, Result = Marshal.StringToHGlobalUni("Cancelled") }
+                : new ActionResult() { Sucess = false, Error = Marshal.StringToHGlobalUni("No scan in progress") };
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "cancelAllScans")]
+        public static ActionResult CancelAllScans()
+        {
+            return Scanner?.CancelAllScans() > 0
+                ? new ActionResult() { Sucess = true, Result = Marshal.StringToHGlobalUni("Cancelled") }
+                : new ActionResult() { Sucess = false, Error = Marshal.StringToHGlobalUni("No scan in progress") };
+        }
+
         [UnmanagedCallersOnly(EntryPoint = "checkUpdates")]
         public static ActionResult CheckUpdates(bool loadDBAfterUpdate = false)
         {
@@ -204,9 +221,7 @@ namespace Xvirus
             if (Scanner == null)
                 LoadAux();
 
-            var results = Scanner!.ScanFolder(folderPath);
-
-            return results.ToArray();
+            return Scanner!.ScanFolder(folderPath).ToArray();
         }
 
         private static void LoadAux(bool force = false)
