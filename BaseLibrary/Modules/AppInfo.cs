@@ -12,8 +12,8 @@ namespace Xvirus
         {
             { "antimalware", "7.0.5.0" },
             { "firewall", "4.5.0.0" },
-            { "sdk", "5.1.1.0" },
-            { "cli", "5.1.1.0" }
+            { "sdk", "5.1.2.0" },
+            { "cli", "5.1.2.0" }
         };
 
         public static string GetVersion()

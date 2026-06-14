@@ -1,6 +1,6 @@
 # XvirusService
 
-Xvirus Background Service 5.1.1
+Xvirus Background Service 5.1.2
 
 ## Table of Contents
 

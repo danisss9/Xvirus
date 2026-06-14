@@ -1,6 +1,6 @@
 # XvirusUI
 
-Xvirus User Interface 5.1.1
+Xvirus User Interface 5.1.2
 
 ## Table of Contents
 
