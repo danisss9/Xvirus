@@ -31,32 +31,49 @@ namespace Xvirus
 
         public Rule AddRule(string path, RuleType type, string rulesFilePath = "rules.json")
         {
-            var rule = new Rule { Path = path, Type = type };
             var rulesPath = Utils.RelativeToFullPath(rulesFilePath);
+            Rule rule;
 
             rwl.AcquireWriterLock(2000);
             try
             {
-                _rules.Add(rule.Path, rule);
-                var json = JsonSerializer.Serialize(rule, SourceGenerationContext.Default.Rule);
-                File.AppendAllText(rulesPath, json + Environment.NewLine);
+                if (_rules.TryGetValue(path, out var existing))
+                {
+                    // Path already has a rule — flip its type and rewrite the file.
+                    rule = existing;
+                    rule.Type = type;
+                    var allRulesJson = string.Join(Environment.NewLine, _rules.Values.Select(r => JsonSerializer.Serialize(r, SourceGenerationContext.Default.Rule)));
+                    File.WriteAllText(rulesPath, allRulesJson + Environment.NewLine);
+                }
+                else
+                {
+                    rule = new Rule { Path = path, Type = type };
+                    _rules.Add(rule.Path, rule);
+                    var json = JsonSerializer.Serialize(rule, SourceGenerationContext.Default.Rule);
+                    File.AppendAllText(rulesPath, json + Environment.NewLine);
+                }
             }
             finally
             {
                 rwl.ReleaseWriterLock();
             }
+
+            ApplyEnforcement(rule);
             return rule;
         }
 
         public void RemoveRule(string id, string rulesFilePath = "rules.json")
         {
             var rulesPath = Utils.RelativeToFullPath(rulesFilePath);
+            Rule? removed = null;
             rwl.AcquireWriterLock(2000);
             try
             {
-                var path = _rules.First(r => r.Value.Id == id).Key;
+                var match = _rules.FirstOrDefault(r => r.Value.Id == id);
+                var path = match.Key;
                 if (path != null && _rules.Remove(path))
                 {
+                    removed = match.Value;
                     // Rewrite the entire file without the removed rule
                     var allRulesJson = string.Join(Environment.NewLine, _rules.Values.Select(r => JsonSerializer.Serialize(r, SourceGenerationContext.Default.Rule)));
                     File.WriteAllText(rulesPath, allRulesJson + Environment.NewLine);
@@ -65,6 +82,51 @@ namespace Xvirus
             finally
             {
                 rwl.ReleaseWriterLock();
+            }
+
+            // Lift any active firewall block for the removed rule (firewall product only).
+            if (removed?.Type == RuleType.Block && AppInfo.IsFirewall)
+            {
+                try { Firewall.UnblockProgram(removed.Path); }
+                catch (Exception ex) { Logger.LogException(ex); }
+            }
+        }
+
+        /// <summary>Re-applies every block rule to the OS firewall (firewall product only).</summary>
+        public void SyncEnforcement()
+        {
+            if (!AppInfo.IsFirewall) return;
+
+            List<Rule> blockRules;
+            rwl.AcquireReaderLock(2000);
+            try
+            {
+                blockRules = _rules.Values.Where(r => r.Type == RuleType.Block).ToList();
+            }
+            finally
+            {
+                rwl.ReleaseReaderLock();
+            }
+
+            foreach (var rule in blockRules)
+                ApplyEnforcement(rule);
+        }
+
+        // Applies (or lifts) OS-level firewall enforcement for a single rule. No-op for
+        // the anti-malware product, where rules stay advisory hints for the scanner.
+        private static void ApplyEnforcement(Rule rule)
+        {
+            if (!AppInfo.IsFirewall) return;
+            try
+            {
+                if (rule.Type == RuleType.Block)
+                    Firewall.BlockProgram(rule.Path);
+                else
+                    Firewall.UnblockProgram(rule.Path);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
             }
         }
 

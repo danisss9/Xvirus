@@ -228,6 +228,15 @@ namespace Xvirus
                     var aiScore = ai.ScanFile(filePath);
                     return new ScanResult(aiScore, $"AI.{aiScore * 100:00.00}", filePath, (100 - (double)settings.AILevel) / 100);
                 }
+
+                if (settings.EnableCloudScan)
+                {
+                    ct.ThrowIfCancellationRequested();
+
+                    var cloudVerdict = CloudReputation.CheckHash(hash);
+                    if (cloudVerdict == true) return new ScanResult(1, "Cloud.Suspicious", filePath);
+                    if (cloudVerdict == false) return new ScanResult(0, "Safe", filePath);
+                }
             }
             return new ScanResult(0, "Safe", filePath);
         }

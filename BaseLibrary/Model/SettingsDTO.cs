@@ -8,6 +8,7 @@ namespace Xvirus.Model
         public bool EnableSignatures { get; set; } = true;
         public bool EnableHeuristics { get; set; } = true;
         public bool EnableAIScan { get; set; } = true;
+        public bool EnableCloudScan { get; set; } = false;
 
         // Scan Levels
         public int HeuristicsLevel { get; set; } = 4; // From 1 to 5, higher is more agressive

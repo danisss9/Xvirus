@@ -22,5 +22,6 @@ namespace BaseLibrary.Serializers
 
     [JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Default, PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
     [JsonSerializable(typeof(UpdateInfo))]
+    [JsonSerializable(typeof(CloudReputationInfo))]
     public partial class SourceGenerationContextCamelCase : JsonSerializerContext { }
 }
