@@ -259,6 +259,81 @@ app.post('/api/vote', legacyLimiter, async (req, res) => {
   res.json({ allow: updated.allow, block: updated.block });
 });
 
+// ---- Cloud reputation ------------------------------------------------------
+// Combines the scan history (scanResults) with community votes (submissions)
+// to produce a reputation score from 0.0 (clean) to 1.0 (malware).
+// Returns `null` when the hash is unknown (no scan and no votes).
+app.get('/api/reputation', legacyLimiter, async (req, res) => {
+  const hash = req.query.hash;
+  if (!hash || !/^[0-9A-Fa-f]{32}$/.test(hash)) {
+    return res.status(400).json({ error: 'Invalid hash.' });
+  }
+  const normalHash = hash.toUpperCase();
+
+  try {
+    const [scan, votes] = await Promise.all([
+      mongoose.model('scanResults').findOne({ md5: normalHash }).lean(),
+      mongoose.model('submissions').findOne({ hash: normalHash }).lean(),
+    ]);
+
+    const hasScan = scan != null;
+    const allow = votes?.allow ?? 0;
+    const block = votes?.block ?? 0;
+    const totalVotes = allow + block;
+    const hasVotes = totalVotes > 0;
+
+    // Unknown: nothing in scan history and no community votes.
+    if (!hasScan && !hasVotes) {
+      return res.json(null);
+    }
+
+    // Community vote ratio: 0.0 = all allow, 1.0 = all block.
+    const voteRatio = hasVotes ? block / totalVotes : null;
+
+    // Confidence weight for community votes grows with vote count (max ~0.6).
+    const voteWeight = hasVotes ? Math.min(totalVotes / 10, 1) * 0.6 : 0;
+    const scanWeight = 1 - voteWeight;
+
+    let score;
+    if (hasScan) {
+      // Blend the engine scan result with the community vote ratio.
+      const scanBase = scan.isMalware ? 0.9 : 0.1;
+      // If the engine also produced a malwareScore, fold it in (normalized 0..1).
+      const engineScore =
+        typeof scan.malwareScore === 'number' ? scan.malwareScore / 100 : scanBase;
+      const scanComponent = (scanBase + engineScore) / 2;
+      score = hasVotes
+        ? scanWeight * scanComponent + voteWeight * voteRatio
+        : scanComponent;
+    } else {
+      // Only community votes available.
+      score = voteRatio;
+    }
+
+    // Clamp to [0, 1].
+    score = Math.max(0, Math.min(1, score));
+
+    // Derive a threat name: prefer the engine detection, then a community label.
+    let name = scan?.name ?? null;
+    if (!name && hasVotes) {
+      name = voteRatio >= 0.5 ? 'Community flagged' : 'Community clean';
+    }
+
+    res.json({
+      malware: score >= 0.5,
+      name,
+      score,
+      // Extra context for the website UI (ignored by the C# client).
+      votes: { allow, block },
+      scannedAt: scan?.scannedAt ?? null,
+    });
+  } catch (err) {
+    console.error('[Reputation] Lookup failed:', err.message);
+    // Fail-open: unknown rather than blocking local scanning.
+    res.json(null);
+  }
+});
+
 // ---- Update info ------------------------------------------------------------
 app.get('/api/updateInfo', (req, res) => {
   const headerApp = req.query.app;
