@@ -11,6 +11,7 @@ export default function SettingsView() {
     enableSignatures: true,
     enableHeuristics: true,
     enableAIScan: true,
+    enableCloudScan: false,
     heuristicsLevel: 4,
     aiLevel: 10,
     maxScanLength: null,
@@ -27,7 +28,6 @@ export default function SettingsView() {
     darkMode: true,
     startWithWindows: true,
     enableContextMenu: false,
-    passwordProtection: false,
     enableLogs: false,
     onlyScanExecutables: true,
     autoQuarantine: false,
@@ -35,11 +35,15 @@ export default function SettingsView() {
     realTimeProtection: true,
     threatAction: 'ask',
     behaviorProtection: false,
-    cloudScan: false,
     networkProtection: true,
     selfDefense: false,
     showNotifications: true
   });
+
+  // Refs mirror the latest state synchronously so saveAllSettings() always persists the
+  // value the user just changed (plain state would be one render behind).
+  const settingsRef = useRef(settings);
+  const appSettingsRef = useRef(appSettings);
 
   useEffect(() => {
     // Fetch structured settings from backend via helper
@@ -48,6 +52,8 @@ export default function SettingsView() {
         const data = await fetchSettings();
         setSettings(data.settings);
         setAppSettings(data.appSettings);
+        settingsRef.current = data.settings;
+        appSettingsRef.current = data.appSettings;
       } catch (error) {
         console.error('Failed to fetch settings:', error);
       }
@@ -57,11 +63,19 @@ export default function SettingsView() {
   }, []);
 
   const handleSettingChange = (field: keyof SettingsDTO, value: boolean | string | number | null) => {
-    setSettings(prev => ({ ...prev, [field]: value } as any));
+    setSettings(prev => {
+      const next = { ...prev, [field]: value } as any;
+      settingsRef.current = next;
+      return next;
+    });
   };
 
   const handleAppSettingChange = (field: keyof AppSettingsDTO, value: string | boolean) => {
-    setAppSettings(prev => ({ ...prev, [field]: value } as any));
+    setAppSettings(prev => {
+      const next = { ...prev, [field]: value } as any;
+      appSettingsRef.current = next;
+      return next;
+    });
     if (field === 'darkMode') {
       document.body.classList.toggle('dark', value as boolean);
     }
@@ -69,7 +83,7 @@ export default function SettingsView() {
 
   const saveAllSettings = async () => {
     try {
-      const payload: SettingsResponseDTO = { settings, appSettings };
+      const payload: SettingsResponseDTO = { settings: settingsRef.current, appSettings: appSettingsRef.current };
       await saveSettings(payload);
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -225,18 +239,6 @@ export default function SettingsView() {
                     class="toggle-switch"
                     checked={appSettings.enableContextMenu}
                     onChange={(e: any) => { handleAppSettingChange('enableContextMenu', e.currentTarget.checked); saveAllSettings(); }}
-                  />
-                </div>
-              )}
-
-              {!isFirewall && (
-                <div class="setting-item">
-                  <label class="setting-label">Password protection</label>
-                  <input
-                    type="checkbox"
-                    class="toggle-switch"
-                    checked={appSettings.passwordProtection}
-                    onChange={(e: any) => { handleAppSettingChange('passwordProtection', e.currentTarget.checked); saveAllSettings(); }}
                   />
                 </div>
               )}
@@ -403,8 +405,8 @@ export default function SettingsView() {
                   <input
                     type="checkbox"
                     class="toggle-switch"
-                    checked={appSettings.cloudScan ?? false}
-                    onChange={(e: any) => { handleAppSettingChange('cloudScan', e.currentTarget.checked); saveAllSettings(); }}
+                    checked={settings.enableCloudScan ?? false}
+                    onChange={(e: any) => { handleSettingChange('enableCloudScan', e.currentTarget.checked); saveAllSettings(); }}
                   />
                 </div>
               )}

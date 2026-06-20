@@ -6,7 +6,6 @@ export interface AppSettingsDTO {
   // general
   startWithWindows: boolean;
   enableContextMenu: boolean;
-  passwordProtection: boolean;
   enableLogs: boolean;
 
   // scan extras
@@ -18,7 +17,6 @@ export interface AppSettingsDTO {
   realTimeProtection: boolean;
   threatAction: 'auto' | 'ask';
   behaviorProtection: boolean;
-  cloudScan: boolean;
   networkProtection: boolean;
   selfDefense: boolean;
   showNotifications: boolean;

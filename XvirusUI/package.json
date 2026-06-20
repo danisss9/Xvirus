@@ -8,7 +8,8 @@
     "prod:am": "vite build && neu build --release --embed-resources",
     "prod:fw": "vite build && neu build --release --embed-resources",
     "start": "neu run",
-    "prod:service": "dotnet publish ../XvirusService/XvirusService.csproj /p:PublishProfile=Windows"
+    "prod:service:am": "dotnet publish ../XvirusService/XvirusService.csproj /p:PublishProfile=Windows",
+    "prod:service:fw": "dotnet publish ../XvirusService/XvirusService.csproj /p:PublishProfile=Windows"
   },
   "dependencies": {
     "@neutralinojs/lib": "^6.5.0",

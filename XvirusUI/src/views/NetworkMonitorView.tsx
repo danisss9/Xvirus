@@ -1,5 +1,8 @@
-import { useState, useEffect, useCallback } from 'preact/hooks';
+import { useState, useEffect, useCallback, useMemo } from 'preact/hooks';
 import { fetchNetworkConnections, NetworkConnection } from '../api/networkApi';
+import { fetchRules, addBlockRule, removeRule } from '../api/rulesApi';
+import { Rule } from '../model/Rule';
+import { isFirewall } from '../services/env';
 
 const IconRefresh = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
@@ -31,7 +34,26 @@ function ScoreBadge({ score }: { score: number }) {
   return <span class={cls}>{pct}%</span>;
 }
 
-function ConnectionRow({ conn, expanded }: { conn: NetworkConnection; expanded: boolean }) {
+function BlockToggle({ blocked, onClick }: { blocked: boolean; onClick: (e: any) => void }) {
+  return (
+    <button
+      class={`nm-block-btn ${blocked ? 'is-blocked' : ''}`}
+      title={blocked ? 'Remove firewall block' : 'Block network access'}
+      onClick={(e: any) => { e.stopPropagation(); onClick(e); }}
+    >
+      {blocked ? 'Unblock' : 'Block'}
+    </button>
+  );
+}
+
+function ConnectionRow({ conn, expanded, blocked, onToggleBlock }: {
+  conn: NetworkConnection;
+  expanded: boolean;
+  blocked: boolean;
+  onToggleBlock?: (conn: NetworkConnection, blocked: boolean) => void;
+}) {
+  const canBlock = !!onToggleBlock && !!conn.filePath;
+
   if (!expanded) {
     return (
       <div class="nm-row nm-row-collapsed">
@@ -39,7 +61,9 @@ function ConnectionRow({ conn, expanded }: { conn: NetworkConnection; expanded: 
           {conn.fileName || <span class="nm-unknown">Unknown</span>}
         </span>
         <span class="nm-remote" title={conn.remoteAddress}>{conn.remoteAddress}</span>
+        {blocked && <span class="nm-blocked-badge">Blocked</span>}
         <ScoreBadge score={conn.score} />
+        {canBlock && <BlockToggle blocked={blocked} onClick={() => onToggleBlock!(conn, blocked)} />}
       </div>
     );
   }
@@ -50,7 +74,9 @@ function ConnectionRow({ conn, expanded }: { conn: NetworkConnection; expanded: 
         <span class="nm-filename" title={conn.filePath}>
           {conn.fileName || <span class="nm-unknown">Unknown</span>}
         </span>
+        {blocked && <span class="nm-blocked-badge">Blocked</span>}
         <ScoreBadge score={conn.score} />
+        {canBlock && <BlockToggle blocked={blocked} onClick={() => onToggleBlock!(conn, blocked)} />}
       </div>
       <div class="nm-fields">
         <div class="nm-field">
@@ -84,6 +110,7 @@ function ConnectionRow({ conn, expanded }: { conn: NetworkConnection; expanded: 
 
 export default function NetworkMonitorView() {
   const [connections, setConnections] = useState<NetworkConnection[]>([]);
+  const [rules, setRules] = useState<Rule[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [allExpanded, setAllExpanded] = useState(false);
@@ -91,8 +118,12 @@ export default function NetworkMonitorView() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchNetworkConnections();
-      setConnections(data);
+      const [conns, ruleList] = await Promise.all([
+        fetchNetworkConnections(),
+        isFirewall ? fetchRules() : Promise.resolve([] as Rule[]),
+      ]);
+      setConnections(conns);
+      setRules(ruleList);
     } catch {
       setConnections([]);
     } finally {
@@ -101,6 +132,34 @@ export default function NetworkMonitorView() {
   }, []);
 
   useEffect(() => { load(); }, []);
+
+  // Map of blocked program path (lowercased) → rule, for badge + unblock.
+  const blockedMap = useMemo(() => {
+    const m = new Map<string, Rule>();
+    for (const r of rules) {
+      if (r.type === 'block' && r.path) m.set(r.path.toLowerCase(), r);
+    }
+    return m;
+  }, [rules]);
+
+  const isBlocked = useCallback(
+    (conn: NetworkConnection) => !!conn.filePath && blockedMap.has(conn.filePath.toLowerCase()),
+    [blockedMap]
+  );
+
+  const toggleBlock = useCallback(async (conn: NetworkConnection, blocked: boolean) => {
+    try {
+      if (blocked) {
+        const rule = blockedMap.get(conn.filePath.toLowerCase());
+        if (rule) await removeRule(rule.id);
+      } else {
+        await addBlockRule(conn.filePath);
+      }
+      setRules(await fetchRules());
+    } catch (error) {
+      console.error('Failed to toggle firewall block:', error);
+    }
+  }, [blockedMap]);
 
   const q = search.toLowerCase();
   const filtered = connections.filter(c =>
@@ -157,7 +216,13 @@ export default function NetworkMonitorView() {
           ) : filtered.length === 0 ? (
             <p class="no-history">No connections found</p>
           ) : filtered.map((conn, i) => (
-            <ConnectionRow key={`${conn.pid}-${conn.localAddress}-${conn.remoteAddress}-${i}`} conn={conn} expanded={allExpanded} />
+            <ConnectionRow
+              key={`${conn.pid}-${conn.localAddress}-${conn.remoteAddress}-${i}`}
+              conn={conn}
+              expanded={allExpanded}
+              blocked={isBlocked(conn)}
+              onToggleBlock={isFirewall ? toggleBlock : undefined}
+            />
           ))}
         </div>
       </div>

@@ -15,22 +15,22 @@ namespace XvirusService.Api
             });
 
             // POST /rules/allow — add an allow rule  { "path": "..." }
-            app.MapPost("/rules/allow", (string rulePath, Rules rules) =>
+            app.MapPost("/rules/allow", (RulePathDTO body, Rules rules) =>
             {
-                if (string.IsNullOrWhiteSpace(rulePath))
+                if (string.IsNullOrWhiteSpace(body?.Path))
                     return Results.BadRequest(new ErrorResponseDTO { Error = "Path must not be empty." });
 
-                var rule = rules.AddAllowRule(rulePath);
+                var rule = rules.AddAllowRule(body.Path);
                 return Results.Ok(rule);
             });
 
             // POST /rules/block — add a block rule  { "path": "..." }
-            app.MapPost("/rules/block", (string rulePath, Rules rules) =>
+            app.MapPost("/rules/block", (RulePathDTO body, Rules rules) =>
             {
-                if (string.IsNullOrWhiteSpace(rulePath))
+                if (string.IsNullOrWhiteSpace(body?.Path))
                     return Results.BadRequest(new ErrorResponseDTO { Error = "Path must not be empty." });
 
-                var rule = rules.AddBlockRule(rulePath);
+                var rule = rules.AddBlockRule(body.Path);
                 return Results.Ok(rule);
             });
 

@@ -7,7 +7,7 @@ namespace XvirusService.Services;
 [SupportedOSPlatform("windows")]
 public class WindowsStartupService
 {
-    private const string ServiceName = "XvirusService";
+    private static string ServiceName => Xvirus.AppInfo.ServiceName;
 
     public void Apply(bool startWithWindows)
     {

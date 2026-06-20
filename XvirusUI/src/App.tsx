@@ -7,7 +7,7 @@ import NetworkMonitorView from './views/NetworkMonitorView';
 import AlertView from './views/AlertView';
 import BottomNav from './components/BottomNav';
 import WindowControls from './components/WindowControls';
-import { initializeWindow, onServerEvent } from './services/neutralino';
+import { initializeWindow, onServerEvent, getLaunchScanPath } from './services/neutralino';
 import { ThreatPayload } from './model/ThreatPayload';
 import './styles/app.css';
 import { isFirewall } from './services/env';
@@ -18,6 +18,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState('home');
   const [scanEvents, setScanEvents] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
+  const [scanPath, setScanPath] = useState('C:\\');
   const [alertQueue, setAlertQueue] = useState<ThreatPayload[]>([]);
 
   // Navigate back to home when the alert queue is cleared
@@ -32,6 +33,14 @@ export default function App() {
     fetchSettings().then(data => {
       document.body.classList.toggle('dark', data.appSettings.darkMode);
     }).catch(() => {});
+
+    // Launched from the "Scan with Xvirus" context menu? Scan the passed path.
+    const launchScan = getLaunchScanPath();
+    if (launchScan) {
+      setScanPath(launchScan);
+      setIsScanning(true);
+      setCurrentView('scanning');
+    }
 
     // Load any alerts that arrived before the UI opened
     getPendingAlerts().then(pending => {
@@ -52,6 +61,7 @@ export default function App() {
   }, []);
 
   const handleScanStart = async () => {
+    setScanPath('C:\\');
     setIsScanning(true);
     setScanEvents([]);
     setCurrentView('scanning');
@@ -77,7 +87,7 @@ export default function App() {
       </div>
       <div class="app-content">
         {currentView === 'home' && <HomeView onScanStart={handleScanStart} onOpenNetworkMonitor={() => setCurrentView('network')} pendingAlerts={alertQueue.length} onOpenAlert={() => setCurrentView('alert')} />}
-        {currentView === 'scanning' && <ScanningView onComplete={handleScanComplete} scanEvents={scanEvents} />}
+        {currentView === 'scanning' && <ScanningView onComplete={handleScanComplete} scanEvents={scanEvents} scanPath={scanPath} />}
         {currentView === 'settings' && <SettingsView />}
         {currentView === 'history' && <HistoryView />}
         {currentView === 'network' && <NetworkMonitorView />}

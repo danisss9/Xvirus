@@ -1422,6 +1422,41 @@ body.dark .score-warn {
   color: #e8b530;
 }
 
+/* Firewall block toggle + blocked badge (Network Monitor, firewall product) */
+.nm-block-btn {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.nm-block-btn:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.nm-block-btn.is-blocked {
+  border-color: var(--red);
+  color: var(--red);
+  background: rgba(224, 82, 82, 0.12);
+}
+
+.nm-blocked-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: rgba(224, 82, 82, 0.15);
+  color: var(--red);
+  flex-shrink: 0;
+}
+
 /* custom scrollbar - modern thin style */
 
 /* WebKit browsers */

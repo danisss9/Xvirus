@@ -9,6 +9,14 @@
     <PublishAot>true</PublishAot>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- Which product this build is: antimalware (default) or firewall.
+         Pass /p:ProductMode=firewall to bake the firewall identity into the binary. -->
+    <ProductMode Condition="'$(ProductMode)' == ''">antimalware</ProductMode>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(ProductMode)' == 'firewall'">
+    <DefineConstants>$(DefineConstants);FIREWALL</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

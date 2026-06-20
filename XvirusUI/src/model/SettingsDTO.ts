@@ -14,6 +14,7 @@ export interface SettingsDTO {
   enableSignatures: boolean;
   enableHeuristics: boolean;
   enableAIScan: boolean;
+  enableCloudScan: boolean;
 
   // levels
   heuristicsLevel: number;

@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Xvirus;
+using Xvirus.Model;
 
 namespace XvirusService.Services;
 
@@ -27,6 +28,13 @@ public class RealTimeProtection(
     // Paths already scanned this session — avoids re-scanning the same executable
     private readonly HashSet<string> _scannedPaths = new(StringComparer.OrdinalIgnoreCase);
     private readonly object _scannedLock = new();
+
+    // Behavior protection — classic macro-malware chain: an Office app spawning a
+    // script host / shell. Low false-positive set that runs only when enabled.
+    private static readonly HashSet<string> SuspiciousParents = new(StringComparer.OrdinalIgnoreCase)
+        { "winword", "excel", "powerpnt", "outlook", "msaccess" };
+    private static readonly HashSet<string> SuspiciousChildren = new(StringComparer.OrdinalIgnoreCase)
+        { "powershell", "pwsh", "cmd", "wscript", "cscript", "mshta" };
 
     private ulong _sessionHandle;
     private long _traceHandle = Etw.InvalidHandle;
@@ -194,20 +202,37 @@ public class RealTimeProtection(
             uint pid = *(uint*)record->UserData;
             if (pid == 0) return;
 
-            Task.Run(() => _current?.HandleProcessAsync((int)pid));
+            int parentPid = record->UserDataLength >= 8
+                ? (int)*(uint*)((byte*)record->UserData + 4)
+                : 0;
+
+            Task.Run(() => _current?.HandleProcessAsync((int)pid, parentPid));
         }
         catch { /* must not throw from an unmanaged callback */ }
     }
 
     // -----------------------------------------------------------------------
 
-    private async Task HandleProcessAsync(int pid)
+    private async Task HandleProcessAsync(int pid, int parentPid = 0)
     {
         try
         {
             string? executablePath = ProcessControl.ResolveProcessPath(pid);
             if (string.IsNullOrEmpty(executablePath))
                 return;
+
+            // Behavior protection runs per-launch (before the per-path scan dedup) so a
+            // legitimate-when-run-once binary is still caught in a suspicious chain.
+            if (settings.AppSettings.BehaviorProtection && IsSuspiciousChain(parentPid, executablePath))
+            {
+                Console.WriteLine($"RealTimeProtection: suspicious process chain – '{executablePath}' from parent pid {parentPid}.");
+                var behaviorResult = new ScanResult(1, "Behavior.SuspiciousScriptHost", executablePath);
+                await ProcessControl.HandleThreatAsync(
+                    quarantine, settings.AppSettings, events, alertService,
+                    behaviorResult, pid, executablePath, string.Empty,
+                    "BehaviorProtection");
+                return;
+            }
 
             lock (_scannedLock)
             {
@@ -228,6 +253,25 @@ public class RealTimeProtection(
         catch (Exception ex)
         {
             Console.WriteLine($"RealTimeProtection: error processing pid {pid} – {ex.Message}");
+        }
+    }
+
+    // True when a script host / shell is launched by an Office application.
+    private static bool IsSuspiciousChain(int parentPid, string childPath)
+    {
+        if (parentPid <= 0) return false;
+
+        var child = Path.GetFileNameWithoutExtension(childPath);
+        if (!SuspiciousChildren.Contains(child)) return false;
+
+        try
+        {
+            using var parent = Process.GetProcessById(parentPid);
+            return SuspiciousParents.Contains(parent.ProcessName);
+        }
+        catch
+        {
+            return false; // parent already exited or inaccessible
         }
     }
 

@@ -1,39 +1,60 @@
 import { useState, useEffect } from 'preact/hooks';
+import { onServerEvent } from '../services/neutralino';
 
-export default function ScanningView({ onComplete, scanEvents }: {
+export default function ScanningView({ onComplete, scanPath = 'C:\\' }: {
   onComplete: () => void;
-  scanEvents: any;
+  scanEvents?: any;
+  scanPath?: string;
 }) {
   const [filesScanned, setFilesScanned] = useState(0);
   const [threatsFound, setThreatsFound] = useState(0);
   const [isRunning, setIsRunning] = useState(true);
 
+  // Live progress: the backend streams scan-progress / scan-complete over SSE.
   useEffect(() => {
-    // Start scan with default path
+    const unsub = onServerEvent(event => {
+      if (event.type === 'scan-progress') {
+        setFilesScanned(event.filesScanned);
+        setThreatsFound(event.threatsFound);
+      }
+    });
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    // Start a full scan; the POST resolves only when the scan finishes/cancels.
     const startScan = async () => {
       try {
         const response = await fetch('http://localhost:5236/scan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: 'C:\\' })
+          body: JSON.stringify({ path: scanPath })
         });
         const data = await response.json();
         setFilesScanned(data.filesScanned || 0);
         setThreatsFound(data.threatsFound || 0);
-        setIsRunning(false);
-        onComplete();
       } catch (error) {
         console.error('Scan error:', error);
+      } finally {
         setIsRunning(false);
         onComplete();
       }
     };
 
     startScan();
-  }, [onComplete]);
+  }, [onComplete, scanPath]);
 
-  const handleStop = () => {
+  const handleStop = async () => {
     setIsRunning(false);
+    try {
+      await fetch('http://localhost:5236/scan/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: scanPath })
+      });
+    } catch (error) {
+      console.error('Failed to cancel scan:', error);
+    }
     onComplete();
   };
 

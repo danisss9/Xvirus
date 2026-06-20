@@ -21,11 +21,13 @@ namespace XvirusService.Api
                 }
             });
 
-            app.MapPut("/settings", (SettingsResponseDTO newSettings, SettingsService settingsService, WindowsStartupService startupService) =>
+            app.MapPut("/settings", (SettingsResponseDTO newSettings, SettingsService settingsService, WindowsStartupService startupService, ContextMenuService contextMenuService, SelfDefenseService selfDefenseService) =>
             {
                 try
                 {
                     bool startWithWindowsChanged = settingsService.AppSettings.StartWithWindows != newSettings.AppSettings.StartWithWindows;
+                    bool contextMenuChanged = settingsService.AppSettings.EnableContextMenu != newSettings.AppSettings.EnableContextMenu;
+                    bool selfDefenseChanged = settingsService.AppSettings.SelfDefense != newSettings.AppSettings.SelfDefense;
 
                     Settings.Save(newSettings.Settings);
                     Settings.SaveAppSettings(newSettings.AppSettings);
@@ -33,6 +35,12 @@ namespace XvirusService.Api
 
                     if (startWithWindowsChanged)
                         startupService.Apply(newSettings.AppSettings.StartWithWindows);
+
+                    if (contextMenuChanged)
+                        contextMenuService.Apply(newSettings.AppSettings.EnableContextMenu);
+
+                    if (selfDefenseChanged)
+                        selfDefenseService.Apply(newSettings.AppSettings.SelfDefense);
 
                     return Results.Ok();
                 }

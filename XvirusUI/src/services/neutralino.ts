@@ -3,6 +3,25 @@ import { ThreatPayload } from '../model/ThreatPayload';
 
 // Neutralino injects these globals before the app JS runs
 declare const NL_PATH: string;
+declare const NL_ARGS: string[];
+
+/**
+ * Path passed via the "Scan with Xvirus" context-menu entry (`--scan "<path>"`),
+ * or null when the app was launched normally.
+ */
+export function getLaunchScanPath(): string | null {
+  try {
+    const args = Array.isArray(NL_ARGS) ? NL_ARGS : [];
+    const i = args.indexOf('--scan');
+    if (i !== -1 && i + 1 < args.length) {
+      const p = args[i + 1];
+      if (p && !p.startsWith('--')) return p;
+    }
+  } catch {
+    /* NL_ARGS not available */
+  }
+  return null;
+}
 
 // ---------------------------------------------------------------------------
 // Server-push event types (C# backend → SSE → webview)
@@ -11,7 +30,9 @@ declare const NL_PATH: string;
 export type ServerEventType =
   | { type: 'updating'; message: string }
   | { type: 'update-complete'; message: string }
-  | { type: 'threat'; payload: ThreatPayload };
+  | { type: 'threat'; payload: ThreatPayload }
+  | { type: 'scan-progress'; filesScanned: number; threatsFound: number }
+  | { type: 'scan-complete'; filesScanned: number; threatsFound: number; cancelled: boolean };
 
 type ServerEventHandler = (event: ServerEventType) => void;
 const _serverEventHandlers: ServerEventHandler[] = [];
@@ -93,7 +114,20 @@ async function subscribeToServiceEvents(): Promise<void> {
             /* ignore malformed */
           }
 
-          if (eventType === 'updating') {
+          if (eventType === 'scan-progress') {
+            dispatchServerEvent({
+              type: 'scan-progress',
+              filesScanned: (payload.filesScanned as number) ?? 0,
+              threatsFound: (payload.threatsFound as number) ?? 0,
+            });
+          } else if (eventType === 'scan-complete') {
+            dispatchServerEvent({
+              type: 'scan-complete',
+              filesScanned: (payload.filesScanned as number) ?? 0,
+              threatsFound: (payload.threatsFound as number) ?? 0,
+              cancelled: (payload.cancelled as boolean) ?? false,
+            });
+          } else if (eventType === 'updating') {
             Neutralino.os.showNotification(
               'Xvirus',
               (payload.message as string) || 'Checking for updates…',

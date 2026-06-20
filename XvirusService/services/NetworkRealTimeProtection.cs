@@ -12,7 +12,8 @@ public class NetworkRealTimeProtection(
     Scanner scanner,
     Quarantine quarantine,
     ServerEventService events,
-    ThreatAlertService alertService) : IDisposable
+    ThreatAlertService alertService,
+    Rules rules) : IDisposable
 {
     private CancellationTokenSource? _cts;
     private Task? _monitorTask;
@@ -112,6 +113,14 @@ public class NetworkRealTimeProtection(
                 return;
 
             Console.WriteLine($"NetworkRealTimeProtection: threat on network – '{executablePath}' (score {result.MalwareScore:F2})");
+
+            // Firewall product: cut the program's network access immediately via a
+            // persisted block rule (enforced through netsh) so it can't reconnect.
+            if (settings.IsFirewall)
+            {
+                try { rules.AddBlockRule(executablePath); }
+                catch (Exception ex) { Console.WriteLine($"NetworkRealTimeProtection: failed to block '{executablePath}' – {ex.Message}"); }
+            }
 
             string processName;
             try { processName = Process.GetProcessById(pid).ProcessName; }
