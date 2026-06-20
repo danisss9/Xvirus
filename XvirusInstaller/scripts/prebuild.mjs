@@ -3,6 +3,7 @@ import { copyFileSync, mkdirSync, existsSync, readdirSync, rmSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import rcedit from 'rcedit';
+import { getProduct, fourPartVersion } from './product-info.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const installerRoot = join(__dirname, '..'); // XvirusInstaller/
@@ -10,14 +11,11 @@ const sdkRoot = join(installerRoot, '..'); // XescSDK/
 const resourcesDir = join(installerRoot, 'resources');
 
 const mode = process.argv[2];
-if (mode !== 'am' && mode !== 'fw') {
-  console.error('Usage: node prebuild.mjs [am|fw]');
-  process.exit(1);
-}
+const product = getProduct(mode);
 
-const uiExeName = mode === 'am' ? 'XvirusAM.exe' : 'XvirusFW.exe';
-const uiProductName = mode === 'am' ? 'Xvirus Anti-Malware' : 'Xvirus Firewall';
-const uiVersion = mode === 'am' ? '8.0.0.0' : '5.0.0.0';
+const uiExeName = product.uiExeName;
+const uiProductName = product.name;
+const uiVersion = fourPartVersion(product.version);
 
 function run(cmd, cwd) {
   console.log(`> ${cmd}`);
@@ -32,8 +30,9 @@ run(`npm run prod:${mode}`, join(sdkRoot, 'XvirusUI'));
 console.log('\n── Publishing XvirusService ──');
 const serviceDir = join(sdkRoot, 'XvirusService');
 const servicePublishDir = join(serviceDir, 'bin', 'Publish');
+const productMode = mode === 'fw' ? 'firewall' : 'antimalware';
 run(
-  `dotnet publish XvirusService.csproj /p:PublishProfile=Windows "/p:PublishDir=${servicePublishDir}\\"`,
+  `dotnet publish XvirusService.csproj /p:PublishProfile=Windows /p:ProductMode=${productMode} "/p:PublishDir=${servicePublishDir}\\"`,
   serviceDir,
 );
 
@@ -73,8 +72,8 @@ await rcedit(uiExePath, {
   'version-string': {
     FileDescription: uiProductName,
     ProductName: uiProductName,
-    CompanyName: 'Xvirus',
-    LegalCopyright: '© 2026 Xvirus',
+    CompanyName: product.publisher,
+    LegalCopyright: product.copyright,
   },
   'file-version': uiVersion,
   'product-version': uiVersion,

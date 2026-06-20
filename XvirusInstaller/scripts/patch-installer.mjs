@@ -2,20 +2,14 @@ import { readdirSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import rcedit from 'rcedit';
+import { getProduct, fourPartVersion } from './product-info.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const installerRoot = join(__dirname, '..');
 
 const mode = process.argv[2];
-if (mode !== 'am' && mode !== 'fw') {
-  console.error('Usage: node patch-installer.mjs [am|fw]');
-  process.exit(1);
-}
-
-const info = {
-  am: { description: 'Xvirus Anti-Malware Setup', version: '8.0.0.0' },
-  fw: { description: 'Xvirus Firewall Setup', version: '5.0.0.0' },
-}[mode];
+const product = getProduct(mode);
+const info = { description: product.setupDescription, version: fourPartVersion(product.version) };
 
 const distRoot = join(installerRoot, 'dist');
 const distFolders = readdirSync(distRoot);
@@ -38,8 +32,8 @@ await rcedit(exePath, {
   'version-string': {
     FileDescription: info.description,
     ProductName: info.description,
-    CompanyName: 'Xvirus',
-    LegalCopyright: '© 2026 Xvirus',
+    CompanyName: product.publisher,
+    LegalCopyright: product.copyright,
   },
   'file-version': info.version,
   'product-version': info.version,

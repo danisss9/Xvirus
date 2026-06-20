@@ -2,15 +2,11 @@ import { execSync } from 'child_process';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { getProduct } from './product-info.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(__dirname, '..');
 const mode = process.argv[2] || 'am';
-
-if (mode !== 'am' && mode !== 'fw') {
-  console.error('Invalid mode. Use: node build-resources.mjs [am|fw]');
-  process.exit(1);
-}
 
 const resourcesDir = join(projectRoot, 'resources');
 const generatedDir = join(projectRoot, 'src', 'generated');
@@ -21,31 +17,8 @@ if (!existsSync(generatedDir)) {
   mkdirSync(generatedDir, { recursive: true });
 }
 
-// Product info based on mode
-const productInfo = {
-  am: {
-    mode: 'am',
-    name: 'Xvirus Anti-Malware',
-    installFolder: 'Xvirus Anti-Malware',
-    uiExeName: 'XvirusAM.exe',
-    serviceName: 'XvirusAntiMalwareService',
-    serviceDescription: 'Xvirus Anti-Malware Protection Service',
-    version: '8.0.0',
-    publisher: 'Xvirus',
-  },
-  fw: {
-    mode: 'fw',
-    name: 'Xvirus Firewall',
-    installFolder: 'Xvirus Firewall',
-    uiExeName: 'XvirusFW.exe',
-    serviceName: 'XvirusFirewallService',
-    serviceDescription: 'Xvirus Firewall Protection Service',
-    version: '5.0.0',
-    publisher: 'Xvirus',
-  },
-};
-
-const product = productInfo[mode];
+// Product info based on mode (single source of truth: product-info.mjs)
+const product = getProduct(mode);
 
 console.log(`Building installer for: ${product.name}`);
 

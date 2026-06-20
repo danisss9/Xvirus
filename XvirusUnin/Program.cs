@@ -113,6 +113,14 @@ internal class Program
             Console.WriteLine("Removing shortcuts...");
             DeleteShortcuts(config);
 
+            // Remove the "Scan with Xvirus" context-menu entry
+            Console.WriteLine("Removing context-menu entry...");
+            RemoveContextMenu();
+
+            // Remove any firewall block rules this product created
+            Console.WriteLine("Removing firewall rules...");
+            RemoveFirewallRules();
+
             // Schedule folder and self-deletion
             Console.WriteLine("Scheduling cleanup...");
             ScheduleSelfDeletion(config);
@@ -229,6 +237,25 @@ internal class Program
         {
             Console.WriteLine($"Warning: Could not remove shortcuts: {ex.Message}");
         }
+    }
+
+    [SupportedOSPlatform("windows")]
+    static void RemoveContextMenu()
+    {
+        foreach (var scope in new[] { "*", "Directory" })
+        {
+            try { Registry.ClassesRoot.DeleteSubKeyTree($@"{scope}\shell\XvirusScan", throwOnMissingSubKey: false); }
+            catch (Exception ex) { Console.WriteLine($"Warning: Could not remove context-menu entry ({scope}): {ex.Message}"); }
+        }
+    }
+
+    static void RemoveFirewallRules()
+    {
+        // Block rules are named Xvirus_Block_* (firewall product). Best-effort wildcard removal.
+        RunCommand(
+            "powershell.exe",
+            "-NoProfile -Command \"Get-NetFirewallRule -DisplayName 'Xvirus_Block_*' -ErrorAction SilentlyContinue | Remove-NetFirewallRule -ErrorAction SilentlyContinue\"",
+            ignoreErrors: true);
     }
 
     static void ScheduleSelfDeletion(ProductConfig config)
