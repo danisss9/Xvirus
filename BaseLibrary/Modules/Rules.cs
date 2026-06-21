@@ -92,7 +92,12 @@ namespace Xvirus
             }
         }
 
-        /// <summary>Re-applies every block rule to the OS firewall (firewall product only).</summary>
+        /// <summary>
+        /// Re-applies every block rule to the OS firewall and reconciles stale netsh
+        /// state (firewall product only). Drops <c>Xvirus_Block_*</c> netsh rules that no
+        /// longer correspond to a stored block rule, and re-adds stored block rules whose
+        /// netsh enforcement is missing.
+        /// </summary>
         public void SyncEnforcement()
         {
             if (!AppInfo.IsFirewall) return;
@@ -108,8 +113,48 @@ namespace Xvirus
                 rwl.ReleaseReaderLock();
             }
 
+            // Expected rule names for every stored block rule.
+            var expected = new Dictionary<string, string>(StringComparer.Ordinal); // name -> path
             foreach (var rule in blockRules)
-                ApplyEnforcement(rule);
+            {
+                if (!string.IsNullOrWhiteSpace(rule.Path))
+                    expected[Firewall.RuleNameFor(rule.Path)] = rule.Path;
+            }
+
+            // Existing Xvirus_Block_* rules in Windows Firewall.
+            List<string> existing;
+            try { existing = Firewall.ListBlockedRules(); }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+                existing = new List<string>();
+            }
+
+            var existingSet = new HashSet<string>(existing, StringComparer.Ordinal);
+
+            // Drop orphans: netsh rules with no matching stored block rule.
+            foreach (var name in existing)
+            {
+                if (expected.ContainsKey(name)) continue;
+                try
+                {
+                    if (Firewall.DeleteRuleByName(name))
+                        Logger.LogHistory("firewall", $"Reconciled orphan firewall rule '{name}' (removed).");
+                }
+                catch (Exception ex) { Logger.LogException(ex); }
+            }
+
+            // Re-add missing: stored block rules with no netsh enforcement.
+            foreach (var (name, path) in expected)
+            {
+                if (existingSet.Contains(name)) continue;
+                try
+                {
+                    Firewall.BlockProgram(path);
+                    Logger.LogHistory("firewall", $"Reconciled missing firewall block for '{path}' (rule {name} re-added).");
+                }
+                catch (Exception ex) { Logger.LogException(ex); }
+            }
         }
 
         // Applies (or lifts) OS-level firewall enforcement for a single rule. No-op for

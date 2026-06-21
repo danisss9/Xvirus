@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Xvirus
 {
@@ -59,9 +60,38 @@ namespace Xvirus
             return removed;
         }
 
+        /// <summary>
+        /// Enumerates every <c>Xvirus_Block_*</c> firewall rule currently registered in
+        /// Windows Firewall (both inbound and outbound). Names are deduplicated — a single
+        /// program block produces two netsh rules (in/out) sharing one name. Returns an
+        /// empty list on non-Windows platforms or when no rules exist.
+        /// </summary>
+        public static List<string> ListBlockedRules()
+        {
+            var result = new List<string>();
+            if (!IsSupported) return result;
+
+            string? output = RunNetshCapture("advfirewall", "firewall", "show", "rule", "name=all");
+            if (string.IsNullOrEmpty(output)) return result;
+
+            // We control the rule names (Xvirus_Block_<16 hex>), so scan the whole output
+            // for that pattern rather than relying on localized "Rule Name:" labels.
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            foreach (Match m in BlockRuleNameRegex.Matches(output))
+            {
+                if (seen.Add(m.Value))
+                    result.Add(m.Value);
+            }
+            return result;
+        }
+
         // -------------------------------------------------------------------
 
-        private static bool DeleteRuleByName(string name)
+        private static readonly Regex BlockRuleNameRegex =
+            new(RulePrefix + "[0-9A-F]{16}", RegexOptions.Compiled);
+
+        /// <summary>Deletes every netsh rule with the given name (both directions).</summary>
+        public static bool DeleteRuleByName(string name)
         {
             // Returns false when no rule existed; netsh exits non-zero ("No rules match").
             return RunNetsh("advfirewall", "firewall", "delete", "rule", $"name={name}");
@@ -71,15 +101,7 @@ namespace Xvirus
         {
             try
             {
-                var psi = new ProcessStartInfo("netsh")
-                {
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                };
-                foreach (var a in args) psi.ArgumentList.Add(a);
-
+                var psi = BuildNetshStartInfo(args);
                 using var proc = Process.Start(psi);
                 if (proc == null) return false;
 
@@ -93,6 +115,40 @@ namespace Xvirus
                 Logger.LogException(ex);
                 return false;
             }
+        }
+
+        /// <summary>Runs netsh and captures stdout (used for rule enumeration).</summary>
+        private static string? RunNetshCapture(params string[] args)
+        {
+            try
+            {
+                var psi = BuildNetshStartInfo(args);
+                using var proc = Process.Start(psi);
+                if (proc == null) return null;
+
+                string stdout = proc.StandardOutput.ReadToEnd();
+                proc.StandardError.ReadToEnd();
+                proc.WaitForExit(30000);
+                return proc.HasExited ? stdout : null;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+                return null;
+            }
+        }
+
+        private static ProcessStartInfo BuildNetshStartInfo(string[] args)
+        {
+            var psi = new ProcessStartInfo("netsh")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+            foreach (var a in args) psi.ArgumentList.Add(a);
+            return psi;
         }
     }
 }
