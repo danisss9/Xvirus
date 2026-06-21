@@ -177,27 +177,27 @@ namespace Xvirus
                     if (isExecutable && database.heurListPatterns != null && (settings.MaxHeuristicsPeScanLength == null || fileInfo.Length <= settings.MaxHeuristicsPeScanLength))
                     {
                         using var stream = Utils.ReadFile(filePath, fileInfo.Length);
-                        var matches = database.heurListPatterns.Search(stream, ct);
+                        var matches = database.heurListPatterns.Search(stream, ct).ToList();
+                        var matchesKeys = matches.ToHashSet();
                         int score = 0;
                         foreach (var match in matches)
                         {
-                            if (database.heurListDeps.TryGetValue(match.Key, out var matchDeps))
+                            if (database.heurListDeps.TryGetValue(match, out var matchDeps))
                             {
-                                var matchesKeys = matches.Select(m => m.Key).ToHashSet();
                                 if (matchDeps.All(dep => dep[0] == '!' ? !matchesKeys.Contains(dep.Substring(1)) : matchesKeys.Contains(dep)))
                                 {
-                                    var nameDeps = database.heurList[match.Key];
+                                    var nameDeps = database.heurList[match];
                                     return new ScanResult(1, nameDeps, filePath);
                                 }
                             }
 
                             if (score < (5 - settings.HeuristicsLevel))
                             {
-                                score += match.Key.StartsWith("Suspicious:") ? 1 : 2;
+                                score += match.StartsWith("Suspicious:") ? 1 : 2;
                                 continue;
                             }
 
-                            if (database.heurList.TryGetValue(match.Key, out var name))
+                            if (database.heurList.TryGetValue(match, out var name))
                             {
                                 return new ScanResult(1, name, filePath);
                             }
@@ -206,27 +206,27 @@ namespace Xvirus
                     else if (!isExecutable && database.heurScriptListPatterns != null && (settings.MaxHeuristicsOthersScanLength == null || fileInfo.Length <= settings.MaxHeuristicsOthersScanLength)) // 10MBs
                     {
                         using var stream = Utils.ReadFile(filePath, fileInfo.Length);
-                        var matches = database.heurScriptListPatterns.Search(stream, ct);
+                        var matches = database.heurScriptListPatterns.Search(stream, ct).ToList();
+                        var matchesKeys = matches.ToHashSet();
                         int score = 0;
                         foreach (var match in matches)
                         {
-                            if (database.heurScriptListDeps.TryGetValue(match.Key, out var matchDeps))
+                            if (database.heurScriptListDeps.TryGetValue(match, out var matchDeps))
                             {
-                                var matchesKeys = matches.Select(m => m.Key).ToHashSet();
                                 if (matchDeps.All(dep => dep[0] == '!' ? !matchesKeys.Contains(dep.Substring(1)) : matchesKeys.Contains(dep)))
                                 {
-                                    var nameDeps = database.heurScriptList[match.Key];
+                                    var nameDeps = database.heurScriptList[match];
                                     return new ScanResult(1, nameDeps, filePath);
                                 }
                             }
 
                             if (score < (5 - settings.HeuristicsLevel))
                             {
-                                score += match.Key.StartsWith("Suspicious:") ? 1 : 2;
+                                score += match.StartsWith("Suspicious:") ? 1 : 2;
                                 continue;
                             }
 
-                            if (database.heurScriptList.TryGetValue(match.Key, out var name))
+                            if (database.heurScriptList.TryGetValue(match, out var name))
                             {
                                 return new ScanResult(1, name, filePath);
                             }

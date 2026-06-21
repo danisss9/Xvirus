@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace AhoCorasick.Net
@@ -29,32 +30,12 @@ namespace AhoCorasick.Net
         public bool Contains(string text)
         {
             var currentNode = _rootNode;
-
             var length = text.Length;
             for (var i = 0; i < length; i++)
             {
-                while (true)
-                {
-                    var node = currentNode.GetNode(text[i]);
-                    if (node == null)
-                    {
-                        currentNode = currentNode.Failure;
-                        if (currentNode == _rootNode)
-                        {
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        if (node.IsFinished)
-                        {
-                            return true;
-                        }
-
-                        currentNode = node;
-                        break;
-                    }
-                }
+                currentNode = Advance(currentNode, text[i], out var finished);
+                if (finished)
+                    return true;
             }
 
             return false;
@@ -63,84 +44,100 @@ namespace AhoCorasick.Net
         public bool Contains(FileStream stream)
         {
             var currentNode = _rootNode;
-            var length = stream.Length;
-            using var reader = new BinaryReader(stream);
-            for (var i = 0; i < length; i++)
+            // Reusable 64 KB buffer — the automaton walks hex characters (2 per byte), so this
+            // feeds 131072 hex chars per read instead of formatting one byte at a time (which
+            // allocated a string and a byte[] for every single byte in the file). The stream is
+            // owned by the caller, so it is read directly and left open.
+            var buffer = new byte[65536];
+            int read;
+            while ((read = stream.Read(buffer, 0, buffer.Length)) > 0)
             {
-                var current = BitConverter.ToString(reader.ReadBytes(1));
-                for (var j = 0; j < current.Length; j++)
+                for (var i = 0; i < read; i++)
                 {
-                    while (true)
-                    {
-                        var node = currentNode.GetNode(current[j]);
-                        if (node == null)
-                        {
-                            currentNode = currentNode.Failure;
-                            if (currentNode == _rootNode)
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            if (node.IsFinished)
-                            {
-                                return true;
-                            }
-
-                            currentNode = node;
-                            break;
-                        }
-                    }
+                    ByteToHexChars(buffer[i], out var hi, out var lo);
+                    currentNode = Advance(currentNode, hi, out var finishedHi);
+                    if (finishedHi) return true;
+                    currentNode = Advance(currentNode, lo, out var finishedLo);
+                    if (finishedLo) return true;
                 }
-                }
+            }
 
             return false;
         }
 
-
-        // todo copy paste from Contains method: Refactor!
-        // todo check performance 
-        public IEnumerable<KeyValuePair<string, int>> Search(FileStream stream, CancellationToken ct = default)
+        public IEnumerable<string> Search(FileStream stream, CancellationToken ct = default)
         {
             var currentNode = _rootNode;
-            var length = stream.Length;
-            using var reader = new BinaryReader(stream);
-            for (var i = 0; i < length; i++)
+            // The stream is owned by the caller, so it is read directly (64 KB at a time) and left open.
+            var buffer = new byte[65536];
+            int read;
+            while ((read = stream.Read(buffer, 0, buffer.Length)) > 0)
             {
-                if ((i & 0xFFFF) == 0)
-                    ct.ThrowIfCancellationRequested();
+                ct.ThrowIfCancellationRequested();
 
-                var current = BitConverter.ToString(reader.ReadBytes(1));
-                for (var j = 0; j < current.Length; j++)
+                for (var i = 0; i < read; i++)
                 {
-                    while (true)
-                    {
-                        var node = currentNode.GetNode(current[j]);
-                        if (node == null)
-                        {
-                            currentNode = currentNode.Failure;
-                            if (currentNode == _rootNode)
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            if (node.IsFinished)
-                            {
-                                foreach (var result in node.Results)
-                                {
-                                    yield return new KeyValuePair<string, int>(result, i - result.Length + 1);
-                                }
-                            }
-
-                            currentNode = node;
-                            break;
-                        }
-                    }
+                    ByteToHexChars(buffer[i], out var hi, out var lo);
+                    currentNode = Advance(currentNode, hi, out var finishedHi);
+                    if (finishedHi)
+                        foreach (var result in currentNode.Results)
+                            yield return result;
+                    currentNode = Advance(currentNode, lo, out var finishedLo);
+                    if (finishedLo)
+                        foreach (var result in currentNode.Results)
+                            yield return result;
                 }
             }
+        }
+
+        /// <summary>
+        /// Walks the automaton one character from <paramref name="current"/>. When the
+        /// destination node is a finished pattern, <paramref name="finished"/> is set to
+        /// <c>true</c> and the node is returned so the caller can read its <c>Results</c>.
+        /// Shared by <see cref="Contains(string)"/>, <see cref="Contains(FileStream)"/>,
+        /// and <see cref="Search(FileStream, CancellationToken)"/>.
+        /// </summary>
+        private AhoCorasickTreeNode Advance(AhoCorasickTreeNode current, char c, out bool finished)
+        {
+            while (true)
+            {
+                var node = current.GetNode(c);
+                if (node != null)
+                {
+                    finished = node.IsFinished;
+                    return node;
+                }
+
+                // No transition for c. Unwind the failure chain and retry — crucially this must
+                // include retrying at the root, otherwise a pattern that begins at this very
+                // character is dropped (e.g. patterns {AB, CD} would miss "CD" in "ABCD"). Only
+                // give up (consume c, stay at root) once we are at the root with no child for c.
+                if (current == _rootNode)
+                {
+                    finished = false;
+                    return _rootNode;
+                }
+
+                current = current.Failure;
+            }
+        }
+
+        /// <summary>
+        /// Converts a byte to two uppercase hex characters without allocating a string.
+        /// Replaces <c>BitConverter.ToString(reader.ReadBytes(1))</c> which allocated a
+        /// <c>byte[]</c> and a <c>string</c> per byte.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void ByteToHexChars(byte b, out char hi, out char lo)
+        {
+            hi = HexChar(b >> 4);
+            lo = HexChar(b & 0x0F);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static char HexChar(int nibble)
+        {
+            return (char)(nibble < 10 ? '0' + nibble : 'A' + nibble - 10);
         }
 
         private void AddPatternToTree(string pattern)

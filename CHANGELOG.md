@@ -28,6 +28,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   as Safe before the expensive hash computation and database lookups. Archives are exempt when
   `EnableArchiveScan` is on, since they may contain executables worth scanning. Default: _false_.
 
+### Changed
+
+- Refactored the Aho-Corasick heuristics engine (`Aho.cs`). The automaton-walking loop that was
+  copy-pasted across `Contains(string)`, `Contains(FileStream)`, and `Search(FileStream)` is now
+  a single shared `Advance` helper, eliminating the duplication flagged by the two `// todo`
+  markers. The `FileStream` overloads were also optimized: instead of calling
+  `reader.ReadBytes(1)` + `BitConverter.ToString()` for every single byte (allocating a `byte[]`
+  and a `string` per byte), they now read in 64 KB chunks and convert bytes to hex characters
+  in-place via a zero-allocation `ByteToHexChars` helper. This removes per-byte GC pressure and
+  reduces I/O syscalls by ~65000× on large files. Both methods are annotated with
+  `[MethodImpl(AggressiveInlining)]` and remain AOT-safe.
+
 ## [5.1.2]
 
 ### Added

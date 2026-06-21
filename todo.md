@@ -15,7 +15,7 @@ features; Phase 4 hardens and exposes everything.
 - [x] 3. **Stale firewall-rule reconciliation** — extend `Rules.SyncEnforcement` to enumerate
      `Xvirus_Block_*` netsh rules, drop orphans, re-add missing; add `Firewall.ListBlockedRules`
      using `netsh advfirewall firewall show rule name=all` parsing. _parallel_
-- [ ] 4. **Refactor `Aho.cs`** — resolve the two `// todo` markers (copy-paste dedup, perf
+- [x] 4. **Refactor `Aho.cs`** — resolve the two `// todo` markers (copy-paste dedup, perf
      check). _parallel_
 - [ ] 5. **Flip `BehaviorProtection` default to `true`** in `AppSettingsDTO` after verifying
      the Office→script false-positive rate. _depends on Phase 4 verification_
