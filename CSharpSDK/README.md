@@ -114,7 +114,7 @@ Settings are located in the `settings.json` file in the SDK root folder. Availab
 - **EnableHeuristics** - Enables heuristics scanning of files. Default: _true_
 - **EnableAIScan** - Enables XvirusAI scan engine. Default: _true_
 - **EnableCloudScan** - Enables cloud reputation hash lookups after local engines. Lookups are fail-open: network errors do not block scanning. Default: _false_
-- **OnlyScanExecutables** - When enabled, non-executable files are short-circuited as Safe before hash computation and database lookups. Archives are exempt when `EnableArchiveScan` is on. Default: _true_
+- **OnlyScanExecutables** - When enabled, non-executable files are short-circuited as Safe before hash computation and database lookups. Archives are exempt when `EnableArchiveScan` is on. Default: _false_
 
 ### Scan Levels
 
@@ -124,7 +124,8 @@ Settings are located in the `settings.json` file in the SDK root folder. Availab
 ### File Size Limits
 
 - **MaxScanLength** - Maximum file size to be scanned in bytes. `null` = no limit. Default: _null_
-- **MaxHeuristicsPeScanLength** - Maximum PE file size for heuristics scanning in bytes. `null` = no limit. Default: _20971520_ (20 MB)
+- **
+  ScanLength** - Maximum PE file size for heuristics scanning in bytes. `null` = no limit. Default: _20971520_ (20 MB)
 - **MaxHeuristicsOthersScanLength** - Maximum non-PE file size for heuristics scanning in bytes. `null` = no limit. Default: _10485760_ (10 MB)
 - **MaxAIScanLength** - Maximum file size for AI scanning in bytes. `null` = no limit. Default: _20971520_ (20 MB)
 
@@ -152,7 +153,7 @@ Example `settings.json`:
   "EnableHeuristics": true,
   "EnableAIScan": true,
   "EnableCloudScan": false,
-  "OnlyScanExecutables": true,
+  "OnlyScanExecutables": false,
   "HeuristicsLevel": 4,
   "AILevel": 10,
   "MaxScanLength": null,

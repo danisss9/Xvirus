@@ -12,6 +12,7 @@ export default function SettingsView() {
     enableHeuristics: true,
     enableAIScan: true,
     enableCloudScan: false,
+    onlyScanExecutables: false,
     heuristicsLevel: 4,
     aiLevel: 10,
     maxScanLength: null,
@@ -29,7 +30,6 @@ export default function SettingsView() {
     startWithWindows: true,
     enableContextMenu: false,
     enableLogs: false,
-    onlyScanExecutables: true,
     autoQuarantine: false,
     scheduledScan: 'off',
     realTimeProtection: true,
@@ -290,8 +290,8 @@ export default function SettingsView() {
                 <input
                   type="checkbox"
                   class="toggle-switch"
-                  checked={appSettings.onlyScanExecutables}
-                  onChange={(e: any) => { handleAppSettingChange('onlyScanExecutables', e.currentTarget.checked); saveAllSettings(); }}
+                  checked={settings.onlyScanExecutables}
+                  onChange={(e: any) => { handleSettingChange('onlyScanExecutables', e.currentTarget.checked); saveAllSettings(); }}
                 />
               </div>
 

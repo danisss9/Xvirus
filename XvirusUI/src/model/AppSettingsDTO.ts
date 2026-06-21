@@ -9,7 +9,6 @@ export interface AppSettingsDTO {
   enableLogs: boolean;
 
   // scan extras
-  onlyScanExecutables: boolean;
   autoQuarantine: boolean;
   scheduledScan: 'off' | 'daily' | 'weekly' | 'monthly';
 

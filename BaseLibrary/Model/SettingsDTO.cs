@@ -11,7 +11,7 @@ namespace Xvirus.Model
         public bool EnableCloudScan { get; set; } = false;
 
         // Scan Filters
-        public bool OnlyScanExecutables { get; set; } = true;
+        public bool OnlyScanExecutables { get; set; } = false;
 
         // Scan Levels
         public int HeuristicsLevel { get; set; } = 4; // From 1 to 5, higher is more agressive

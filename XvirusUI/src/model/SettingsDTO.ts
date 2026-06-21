@@ -16,6 +16,9 @@ export interface SettingsDTO {
   enableAIScan: boolean;
   enableCloudScan: boolean;
 
+  // scan filters
+  onlyScanExecutables: boolean;
+
   // levels
   heuristicsLevel: number;
   aiLevel: number;

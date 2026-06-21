@@ -164,7 +164,7 @@ Settings are read from the `settings.json` file in the SDK base folder. Availabl
 - **EnableHeuristics** — Enables heuristics scanning. Default: _true_
 - **EnableAIScan** — Enables the XvirusAI scan engine. Default: _true_
 - **EnableCloudScan** — Enables cloud reputation hash lookups after local engines. Lookups are fail-open: network errors do not block scanning. Default: _false_
-- **OnlyScanExecutables** — When enabled, non-executable files are short-circuited as Safe before hash computation and database lookups. Archives are exempt when `EnableArchiveScan` is on. Default: _true_
+- **OnlyScanExecutables** — When enabled, non-executable files are short-circuited as Safe before hash computation and database lookups. Archives are exempt when `EnableArchiveScan` is on. Default: _false_
 
 ### Scan Levels
 
@@ -202,7 +202,7 @@ Example `settings.json`:
   "EnableHeuristics": true,
   "EnableAIScan": true,
   "EnableCloudScan": false,
-  "OnlyScanExecutables": true,
+  "OnlyScanExecutables": false,
   "HeuristicsLevel": 4,
   "AILevel": 10,
   "MaxScanLength": null,
