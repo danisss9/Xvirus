@@ -55,11 +55,11 @@ features; Phase 4 hardens and exposes everything.
 
 ## Phase 4 — Cross-Cutting & Verification
 
-- [ ] 16. **Self-defense hardening (userland)** — extend `SelfDefenseService` with `icacls`
+- [x] 16. **Self-defense hardening (userland)** — extend `SelfDefenseService` with `icacls`
       ACLs on binary/config/quarantine and restricted service-stop perms. _parallel with 2/3_
-- [ ] 17. **UI surfaces** — Settings toggles for `EnableArchiveScan`/`EnableYara`/
-      `ScheduledScanPath`/`FirewallProfile` and IP/domain block controls in
-      `NetworkMonitorView.tsx`/`SettingsView.tsx`. _depends on backend steps_
+- [-] 17. **UI surfaces** — Settings toggles for `EnableArchiveScan`/`EnableYara`/
+  `ScheduledScanPath`/`FirewallProfile` and IP/domain block controls in
+  `NetworkMonitorView.tsx`/`SettingsView.tsx`. _depends on backend steps_
 - [-] 18. **SDK/CLI exposure** — new settings and block-by-IP/port in `CSharpSDK`/`NativeSDK`/
   `NodeSDK`/`XvirusCLI`. _depends on backend steps_
 

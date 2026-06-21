@@ -101,6 +101,13 @@ internal class Program
             Console.WriteLine($"Stopping {config.ProductName} application...");
             KillUiProcess(config);
 
+            // Undo self-defense hardening (service SDDL, failure actions, ACLs) so the
+            // service can be stopped/deleted and the install folder can be removed. The
+            // hardened quarantine ACL has an explicit Users:(DE,DC) deny that would
+            // otherwise block the cleanup rmdir for any admin who is also a User.
+            Console.WriteLine("Releasing self-defense hardening...");
+            UndoSelfDefense(config);
+
             // Stop and delete Windows Service
             Console.WriteLine("Stopping and removing Windows Service...");
             StopAndDeleteService(config);
@@ -172,6 +179,47 @@ internal class Program
         {
             Console.WriteLine($"Warning: Could not terminate UI process: {ex.Message}");
         }
+    }
+
+    static void UndoSelfDefense(ProductConfig config)
+    {
+        // 1. Restore the default (permissive) service security descriptor so that sc stop
+        //    works reliably even if the hardened SDDL had restricted it.
+        var defaultSddl =
+            "D:(A;;CCLCSWRPWPDTLOCRRC;;;SY)" +
+            "(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)" +
+            "(A;;CCLCSWLOCRRC;;;IU)" +
+            "(A;;CCLCSWLOCRRC;;;SU)" +
+            "(A;;CCLCSWRPWPDTLOCRRC;;;S-1-5-32-547)";
+        RunCommand("sc.exe", $"sdset {config.ServiceName} \"{defaultSddl}\"", ignoreErrors: true);
+
+        // 2. Clear the failure-recovery actions.
+        RunCommand("sc.exe", $"failure {config.ServiceName} reset= 0 actions= \"\"", ignoreErrors: true);
+
+        // 3. Reset ACLs on the binary directory, config files, and quarantine folder so
+        //    the cleanup rmdir can delete them. The uninstaller runs from the install
+        //    folder, so AppContext.BaseDirectory is the service binary directory.
+        var baseDir = AppContext.BaseDirectory.TrimEnd('\\', '/');
+
+        ResetAcl(baseDir);
+
+        foreach (var configFile in new[] { "settings.json", "appsettings.json", "appsettings.Development.json" })
+        {
+            var path = Path.Combine(baseDir, configFile);
+            if (File.Exists(path))
+                ResetAcl(path);
+        }
+
+        var quarantineDir = Path.Combine(baseDir, "Quarantine");
+        if (Directory.Exists(quarantineDir))
+            ResetAcl(quarantineDir);
+    }
+
+    static void ResetAcl(string path)
+    {
+        // /reset restores inheritable defaults from the parent; /q silences output.
+        // /c continues on errors so a single locked file doesn't abort the reset.
+        RunCommand("icacls.exe", $"\"{path}\" /reset /q /c", ignoreErrors: true);
     }
 
     static void StopAndDeleteService(ProductConfig config)
