@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [5.1.3]
+
+### Added
+
+- Cloud reputation scanner, gated by the new `SettingsDTO.EnableCloudScan` flag (off by default).
+  After local engines (signatures, heuristics, AI) fail to reach a verdict, the engine queries the
+  Xvirus cloud (`cloud.xvirus.net/api/reputation`) with the file's MD5 hash and returns
+  `Cloud.Suspicious` when the cloud flags it as malware or `Safe` when explicitly clean. The
+  lookup is fail-open with a 4-second timeout: any network error, offline state, or unknown hash
+  returns `null` and local scanning continues uninterrupted — no file content is ever uploaded,
+  only the hash. Documented in all SDK and CLI READMEs.
+- Archive unpacking in the scan engine, gated by the new `SettingsDTO.EnableArchiveScan` flag
+  (off by default). When enabled, the engine extracts zip-based archives (`.zip`, `.jar`, `.war`,
+  `.ear`, `.apk`, `.xpi`, `.nupkg`, `.whl`, `.egg`) to a temp directory and recursively scans each
+  entry. New configurable guards: `MaxArchiveDepth` (default 3), `MaxArchiveTotalSize`
+  (default 100 MB), and `MaxArchiveFileCount` (default 1000). Zip-slip / zip-bomb attempts are
+  detected and reported as `Suspicious.ArchiveBomb`. A malware hit on an inner entry is reported
+  against the outer archive path so quarantine targets the archive. rar/7z support is pending a
+  SharpCompress license check.
+
 ## [5.1.2]
 
 ### Added

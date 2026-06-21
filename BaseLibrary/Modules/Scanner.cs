@@ -94,6 +94,16 @@ namespace Xvirus
 
         public ScanResult ScanFile(string filePath, CancellationToken ct)
         {
+            return ScanFileInternal(filePath, ct, 0);
+        }
+
+        /// <summary>
+        /// Single-file scan with optional recursive archive unpacking. <paramref name="archiveDepth"/>
+        /// tracks how many archive layers we have descended through so nested archives cannot
+        /// recurse unbounded.
+        /// </summary>
+        private ScanResult ScanFileInternal(string filePath, CancellationToken ct, int archiveDepth)
+        {
             ct.ThrowIfCancellationRequested();
 
             var fileInfo = new FileInfo(filePath);
@@ -238,7 +248,103 @@ namespace Xvirus
                     if (cloudVerdict == false) return new ScanResult(0, "Safe", filePath);
                 }
             }
+
+            // The archive itself was not flagged by any engine; if archive scanning is enabled,
+            // descend into it (depth-guarded) and scan every extracted entry. A malware hit on an
+            // inner entry is reported against the outer archive path so callers quarantine the
+            // archive, not the temp-extracted copy.
+            if (settings.EnableArchiveScan && ArchiveExtractor.IsArchive(filePath))
+            {
+                var archiveResult = ScanArchiveContents(filePath, ct, archiveDepth);
+                if (archiveResult != null)
+                    return archiveResult;
+            }
+
             return new ScanResult(0, "Safe", filePath);
+        }
+
+        /// <summary>
+        /// Extracts <paramref name="archivePath"/> to a temp directory and scans each entry via
+        /// <see cref="ScanFileInternal"/> with an incremented depth. Returns <c>null</c> when no
+        /// inner entry is malicious (so the caller reports the archive as Safe), or a malware
+        /// <see cref="ScanResult"/> when one is. Returns a "Suspicious.ArchiveBomb" verdict when
+        /// the archive trips the depth/size/count guards.
+        /// </summary>
+        private ScanResult? ScanArchiveContents(string archivePath, CancellationToken ct, int archiveDepth)
+        {
+            int maxDepth = settings.MaxArchiveDepth ?? ArchiveExtractor.DefaultMaxDepth;
+            if (archiveDepth >= maxDepth)
+                return null;
+
+            var limits = new ArchiveExtractor.ArchiveLimits(
+                maxDepth,
+                (long)(settings.MaxArchiveTotalSize ?? ArchiveExtractor.DefaultMaxTotalSize),
+                settings.MaxArchiveFileCount ?? ArchiveExtractor.DefaultMaxFileCount);
+
+            string tempDir;
+            try
+            {
+                tempDir = Path.Combine(Path.GetTempPath(), "xvirus-archive-" + Guid.NewGuid().ToString("N"));
+                Directory.CreateDirectory(tempDir);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+                return null;
+            }
+
+            try
+            {
+                List<string> extracted;
+                try
+                {
+                    extracted = ArchiveExtractor.Extract(archivePath, tempDir, limits, ct);
+                }
+                catch (ArchiveExtractor.ArchiveBombException)
+                {
+                    return new ScanResult(1, "Suspicious.ArchiveBomb", archivePath);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    // Corrupt or unsupported archive — log and treat the archive as non-malicious.
+                    Logger.LogException(ex);
+                    return null;
+                }
+
+                foreach (var innerPath in extracted)
+                {
+                    ct.ThrowIfCancellationRequested();
+                    try
+                    {
+                        var innerResult = ScanFileInternal(innerPath, ct, archiveDepth + 1);
+                        if (innerResult.IsMalware)
+                        {
+                            return new ScanResult(
+                                innerResult.MalwareScore,
+                                $"{innerResult.Name} (in {Path.GetFileName(archivePath)})",
+                                archivePath);
+                        }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogException(ex);
+                    }
+                }
+
+                return null;
+            }
+            finally
+            {
+                try { Directory.Delete(tempDir, recursive: true); } catch { }
+            }
         }
 
         /// <summary>

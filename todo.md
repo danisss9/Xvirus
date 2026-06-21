@@ -22,7 +22,7 @@ features; Phase 4 hardens and exposes everything.
 
 ## Phase 2 — Anti-Malware Major Features (userland)
 
-- [ ] 6. **Archive unpacking** — new `ArchiveExtractor` module (zip via
+- [x] 6. **Archive unpacking** — new `ArchiveExtractor` module (zip via
      `System.IO.Compression`; rar/7z via SharpCompress pending license check), integrated into
      `Scanner.ScanFile` behind `SettingsDTO.EnableArchiveScan` with depth/size guards.
      _can start parallel with Phase 1_

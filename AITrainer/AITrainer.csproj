@@ -5,6 +5,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Authors>Xvirus</Authors>
+    <Company>Xvirus</Company>
+    <Copyright>Copyright $([System.DateTime]::Now.Year) $(Company)</Copyright>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\BaseLibrary\BaseLibrary.csproj" />

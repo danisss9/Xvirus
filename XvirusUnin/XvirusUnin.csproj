@@ -3,6 +3,9 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Authors>Xvirus</Authors>
+    <Company>Xvirus</Company>
+    <Copyright>Copyright $([System.DateTime]::Now.Year) $(Company)</Copyright>
     <PublishAot>true</PublishAot>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationManifest>app.manifest</ApplicationManifest>

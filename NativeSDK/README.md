@@ -1,6 +1,6 @@
 # NativeSDK
 
-Xvirus Native SDK 5.1.2
+Xvirus Native SDK 5.1.3
 
 ## Table of Contents
 
@@ -14,6 +14,7 @@ Xvirus Native SDK 5.1.2
     - [Engine Settings](#engine-settings)
     - [Scan Levels](#scan-levels)
     - [File Size Limits](#file-size-limits)
+    - [Archive Scanning](#archive-scanning)
     - [Update Settings](#update-settings)
   - [Exceptions](#exceptions)
 
@@ -143,6 +144,7 @@ Settings are located in the `settings.json` file next to the library. Available 
 - **EnableSignatures** - Enables signature-based scanning of files. Default: _true_
 - **EnableHeuristics** - Enables heuristics scanning of files. Default: _true_
 - **EnableAIScan** - Enables XvirusAI scan engine. Default: _true_
+- **EnableCloudScan** - Enables cloud reputation hash lookups after local engines. Lookups are fail-open: network errors do not block scanning. Default: _false_
 
 ### Scan Levels
 
@@ -156,10 +158,20 @@ Settings are located in the `settings.json` file next to the library. Available 
 - **MaxHeuristicsOthersScanLength** - Maximum non-PE file size for heuristics scanning in bytes. `null` = no limit. Default: _10485760_ (10 MB)
 - **MaxAIScanLength** - Maximum file size for AI scanning in bytes. `null` = no limit. Default: _20971520_ (20 MB)
 
+### Archive Scanning
+
+When `EnableArchiveScan` is on, the engine extracts zip-based archives (`.zip`, `.jar`, `.war`, `.ear`, `.apk`, `.xpi`, `.nupkg`, `.whl`, `.egg`) to a temporary directory and recursively scans every entry. A malware hit on an inner entry is reported against the outer archive path so quarantine targets the archive. Archives that trip the depth/size/count guards are reported as `Suspicious.ArchiveBomb`. rar/7z support is pending a SharpCompress license check.
+
+- **EnableArchiveScan** - Enables recursive scanning of archive contents. Default: _false_
+- **MaxArchiveDepth** - Maximum number of nested archive layers to descend into. `null` = use default. Default: _3_
+- **MaxArchiveTotalSize** - Maximum total extracted bytes across all entries before the archive is treated as a zip bomb. `null` = use default. Default: _104857600_ (100 MB)
+- **MaxArchiveFileCount** - Maximum number of entries to extract before the archive is treated as a zip bomb. `null` = use default. Default: _1000_
+
 ### Update Settings
 
 - **CheckSDKUpdates** - Enables checking for SDK updates. Default: _true_
 - **DatabaseFolder** - Path to the database folder, accepts both relative and absolute paths. Default: _"Database"_
+- **LastUpdateCheck** - UTC timestamp of the last update check. Set automatically by `checkUpdates`. `null` = never checked. Default: _null_
 - **DatabaseVersion** - Key-value list of database file versions. Updated automatically by `checkUpdates`.
 
 Example `settings.json`:
@@ -169,14 +181,20 @@ Example `settings.json`:
   "EnableSignatures": true,
   "EnableHeuristics": true,
   "EnableAIScan": true,
+  "EnableCloudScan": false,
   "HeuristicsLevel": 4,
   "AILevel": 10,
   "MaxScanLength": null,
   "MaxHeuristicsPeScanLength": 20971520,
   "MaxHeuristicsOthersScanLength": 10485760,
   "MaxAIScanLength": 20971520,
+  "EnableArchiveScan": false,
+  "MaxArchiveDepth": 3,
+  "MaxArchiveTotalSize": 104857600,
+  "MaxArchiveFileCount": 1000,
   "CheckSDKUpdates": true,
   "DatabaseFolder": "Database",
+  "LastUpdateCheck": null,
   "DatabaseVersion": {
     "AIModel": 0,
     "MainDB": 0,
