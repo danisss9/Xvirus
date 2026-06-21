@@ -178,7 +178,6 @@ App settings are stored in `appsettings.json` in the service root folder:
 | `StartWithWindows`    | bool   | `true`  | Registers the service to start automatically with Windows.                                    |
 | `EnableContextMenu`   | bool   | `false` | Adds a right-click context menu entry for scanning files.                                     |
 | `EnableLogs`          | bool   | `true`  | Enables scan history logging.                                                                 |
-| `OnlyScanExecutables` | bool   | `true`  | Restricts real-time protection to PE (executable) files only.                                 |
 | `AutoQuarantine`      | bool   | `false` | Automatically quarantines detected threats without user confirmation.                         |
 | `ScheduledScan`       | string | `"off"` | Scheduled scan frequency. Values: `off`, `daily`, `weekly`, `monthly`.                        |
 | `RealTimeProtection`  | bool   | `true`  | Enables real-time process monitoring.                                                         |

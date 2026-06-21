@@ -121,6 +121,21 @@ namespace Xvirus
 
             ct.ThrowIfCancellationRequested();
 
+            // Determine once whether the file is a PE executable. This is reused by the
+            // OnlyScanExecutables short-circuit below and by the heuristics/AI branches later,
+            // avoiding a second header read.
+            bool isExecutable = IsExecutable(filePath);
+
+            // When OnlyScanExecutables is on, skip non-executables early — before the expensive
+            // hash computation and database lookups. Archives are exempt when archive scanning is
+            // enabled, since they may contain executables worth scanning.
+            if (settings.OnlyScanExecutables && !isExecutable)
+            {
+                bool isArchive = settings.EnableArchiveScan && ArchiveExtractor.IsArchive(filePath);
+                if (!isArchive)
+                    return new ScanResult(0, "Safe", filePath);
+            }
+
             string? hash = null;
             using (var md5 = MD5.Create())
             {
@@ -156,18 +171,6 @@ namespace Xvirus
             if (settings.EnableHeuristics || settings.EnableAIScan)
             {
                 ct.ThrowIfCancellationRequested();
-
-                bool isExecutable = false;
-                using (var stream = File.OpenRead(filePath))
-                {
-                    using var reader = new BinaryReader(stream);
-                    try
-                    {
-                        var bytes = reader.ReadChars(2);
-                        isExecutable = bytes[0] == 'M' && bytes[1] == 'Z';
-                    }
-                    catch (ArgumentException) { }
-                }
 
                 if (settings.EnableHeuristics)
                 {
@@ -261,6 +264,25 @@ namespace Xvirus
             }
 
             return new ScanResult(0, "Safe", filePath);
+        }
+
+        /// <summary>
+        /// Checks whether <paramref name="filePath"/> starts with the PE "MZ" magic bytes.
+        /// Returns <c>false</c> on any read error or if the file is too short.
+        /// </summary>
+        private static bool IsExecutable(string filePath)
+        {
+            try
+            {
+                using var stream = File.OpenRead(filePath);
+                using var reader = new BinaryReader(stream);
+                var bytes = reader.ReadChars(2);
+                return bytes.Length >= 2 && bytes[0] == 'M' && bytes[1] == 'Z';
+            }
+            catch (ArgumentException) { }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
+            return false;
         }
 
         /// <summary>

@@ -23,6 +23,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   detected and reported as `Suspicious.ArchiveBomb`. A malware hit on an inner entry is reported
   against the outer archive path so quarantine targets the archive. rar/7z support is pending a
   SharpCompress license check.
+- Added `OnlyScanExecutables` to `Settings` and wired it up in
+  `Scanner.ScanFile`. When enabled (the default), the engine short-circuits non-executable files
+  as Safe before the expensive hash computation and database lookups. Archives are exempt when
+  `EnableArchiveScan` is on, since they may contain executables worth scanning.
 
 ## [5.1.2]
 

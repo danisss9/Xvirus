@@ -10,6 +10,9 @@ namespace Xvirus.Model
         public bool EnableAIScan { get; set; } = true;
         public bool EnableCloudScan { get; set; } = false;
 
+        // Scan Filters
+        public bool OnlyScanExecutables { get; set; } = true;
+
         // Scan Levels
         public int HeuristicsLevel { get; set; } = 4; // From 1 to 5, higher is more agressive
         public int AILevel { get; set; } = 10; // From 1 to 100, higher is more agressive

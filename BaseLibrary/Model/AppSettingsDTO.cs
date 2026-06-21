@@ -12,7 +12,6 @@ namespace Xvirus.Model
         public bool EnableLogs { get; set; } = true;
 
         // Scan Extra Settings
-        public bool OnlyScanExecutables { get; set; } = true;
         public bool AutoQuarantine { get; set; } = false;
         public string ScheduledScan { get; set; } = "off"; // off, daily, weekly, monthly
 

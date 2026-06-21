@@ -6,7 +6,7 @@ features; Phase 4 hardens and exposes everything.
 
 ## Phase 1 — Quick Wins & Polish (parallelizable)
 
-- [ ] 1. **Wire up `OnlyScanExecutables`** in `Scanner.ScanFile` — currently declared in
+- [x] 1. **Wire up `OnlyScanExecutables`** in `Scanner.ScanFile` — currently declared in
      `AppSettingsDTO` but unused. Short-circuit non-executables when the setting is on.
      _parallel with 2–4_
 - [-] 2. **Configurable scheduled-scan path** — replace hardcoded `C:\` in
