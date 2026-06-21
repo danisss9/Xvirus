@@ -302,9 +302,7 @@ app.get('/api/reputation', legacyLimiter, async (req, res) => {
       const engineScore =
         typeof scan.malwareScore === 'number' ? scan.malwareScore / 100 : scanBase;
       const scanComponent = (scanBase + engineScore) / 2;
-      score = hasVotes
-        ? scanWeight * scanComponent + voteWeight * voteRatio
-        : scanComponent;
+      score = hasVotes ? scanWeight * scanComponent + voteWeight * voteRatio : scanComponent;
     } else {
       // Only community votes available.
       score = voteRatio;
@@ -402,7 +400,7 @@ app.get('/api/updateInfo', (req, res) => {
     default:
       result.aimodel.downloadUrl = 'https://cloud.xvirus.net/database/model.new.ai';
       result.app = {
-        version: '5.1.2.0',
+        version: '5.1.3.0',
         downloadUrl: 'https://github.com/danisss9/Xvirus/releases',
         description: 'Xvirus Anti-Malware SDK/CLI',
       };

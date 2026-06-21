@@ -18,7 +18,7 @@ namespace Xvirus.Model
         // Protection features
         public bool RealTimeProtection { get; set; } = true;
         public string ThreatAction { get; set; } = "ask"; // auto, ask
-        public bool BehaviorProtection { get; set; } = false;
+        public bool BehaviorProtection { get; set; } = true;
         public bool NetworkProtection { get; set; } = true;
         public bool SelfDefense { get; set; } = false;
         public bool ShowNotifications { get; set; } = true;

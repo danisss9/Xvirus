@@ -16,6 +16,8 @@ namespace XvirusService.Services;
 internal static class ProcessControl
 {
     private const uint ProcessQueryLimitedInfo = 0x1000;
+    private const uint ProcessQueryInformation = 0x0400;
+    private const uint ProcessVmRead = 0x0010;
     private const uint ProcessTerminate = 0x0001;
     private const uint ProcessSuspendResume = 0x0800;
     private const uint MoveFileDelayUntilReboot = 0x00000004;
@@ -25,6 +27,33 @@ internal static class ProcessControl
 
     [DllImport("ntdll.dll")]
     private static extern int NtResumeProcess(IntPtr processHandle);
+
+    [DllImport("ntdll.dll")]
+    private static extern int NtQueryInformationProcess(
+        IntPtr processHandle,
+        int processInformationClass,
+        ref PROCESS_BASIC_INFORMATION processInformation,
+        int processInformationLength,
+        out int returnLength);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool ReadProcessMemory(
+        IntPtr hProcess,
+        IntPtr lpBaseAddress,
+        [Out] byte[] lpBuffer,
+        IntPtr nSize,
+        out IntPtr lpNumberOfBytesRead);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct PROCESS_BASIC_INFORMATION
+    {
+        public int ExitStatus;            // NTSTATUS (4) + 4 padding on x64
+        public IntPtr PebBaseAddress;     // offset 8
+        public IntPtr AffinityMask;       // offset 16
+        public int BasePriority;          // offset 24
+        public IntPtr UniqueProcessId;    // offset 32
+        public IntPtr InheritedFromUniqueProcessId; // offset 40
+    }
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, int dwProcessId);
@@ -59,6 +88,76 @@ internal static class ProcessControl
         {
             CloseHandle(handle);
         }
+    }
+
+    /// <summary>
+    /// Reads the command line of a running process by walking its PEB
+    /// (PROCESS_BASIC_INFORMATION → PEB.ProcessParameters → CommandLine).
+    /// Native-AOT safe — no WMI / System.Management reflection. Returns
+    /// <c>null</c> when the process has exited or is inaccessible.
+    /// </summary>
+    internal static string? GetCommandLine(int pid)
+    {
+        IntPtr handle = OpenProcess(ProcessQueryInformation | ProcessVmRead, false, pid);
+        if (handle == IntPtr.Zero)
+        {
+            // Fall back to limited info — some processes still expose the PEB
+            // without VM read, but ReadProcessMemory will then fail gracefully.
+            handle = OpenProcess(ProcessQueryLimitedInfo, false, pid);
+            if (handle == IntPtr.Zero) return null;
+        }
+
+        try
+        {
+            var pbi = new PROCESS_BASIC_INFORMATION();
+            int status = NtQueryInformationProcess(
+                handle, 0 /* ProcessBasicInformation */, ref pbi,
+                Marshal.SizeOf<PROCESS_BASIC_INFORMATION>(), out _);
+            if (status != 0 || pbi.PebBaseAddress == IntPtr.Zero) return null;
+
+            // PEB.ProcessParameters pointer is at offset 0x20 on x64.
+            IntPtr processParameters = ReadIntPtr(handle, pbi.PebBaseAddress + 0x20);
+            if (processParameters == IntPtr.Zero) return null;
+
+            // RTL_USER_PROCESS_PARAMETERS.CommandLine is a UNICODE_STRING at
+            // offset 0x70 on x64: { Length(2), MaxLength(2), [4 pad], Buffer(8) }.
+            ushort length = ReadUshort(handle, processParameters + 0x70);
+            if (length == 0) return null;
+            IntPtr buffer = ReadIntPtr(handle, processParameters + 0x78);
+            if (buffer == IntPtr.Zero) return null;
+
+            byte[] bytes = new byte[length];
+            if (!ReadProcessMemory(handle, buffer, bytes, (IntPtr)length, out _))
+                return null;
+
+            return Encoding.Unicode.GetString(bytes, 0, length);
+        }
+        catch
+        {
+            return null;
+        }
+        finally
+        {
+            CloseHandle(handle);
+        }
+    }
+
+    private static IntPtr ReadIntPtr(IntPtr hProcess, IntPtr address)
+    {
+        byte[] buf = new byte[IntPtr.Size];
+        if (!ReadProcessMemory(hProcess, address, buf, (IntPtr)IntPtr.Size, out _))
+            return IntPtr.Zero;
+        return IntPtr.Size == 8
+            ? (IntPtr)BitConverter.ToInt64(buf, 0)
+            : (IntPtr)BitConverter.ToInt32(buf, 0);
+    }
+
+    private static ushort ReadUshort(IntPtr hProcess, IntPtr address)
+    {
+        byte[] buf = new byte[2];
+        return ReadProcessMemory(hProcess, address, buf, (IntPtr)2, out _)
+            ? BitConverter.ToUInt16(buf, 0)
+            : (ushort)0;
     }
 
     internal static void Kill(int pid, string source)
