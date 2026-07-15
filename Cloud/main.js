@@ -359,7 +359,7 @@ app.get('/api/updateInfo', (req, res) => {
       description: 'Whitelist database updated daily',
     },
     heurdb: {
-      version: 736,
+      version: 737,
       downloadUrl: 'https://cloud.xvirus.net/database/heurlist.db',
       description: 'Heuristic rules database for PE files',
     },
