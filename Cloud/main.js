@@ -344,7 +344,7 @@ app.get('/api/updateInfo', (req, res) => {
       description: 'Main malware database',
     },
     dailydb: {
-      version: 15247,
+      version: 15248,
       downloadUrl: 'https://cloud.xvirus.net/database/dailylist.db',
       description: 'Malware database updated daily',
     },
