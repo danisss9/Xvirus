@@ -953,7 +953,6 @@ key|hkml|SOFTWARE\Classes\*\shell\filescout
 key|hkml|SOFTWARE\Classes\AppID\CertifiedToolbar.DLL
 key|hkml|SOFTWARE\Classes\AppID\Complitly.DLL
 key|hkml|SOFTWARE\Classes\AppID\Extension.DLL
-key|hkml|SOFTWARE\Classes\d
 key|hkml|SOFTWARE\Classes\delta.deltaappCore
 key|hkml|SOFTWARE\Classes\delta.deltaappCore.1
 key|hkml|SOFTWARE\Classes\esrv.deltaESrvc
@@ -962,7 +961,6 @@ key|hkml|SOFTWARE\Classes\esrv.IncredibarESrvc
 key|hkml|SOFTWARE\Classes\esrv.IncredibarESrvc.1
 key|hkml|SOFTWARE\Classes\Extension.ExtensionHelperObject
 key|hkml|SOFTWARE\Classes\Extension.ExtensionHelperObject.1
-key|hkml|SOFTWARE\Classes\I
 key|hkml|SOFTWARE\Classes\Incredibar.dskBnd
 key|hkml|SOFTWARE\Classes\Incredibar.dskBnd.1
 key|hkml|SOFTWARE\Classes\Incredibar.IncredibarHlpr
@@ -1986,7 +1984,6 @@ key|hkcu|Software\SmileFiles
 key|hkcu|Software\Microsoft\Internet Explorer\SearchScopes\{95B7759C-8C7F-4BF1-B163-73684A933233}
 key|hkml|SOFTWARE\Classes\CLSID\{95B7759C-8C7F-4BF1-B163-73684A933233}
 key|hkml|SOFTWARE\Classes\Interface\{E4C3E50F-5761-4BF8-95A0-939A819DF1C3}
-key|hkml|SOFTWARE\Classes\S
 key|hkml|SOFTWARE\d0c61be9-2470-fba0-7bf5-fc3ac4c3ce26
 key|hkml|SOFTWARE\Trymedia Systems
 key|hkml|SYSTEM\ControlSet001\ColorMedia
