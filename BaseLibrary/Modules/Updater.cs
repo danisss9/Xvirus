@@ -59,6 +59,12 @@ namespace Xvirus
                 GetDatabaseInfoVersion = (DatabaseDTO info) => info.AIModel,
                 SetDatabaseInfoVersion = (DatabaseDTO info, long value) => info.AIModel = value,
             },
+            new UpdateMethod {
+                FileName = "scriptmodel.gguf",
+                GetUpdateInfoVersion = (UpdateInfo info) => info.Scriptmodel,
+                GetDatabaseInfoVersion = (DatabaseDTO info) => info.ScriptAIModel,
+                SetDatabaseInfoVersion = (DatabaseDTO info, long value) => info.ScriptAIModel = value,
+            },
         };
 
         public static string CheckUpdates(SettingsDTO settings)
@@ -84,15 +90,28 @@ namespace Xvirus
                     var versionInfo = updateMethod.GetUpdateInfoVersion(updateInfo);
                     if (versionInfo != null && currVersion != versionInfo.Version)
                     {
-                        var database = wc.GetByteArrayAsync(versionInfo.DownloadUrl).GetAwaiter().GetResult();
-
-                        if (database != null)
+                        // Stream to disk instead of buffering in memory: the script AI model is a
+                        // large GGUF file (~1GB) that does not fit the byte-array pattern.
+                        var path = Utils.RelativeToFullPath(settings.DatabaseFolder, updateMethod.FileName);
+                        try
                         {
-                            var path = Utils.RelativeToFullPath(settings.DatabaseFolder, updateMethod.FileName);
-                            File.WriteAllBytes(path, database);
-                            updateMethod.SetDatabaseInfoVersion(settings.DatabaseVersion, versionInfo.Version);
-                            newUpdates = true;
+                            using (var response = wc.GetAsync(versionInfo.DownloadUrl, HttpCompletionOption.ResponseHeadersRead).GetAwaiter().GetResult())
+                            {
+                                response.EnsureSuccessStatusCode();
+                                using var contentStream = response.Content.ReadAsStreamAsync().GetAwaiter().GetResult();
+                                using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 81920);
+                                contentStream.CopyTo(fileStream);
+                            }
                         }
+                        catch
+                        {
+                            // A partially written model would fail to load later; remove it so the
+                            // next update attempt starts clean.
+                            try { File.Delete(path); } catch { }
+                            throw;
+                        }
+                        updateMethod.SetDatabaseInfoVersion(settings.DatabaseVersion, versionInfo.Version);
+                        newUpdates = true;
                     }
                 }
 

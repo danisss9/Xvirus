@@ -1,6 +1,6 @@
 # Xvirus Node.js SDK
 
-Xvirus SDK 5.1.3 — Node.js native addon built with .NET Native AOT.
+Xvirus SDK 5.2.0 — Node.js native addon built with .NET Native AOT.
 
 The module ships as a pre-compiled `.node` binary paired with a generated `.js` ESM wrapper. No .NET runtime is required on the target machine.
 
@@ -162,7 +162,7 @@ Settings are read from the `settings.json` file in the SDK base folder. Availabl
 
 - **EnableSignatures** — Enables signature-based scanning. Default: _true_
 - **EnableHeuristics** — Enables heuristics scanning. Default: _true_
-- **EnableAIScan** — Enables the XvirusAI scan engine. Default: _true_
+- **EnableAIScan** — Enables the XvirusAI scan engines: the ONNX PE model and the script AI model (`.bat`, `.cmd`, `.ps1`, `.py`, `.js`, `.vbs`). Default: _true_
 - **EnableCloudScan** — Enables cloud reputation hash lookups after local engines. Lookups are fail-open: network errors do not block scanning. Default: _false_
 - **OnlyScanExecutables** — When enabled, non-executable files are short-circuited as Safe before hash computation and database lookups. Archives are exempt when `EnableArchiveScan` is on. Default: _false_
 
@@ -177,6 +177,7 @@ Settings are read from the `settings.json` file in the SDK base folder. Availabl
 - **MaxHeuristicsPeScanLength** — Maximum PE file size for heuristics scanning in bytes. Set `null` for no limit. Default: _20971520_ (20 MB)
 - **MaxHeuristicsOthersScanLength** — Maximum non-PE file size for heuristics scanning in bytes. Set `null` for no limit. Default: _10485760_ (10 MB)
 - **MaxAIScanLength** — Maximum file size for AI scanning in bytes. Set `null` for no limit. Default: _20971520_ (20 MB)
+- **MaxAIScriptScanLength** — Maximum file size for AI script scanning (`.bat`, `.cmd`, `.ps1`, `.py`, `.js`, `.vbs`) in bytes. Set `null` for no limit. Default: _1048576_ (1 MB)
 
 ### Archive Scanning
 
@@ -209,6 +210,7 @@ Example `settings.json`:
   "MaxHeuristicsPeScanLength": 20971520,
   "MaxHeuristicsOthersScanLength": 10485760,
   "MaxAIScanLength": 20971520,
+  "MaxAIScriptScanLength": 1048576,
   "EnableArchiveScan": false,
   "MaxArchiveDepth": 3,
   "MaxArchiveTotalSize": 104857600,
@@ -218,6 +220,7 @@ Example `settings.json`:
   "LastUpdateCheck": null,
   "DatabaseVersion": {
     "AIModel": 0,
+    "ScriptAIModel": 0,
     "MainDB": 0,
     "DailyDB": 0,
     "WhiteDB": 0,

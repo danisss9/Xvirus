@@ -3,6 +3,7 @@
     public class DatabaseDTO
     {
         public long AIModel { get; set; } = 0;
+        public long ScriptAIModel { get; set; } = 0;
         public long MainDB { get; set; } = 0;
         public long DailyDB { get; set; } = 0;
         public long WhiteDB { get; set; } = 0;

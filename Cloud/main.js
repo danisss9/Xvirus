@@ -378,6 +378,11 @@ app.get('/api/updateInfo', (req, res) => {
       downloadUrl: 'https://cloud.xvirus.net/database/model.ai',
       description: 'XvirusAI offline train model',
     },
+    scriptmodel: {
+      version: 1,
+      downloadUrl: 'https://cloud.xvirus.net/database/scriptmodel.gguf',
+      description: 'XvirusAI script scanner model',
+    },
   };
 
   switch (app) {
@@ -400,7 +405,7 @@ app.get('/api/updateInfo', (req, res) => {
     default:
       result.aimodel.downloadUrl = 'https://cloud.xvirus.net/database/model.new.ai';
       result.app = {
-        version: '5.1.3.0',
+        version: '5.2.0.0',
         downloadUrl: 'https://github.com/danisss9/Xvirus/releases',
         description: 'Xvirus Anti-Malware SDK/CLI',
       };

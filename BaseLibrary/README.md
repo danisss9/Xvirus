@@ -1,6 +1,6 @@
 # BaseLibrary
 
-Xvirus SDK Core Library 5.1.2
+Xvirus SDK Core Library 5.2.0
 
 ## Table of Contents
 
@@ -20,9 +20,9 @@ Xvirus SDK Core Library 5.1.2
 
 `BaseLibrary` is the shared core used by all Xvirus SDK bindings (C#, Native, Node). It provides the scanning engine, AI inference, database management, updater, settings, quarantine, and logging.
 
-**Version:** 5.1.2
+**Version:** 5.2.0
 **Target:** .NET 8 (AOT compatible)
-**Dependencies:** `Microsoft.ML.OnnxRuntime`, `SixLabors.ImageSharp`
+**Dependencies:** `Microsoft.ML.OnnxRuntime`, `SixLabors.ImageSharp`, `LLamaSharp`
 
 ## Minimum Requirements
 
@@ -34,6 +34,7 @@ Xvirus SDK Core Library 5.1.2
 |--------------|---------------------------------------------------------------------------------------------------|
 | `Scanner`    | Main scan engine. Runs signature, heuristics, and AI checks against a file or a folder.           |
 | `AI`         | Loads and runs the ONNX model (`model.ai`). Converts PE files to grayscale images for inference.  |
+| `AIScript`   | Loads and runs the script AI model (`scriptmodel.gguf`, Qwen Coder 1.5B, CPU). Classifies `.bat`, `.cmd`, `.ps1`, `.py`, `.js` and `.vbs` files as malicious/suspicious/benign. |
 | `DB`         | Loads all database files (hash lists, heuristics patterns, vendor list) into memory.              |
 | `Updater`    | Downloads updated database files and AI model from the Xvirus update server.                      |
 | `Settings`   | Reads and writes `settings.json` and `appsettings.json`.                                          |
@@ -70,6 +71,16 @@ byte[] png  = AI.GetFileImageBytes(filePath);   // grayscale PNG visualization
 ```
 
 Files are mapped to 224×224 grayscale images (width adapts to file size) and normalized with ImageNet statistics before inference.
+
+### AIScript
+
+```csharp
+var aiScript = new AIScript(settings);
+float score = aiScript.ScanFile(filePath);      // 1.0 malicious, 0.5 suspicious, 0.0 benign, -1 on error
+bool isScript = AIScript.IsScriptFile(filePath); // .bat, .cmd, .ps1, .py, .js, .vbs
+```
+
+Loads the Qwen Coder 1.5B GGUF model (`scriptmodel.gguf`) from the database folder when `EnableAIScan` is on and the file exists. Inference runs on CPU only (`GpuLayerCount = 0`) with a 4096 token context, greedy sampling (temperature 0) and a grammar that constrains the output to exactly one of `malicious`, `suspicious` or `benign`. Script content is truncated to 12000 characters to fit the context window. The `update` command downloads and updates the model from the Xvirus cloud.
 
 ### Updater
 
@@ -117,7 +128,7 @@ Settings are stored in `settings.json` in the root folder of the consuming appli
 
 - **EnableSignatures** — Enables signature-based scanning. Default: _true_
 - **EnableHeuristics** — Enables heuristics scanning. Default: _true_
-- **EnableAIScan** — Enables XvirusAI ONNX scan engine. Default: _true_
+- **EnableAIScan** — Enables the XvirusAI scan engines: the ONNX PE model and the script AI model (`.bat`, `.cmd`, `.ps1`, `.py`, `.js`, `.vbs`). Default: _true_
 
 ### Scan Levels
 
@@ -130,6 +141,7 @@ Settings are stored in `settings.json` in the root folder of the consuming appli
 - **MaxHeuristicsPeScanLength** — Maximum PE file size for heuristics in bytes. Default: _20971520_ (20 MB)
 - **MaxHeuristicsOthersScanLength** — Maximum non-PE file size for heuristics in bytes. Default: _10485760_ (10 MB)
 - **MaxAIScanLength** — Maximum file size for AI scanning in bytes. Default: _20971520_ (20 MB)
+- **MaxAIScriptScanLength** — Maximum file size for AI script scanning in bytes. Default: _1048576_ (1 MB)
 
 ### Update Settings
 
@@ -150,10 +162,12 @@ Example `settings.json`:
   "MaxHeuristicsPeScanLength": 20971520,
   "MaxHeuristicsOthersScanLength": 10485760,
   "MaxAIScanLength": 20971520,
+  "MaxAIScriptScanLength": 1048576,
   "CheckSDKUpdates": true,
   "DatabaseFolder": "Database",
   "DatabaseVersion": {
     "AIModel": 0,
+    "ScriptAIModel": 0,
     "MainDB": 0,
     "DailyDB": 0,
     "WhiteDB": 0,

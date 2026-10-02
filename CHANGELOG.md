@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [5.2.0]
+
+### Added
+
+- New AI-based script scanner (`AIScript`). Script files (`.bat`, `.cmd`, `.ps1`, `.py`, `.js` and
+  `.vbs`) are classified by a dedicated Qwen Coder GGUF model (`scriptmodel.gguf`) running on CPU via
+  LLamaSharp, alongside the existing ONNX PE engine. Inference uses a 4096 token context, greedy
+  sampling and a grammar that constrains the model output to exactly one verdict. A malicious or
+  suspicious verdict is reported as `AI.Script.Malicious` or `AI.Script.Suspicious`; benign files
+  continue through the remaining scan engines. Script content is truncated to 12000 characters to fit
+  the context window, and chat template special tokens (`<|im_start|>`, `<|im_end|>`,
+  `<|endoftext|>`) are stripped so a malicious script cannot inject a fake verdict into the prompt.
+- New setting `MaxAIScriptScanLength` — maximum file size for AI script scanning in bytes. Default:
+  _1048576_ (1 MB). The script scanner runs whenever `EnableAIScan` is enabled, no new toggle is
+  required.
+- The script AI model is now a first-class updatable database component: the update server advertises
+  it as `Scriptmodel`, `DatabaseVersion` gains a `ScriptAIModel` entry, and the `update` command
+  downloads `scriptmodel.gguf` from the Xvirus cloud like every other database file.
+
+### Changed
+
+- Database and AI model downloads are now streamed to disk instead of being fully buffered in memory,
+  which is required for the ~1 GB script model. Partially downloaded files are removed automatically
+  so the next update attempt starts clean.
+- New dependency: LLamaSharp (script AI inference).
+
 ## [5.1.3]
 
 ### Added

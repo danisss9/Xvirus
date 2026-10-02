@@ -10,6 +10,7 @@
         public VersionInfo<long> Heurdb2 { get; set; }
         public VersionInfo<long> Malvendordb { get; set; }
         public VersionInfo<long> Aimodel { get; set; }
+        public VersionInfo<long> Scriptmodel { get; set; }
         public VersionInfo<string> App { get; set; }
     }
 

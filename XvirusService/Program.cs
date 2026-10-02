@@ -58,10 +58,13 @@ builder.Services.AddSingleton(sp =>
 builder.Services.AddSingleton(sp =>
     new AI(sp.GetRequiredService<SettingsService>().Settings));
 builder.Services.AddSingleton(sp =>
+    new AIScript(sp.GetRequiredService<SettingsService>().Settings));
+builder.Services.AddSingleton(sp =>
     new Scanner(
         sp.GetRequiredService<SettingsService>().Settings,
         sp.GetRequiredService<DB>(),
         sp.GetRequiredService<AI>(),
+        sp.GetRequiredService<AIScript>(),
         sp.GetRequiredService<Rules>()));
 
 // Configure JSON serialization for Native AOT

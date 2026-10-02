@@ -14,6 +14,7 @@ namespace Xvirus
         public readonly SettingsDTO settings;
         private readonly DB database;
         private readonly AI ai;
+        private readonly AIScript aiScript;
         private readonly Rules rules;
 
         // Registry of in-progress scans, keyed by the file or folder path being scanned, so
@@ -22,11 +23,12 @@ namespace Xvirus
         // already being scanned cancels and replaces the in-progress one.
         private readonly ConcurrentDictionary<string, CancellationTokenSource> _activeScans = new();
 
-        public Scanner(SettingsDTO settings, DB database, AI ai, Rules rules)
+        public Scanner(SettingsDTO settings, DB database, AI ai, AIScript aiScript, Rules rules)
         {
             this.settings = settings;
             this.database = database;
             this.ai = ai;
+            this.aiScript = aiScript;
             this.rules = rules;
         }
 
@@ -240,6 +242,18 @@ namespace Xvirus
 
                     var aiScore = ai.ScanFile(filePath);
                     return new ScanResult(aiScore, $"AI.{aiScore * 100:00.00}", filePath, (100 - (double)settings.AILevel) / 100);
+                }
+
+                if (settings.EnableAIScan && AIScript.IsScriptFile(filePath) && (settings.MaxAIScriptScanLength == null || fileInfo.Length <= settings.MaxAIScriptScanLength))
+                {
+                    ct.ThrowIfCancellationRequested();
+
+                    var scriptScore = aiScript.ScanFile(filePath);
+                    if (scriptScore > 0)
+                    {
+                        var scriptName = scriptScore >= 1 ? "AI.Script.Malicious" : "AI.Script.Suspicious";
+                        return new ScanResult(scriptScore, scriptName, filePath, (100 - (double)settings.AILevel) / 100);
+                    }
                 }
 
                 if (settings.EnableCloudScan)

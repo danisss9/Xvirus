@@ -22,6 +22,7 @@ namespace Xvirus.Model
         public double? MaxHeuristicsPeScanLength { get; set; } = 20971520; // 20MBs
         public double? MaxHeuristicsOthersScanLength { get; set; } = 10485760; // 10MBs
         public double? MaxAIScanLength { get; set; } = 20971520; // 20MBs
+        public double? MaxAIScriptScanLength { get; set; } = 1048576; // 1MB
 
         // Archive scanning
         public bool EnableArchiveScan { get; set; } = false;
