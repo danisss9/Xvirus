@@ -380,7 +380,7 @@ app.get('/api/updateInfo', (req, res) => {
     },
     scriptmodel: {
       version: 1,
-      downloadUrl: 'https://cloud.xvirus.net/database/scriptmodel.gguf',
+      downloadUrl: 'https://files.xvirus.net/api/public/dl/Um0CRbLL',
       description: 'XvirusAI script scanner model',
     },
   };
