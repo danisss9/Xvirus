@@ -29,6 +29,15 @@ async function loadSDK() {
     const { XvirusNodeSDK } = await import(sdkPath);
     sdk = XvirusNodeSDK;
     sdk.baseFolder(path.join(__dirname, 'sdk'));
+
+    // Update the detection databases before loading so the engine starts on
+    // the latest definitions; fall back to the local files if the check fails.
+    try {
+      console.log('[SDK] Database update check:', sdk.checkUpdates(false));
+    } catch (updateErr) {
+      console.warn('[SDK] Database update check failed, loading local databases:', updateErr.message);
+    }
+
     sdk.load(false);
     sdkReady = true;
     console.log('[SDK] Xvirus engine loaded — version', sdk.version());
