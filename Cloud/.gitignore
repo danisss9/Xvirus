@@ -225,4 +225,4 @@ AppPackages/
 # End of core ignore list, below put you custom 'per project' settings (patterns or path)
 #####
 public/database/scriptmodel.gguf
-sdk/Database/scriptmodel.gguf
+sdk/Database/*
