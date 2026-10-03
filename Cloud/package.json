@@ -7,7 +7,8 @@
     "start": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy": "powershell -File ../deploy.ps1 -AppName cloud",
-    "build:sdk": "dotnet publish ../NodeSDK -r linux-x64 -c Release && cp ../NodeSDK/bin/Release/net8.0/linux-x64/publish/XvirusNodeSDK.node sdk/ && cp ../NodeSDK/bin/Release/net8.0/linux-x64/publish/XvirusNodeSDK.mjs sdk/ && cp ../NodeSDK/bin/Release/net8.0/linux-x64/publish/import.cjs sdk/ && cp ../NodeSDK/bin/Release/net8.0/linux-x64/publish/*.so sdk/"
+    "build:sdk": "dotnet publish ../NodeSDK -r linux-x64 -c Release && cp ../NodeSDK/bin/Release/net8.0/linux-x64/publish/XvirusNodeSDK.node sdk/ && cp ../NodeSDK/bin/Release/net8.0/linux-x64/publish/XvirusNodeSDK.mjs sdk/ && cp ../NodeSDK/bin/Release/net8.0/linux-x64/publish/import.cjs sdk/ && cp ../NodeSDK/bin/Release/net8.0/linux-x64/publish/*.so sdk/",
+    "build:sdk:wsl": "wsl -d CentOS7 -- bash /mnt/d/Projects/Atool/Xvirus/AntiMalwareSDK/projeto/XescSDK/Cloud/build-sdk.sh"
   },
   "author": "",
   "license": "ISC",
