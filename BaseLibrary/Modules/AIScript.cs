@@ -1,5 +1,6 @@
 ﻿using LLama;
 using LLama.Common;
+using LLama.Native;
 using LLama.Sampling;
 using System;
 using System.IO;
@@ -42,6 +43,11 @@ namespace Xvirus
 
             try
             {
+                // llama.cpp prints model load and runtime details directly to stderr.
+                // Route those messages to a no-op callback so nothing reaches the console;
+                // load failures still throw managed exceptions which are logged below.
+                NativeLogConfig.llama_log_set((_, _) => { });
+
                 var parameters = new ModelParams(path)
                 {
                     ContextSize = ContextSize,
