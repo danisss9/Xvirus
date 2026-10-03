@@ -229,3 +229,4 @@ browser/
 resources/
 Cloud/public/database/scriptmodel.gguf
 Cloud/sdk/Database/scriptmodel.gguf
+**/.vscode-debug-eval.cs
