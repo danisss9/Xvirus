@@ -72,6 +72,11 @@ The build produces two files in the publish output directory:
 | `XvirusNodeSDK.js`   | Generated ESM wrapper — **import this file** |
 | `XvirusNodeSDK.d.ts` | TypeScript type definitions                  |
 
+The publish output also contains native backend libraries that must be shipped next to the `.node` module, keeping the directory layout intact:
+
+- `libonnxruntime.so` / `libonnxruntime_providers_shared.so` (and `onnxruntime.dll` on Windows) — ONNX Runtime backend of the PE AI engine, loaded from the module directory.
+- `runtimes/<rid>/native/…` — LLamaSharp's llama.cpp backend (`libllama.so`, `libggml*.so`, `libmtmd.so`) for the script AI engine. LLamaSharp resolves these through relative paths such as `runtimes/linux-x64/native/avx2/libllama.so` searched from the SDK base folder.
+
 ## Get Started
 
 Import `XvirusNodeSDK` from the generated `.js` wrapper. The path must point to the publish output directory.

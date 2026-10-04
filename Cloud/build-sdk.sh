@@ -44,9 +44,18 @@ PUB="$NODESDK/bin/Release/net8.0/linux-x64/publish"
 cp -f "$PUB/XvirusNodeSDK.node" "$SDK_OUT/"
 cp -f "$PUB/XvirusNodeSDK.mjs" "$SDK_OUT/"
 cp -f "$PUB/import.cjs" "$SDK_OUT/"
+# Root .so files: ONNX Runtime, loaded from next to the .node module.
 for so in "$PUB"/*.so; do
   [ -f "$so" ] && cp -f "$so" "$SDK_OUT/"
 done
+# LLamaSharp resolves its llama.cpp backend via the relative path
+# runtimes/linux-x64/native/<avx-variant>/libllama.so (plus libggml*/libmtmd
+# dependencies from the same tree), searched from the SDK base folder — copy it
+# with the directory layout intact or the script AI engine cannot load.
+mkdir -p "$SDK_OUT/runtimes"
+rm -rf "$SDK_OUT/runtimes/linux-x64"
+cp -rf "$PUB/runtimes/linux-x64" "$SDK_OUT/runtimes/"
 
 echo "=== done ==="
 ls -la "$SDK_OUT"
+ls -la "$SDK_OUT/runtimes/linux-x64/native"

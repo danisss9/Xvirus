@@ -29,6 +29,35 @@ namespace Xvirus
         private LLamaWeights? model;
         private StatelessExecutor? executor;
 
+        // LLamaSharp resolves its llama.cpp backend (libllama.so) through relative paths such as
+        // "runtimes/linux-x64/native/<variant>/libllama.so", which it only searches in the process
+        // base directory and the assembly location. Under NativeAOT the assembly location is empty
+        // and in an embedded node module the base directory is the node executable's, so without an
+        // explicit search directory the backend is never found. Register the SDK base folder once,
+        // before the first native call, so the backend is found wherever the engine is deployed.
+        private static readonly object nativeSearchLock = new();
+        private static bool nativeSearchConfigured;
+
+        private static void ConfigureNativeSearch()
+        {
+            lock (nativeSearchLock)
+            {
+                if (nativeSearchConfigured)
+                    return;
+
+                try
+                {
+                    // Throws InvalidOperationException if the backend already loaded without this
+                    // configuration (can only happen on reloads after a successful first load,
+                    // where the already-registered search directories keep applying).
+                    NativeLibraryConfig.All.WithSearchDirectories([Utils.CurrentDir]);
+                }
+                catch (InvalidOperationException) { }
+
+                nativeSearchConfigured = true;
+            }
+        }
+
         public AIScript(SettingsDTO settings)
         {
             Load(settings);
@@ -43,6 +72,8 @@ namespace Xvirus
 
             try
             {
+                ConfigureNativeSearch();
+
                 // llama.cpp prints model load and runtime details directly to stderr.
                 // Route those messages to a no-op callback so nothing reaches the console;
                 // load failures still throw managed exceptions which are logged below.
@@ -60,6 +91,7 @@ namespace Xvirus
             catch (Exception ex)
             {
                 Logger.LogException(ex);
+                Logger.LogMessage($"Script AI scan disabled: '{ModelFileName}' was found at '{path}' but the LLamaSharp backend failed to load.");
                 Unload();
             }
         }

