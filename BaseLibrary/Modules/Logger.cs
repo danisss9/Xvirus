@@ -33,6 +33,25 @@ namespace Xvirus
             }
         }
 
+        internal static void LogMessage(string message)
+        {
+            if (!EnableLogging)
+                return;
+
+            var path = Utils.RelativeToFullPath("errorlog.txt");
+            var content = $"Error Log - ${DateTime.UtcNow}\n${message}\n----------------------------------------------";
+            rwl.AcquireWriterLock(2000);
+            try
+            {
+                File.AppendAllText(path, content);
+            }
+            catch (Exception) { }
+            finally
+            {
+                rwl.ReleaseWriterLock();
+            }
+        }
+
         public static void LogHistory(string type, string details)
         {
             if (!EnableLogging)
