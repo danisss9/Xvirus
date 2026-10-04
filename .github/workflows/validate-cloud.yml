@@ -2,6 +2,12 @@ name: Validate Cloud script AI (Linux)
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'Cloud/**'
+      - 'NodeSDK/**'
+      - 'BaseLibrary/**'
+      - '.github/workflows/validate-cloud.yml'
 
 env:
   DOTNET_VERSION: '8.0.x'
