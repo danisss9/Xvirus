@@ -143,11 +143,28 @@ app.post('/api/scan', scanLimiter, upload.single('file'), async (req, res) => {
   const force = req.query.force === 'true';
   activeScanCount++;
   const tmpPath = req.file.path;
+  // Multer writes uploads extensionless (e.g. /tmp/ab12cd). The engine gates the
+  // script-AI scanner on the file extension (AIScript.IsScriptFile: .bat/.cmd/
+  // .ps1/.py/.js/.vbs) and archive handling on zip extensions, so scanning the
+  // raw tmp path silently skips those engines — while the local CLI works because
+  // the file on disk keeps its extension. Re-attach the sanitized original
+  // extension before hashing/scanning so cloud matches CLI behaviour.
+  const originalExt = path.extname(req.file.originalname || '').toLowerCase();
+  const safeExt = /^\.[a-z0-9]{1,10}$/.test(originalExt) ? originalExt : '';
+  let scanPath = tmpPath;
+  if (safeExt && !tmpPath.toLowerCase().endsWith(safeExt)) {
+    try {
+      scanPath = `${tmpPath}${safeExt}`;
+      fs.renameSync(tmpPath, scanPath);
+    } catch {
+      scanPath = tmpPath;
+    }
+  }
   try {
     // Calculate MD5 via stream
     const md5 = await new Promise((resolve, reject) => {
       const hash = crypto.createHash('md5');
-      fs.createReadStream(tmpPath)
+      fs.createReadStream(scanPath)
         .on('data', (d) => hash.update(d))
         .on('end', () => resolve(hash.digest('hex').toUpperCase()))
         .on('error', reject);
@@ -177,8 +194,9 @@ app.post('/api/scan', scanLimiter, upload.single('file'), async (req, res) => {
       });
     }
 
-    // Scan
-    const result = sdk.scan(tmpPath);
+    // Scan (scanPath carries the original extension so extension-gated
+    // engines — script AI, archive unpacking — behave as they do in the CLI).
+    const result = sdk.scan(scanPath);
     const scannedAt = new Date();
 
     // Upsert scan result
@@ -215,7 +233,8 @@ app.post('/api/scan', scanLimiter, upload.single('file'), async (req, res) => {
     res.status(500).json({ error: err.message || 'Scan failed.' });
   } finally {
     activeScanCount--;
-    fs.unlink(tmpPath, () => {});
+    fs.unlink(scanPath, () => {});
+    if (scanPath !== tmpPath) fs.unlink(tmpPath, () => {});
   }
 });
 
