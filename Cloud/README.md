@@ -29,7 +29,9 @@ Builds the NodeSDK for Linux x64 and copies the output to `./sdk/`:
 npm run build:sdk
 ```
 
-This runs `dotnet publish` on the `NodeSDK` project and copies `XvirusNodeSDK.node`, `XvirusNodeSDK.mjs`, `import.cjs`, and all `.so` files into `./sdk/`. Create a `settings.json` inside `./sdk/` with `DatabaseFolder` set to `"../public/database"`.
+This runs `dotnet publish` on the `NodeSDK` project and copies `XvirusNodeSDK.node`, `XvirusNodeSDK.mjs`, `import.cjs`, the `.so` files, and `runtimes/linux-x64/` into `./sdk/`. The `runtimes` tree holds LLamaSharp's llama.cpp backend (`libllama.so`, `libggml*.so`, `libmtmd.so` under `native/<avx-variant>/`) — the script AI engine resolves it by relative path from the `./sdk/` base folder, so the directory layout must be preserved.
+
+Create a `settings.json` inside `./sdk/` with `DatabaseFolder` set to `"Database"` (the shipped database and AI model files live in `./sdk/Database/`; `public/database/` only serves the update downloads).
 
 ## Deploy
 

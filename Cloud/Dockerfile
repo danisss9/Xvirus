@@ -18,8 +18,7 @@ RUN npm install --omit=dev
 
 # The script AI model (sdk/Database/scriptmodel.gguf, ~940 MB) is not stored in the
 # repository; download it into the image at build time from the update server. It is
-# fetched before COPY so the 940 MB layer stays cached across source-only rebuilds;
-# main.js still downloads it at startup when missing as a fallback.
+# fetched before COPY so the 940 MB layer stays cached across source-only rebuilds.
 RUN mkdir -p sdk/Database \
  && curl -fSL --retry 3 -o sdk/Database/scriptmodel.gguf "https://files.xvirus.net/api/public/dl/Um0CRbLL" \
  && head -c 4 sdk/Database/scriptmodel.gguf | grep -q GGUF
