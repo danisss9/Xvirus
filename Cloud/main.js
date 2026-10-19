@@ -358,12 +358,12 @@ app.get('/api/updateInfo', (req, res) => {
 
   const result = {
     maindb: {
-      version: 105,
+      version: 106,
       downloadUrl: 'https://cloud.xvirus.net/database/viruslist.db',
       description: 'Main malware database',
     },
     dailydb: {
-      version: 15281,
+      version: 15282,
       downloadUrl: 'https://cloud.xvirus.net/database/dailylist.db',
       description: 'Malware database updated daily',
     },
