@@ -33,6 +33,14 @@ This runs `dotnet publish` on the `NodeSDK` project and copies `XvirusNodeSDK.no
 
 Create a `settings.json` inside `./sdk/` with `DatabaseFolder` set to `"Database"` (the shipped database and AI model files live in `./sdk/Database/`; `public/database/` only serves the update downloads).
 
+To copy the SDK's required database files from `./public/database/` into `./sdk/Database/`, run:
+
+```bash
+npm run copy:db
+```
+
+The `model.new.ai` source file is copied as `model.ai`.
+
 ## Deploy
 
 ```bash
