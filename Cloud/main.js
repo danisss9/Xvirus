@@ -358,7 +358,7 @@ app.get('/api/updateInfo', (req, res) => {
 
   const result = {
     maindb: {
-      version: 106,
+      version: 107,
       downloadUrl: 'https://cloud.xvirus.net/database/viruslist.db',
       description: 'Main malware database',
     },
