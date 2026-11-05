@@ -374,7 +374,7 @@
           <div class="score-fill" id="score-fill" style="width:0%"></div>
         </div>
       </div>
-      <div class="result-row">
+      <div class="result-row" id="size-row">
         <span class="label">File size</span>
         <span class="value" id="result-size"></span>
       </div>
@@ -424,6 +424,8 @@
 
   let selectedFile = null;
   let currentMd5 = null;
+  // Incremented whenever the displayed result should stop tracking a pending lookup.
+  let lookupToken = 0;
 
   function relativeTime(date) {
     const diff = Math.floor((Date.now() - new Date(date)) / 1000);
@@ -439,6 +441,17 @@
     return (bytes / 1024 / 1024).toFixed(2) + ' MB';
   }
 
+  function isValidMd5(value) {
+    return /^[0-9a-f]{32}$/i.test(value);
+  }
+
+  function setHashParam(md5) {
+    const url = new URL(window.location.href);
+    if (md5) url.searchParams.set('hash', md5);
+    else url.searchParams.delete('hash');
+    history.replaceState(null, '', url);
+  }
+
   function setFile(file) {
     if (!file) return;
     selectedFile = file;
@@ -446,6 +459,8 @@
     previewSize.textContent = formatBytes(file.size);
     filePreview.style.display = 'flex';
     scanBtn.disabled = false;
+    lookupToken++;
+    setHashParam(null);
     hideResult();
     hideError();
   }
@@ -455,6 +470,8 @@
     fileInput.value = '';
     filePreview.style.display = 'none';
     scanBtn.disabled = true;
+    lookupToken++;
+    setHashParam(null);
     hideResult();
     hideError();
   }
@@ -526,11 +543,30 @@
     }
   }
 
+  // Restore a previously stored scan result from a ?hash=<MD5> link.
+  async function loadHashResult(hash) {
+    const token = ++lookupToken;
+    try {
+      const resp = await fetch('/api/scan/' + encodeURIComponent(hash));
+      const data = await resp.json();
+      // A file was selected or another scan started while this lookup was in flight.
+      if (token !== lookupToken) return;
+      if (!resp.ok) {
+        showError(data.error || 'Could not load the scan result.');
+        return;
+      }
+      showResult(data, { fromLookup: true });
+    } catch {
+      if (token !== lookupToken) return;
+      showError('Network error — could not load the scan result.');
+    }
+  }
+
   // Scan
   scanBtn.addEventListener('click', () => doScan());
   document.getElementById('rescan-btn').addEventListener('click', () => doScan(true));
 
-  function showResult(data) {
+  function showResult(data, { fromLookup = false } = {}) {
     const isMalware = data.isMalware;
     const score = Math.round(data.malwareScore * 100);
 
@@ -552,7 +588,9 @@
     }
 
     document.getElementById('result-verdict').textContent = isMalware ? 'Threat Detected' : 'File is Clean';
-    document.getElementById('result-fname').textContent = data.fileName;
+    const fnameEl = document.getElementById('result-fname');
+    fnameEl.textContent = data.fileName ?? '';
+    fnameEl.style.display = data.fileName ? '' : 'none';
 
     const detRow = document.getElementById('detection-row');
     if (isMalware && data.name) {
@@ -567,7 +605,13 @@
       document.getElementById('score-fill').style.width = score + '%';
     });
 
-    document.getElementById('result-size').textContent = formatBytes(data.fileSize);
+    const sizeRow = document.getElementById('size-row');
+    if (data.fileSize != null) {
+      document.getElementById('result-size').textContent = formatBytes(data.fileSize);
+      sizeRow.style.display = 'flex';
+    } else {
+      sizeRow.style.display = 'none';
+    }
     document.getElementById('result-md5').textContent = data.md5 ?? '—';
     const allow = data.votes?.allow ?? 0;
     const block = data.votes?.block ?? 0;
@@ -579,7 +623,8 @@
     const rescanBtn = document.getElementById('rescan-btn');
     if (data.cached && data.scannedAt) {
       document.getElementById('result-scanned-at').textContent = relativeTime(data.scannedAt);
-      rescanBtn.style.display = data.canRescan ? 'inline-block' : 'none';
+      // A deep link has no file selected, so there is nothing to rescan.
+      rescanBtn.style.display = data.canRescan && !fromLookup ? 'inline-block' : 'none';
       cachedRow.style.display = 'flex';
     } else {
       cachedRow.style.display = 'none';
@@ -595,6 +640,9 @@
     vBlock.disabled = true;
     vBlock.className = 'vote-btn';
     if (currentMd5) checkVoteStatus(currentMd5);
+
+    // Keep the URL shareable: ?hash= restores this result on load.
+    if (!fromLookup && data.md5) setHashParam(data.md5);
   }
 
   async function checkVoteStatus(hash) {
@@ -653,6 +701,13 @@
 
   document.getElementById('vote-allow').addEventListener('click', () => submitVote('allow'));
   document.getElementById('vote-block').addEventListener('click', () => submitVote('block'));
+
+  // Deep link: show the shared result as soon as the page opens.
+  const initialHash = new URLSearchParams(window.location.search).get('hash');
+  if (initialHash) {
+    if (isValidMd5(initialHash)) loadHashResult(initialHash);
+    else showError('Invalid hash in URL.');
+  }
 </script>
 </body>
 </html>

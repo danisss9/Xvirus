@@ -82,6 +82,32 @@ Scans an uploaded file. Accepts `multipart/form-data` with a `file` field (max 2
 }
 ```
 
+### `GET /api/scan/:hash`
+
+Returns the stored scan result for a file MD5 without re-scanning. Used by the web UI to restore a result from a `?hash=<MD5>` link.
+
+- `hash` must be a 32-character MD5 (case-insensitive).
+- Rate limit: 60 requests per 15 minutes per IP.
+- Returns `404` when the hash has never been scanned.
+
+**Response:**
+```json
+{
+  "isMalware": false,
+  "name": "Safe",
+  "malwareScore": 1,
+  "fileName": "example.exe",
+  "fileSize": 102400,
+  "md5": "D41D8CD98F00B204E9800998ECF8427E",
+  "votes": { "allow": 5, "block": 0 },
+  "cached": true,
+  "scannedAt": "2026-01-01T00:00:00.000Z",
+  "canRescan": false
+}
+```
+
+`fileName` and `fileSize` are `null` for results stored before those fields were added; the web UI hides them in that case.
+
 ### `GET /api/vote/:hash`
 
 Returns whether the current IP has already voted for a file identified by its MD5 hash.

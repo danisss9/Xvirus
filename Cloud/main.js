@@ -93,6 +93,9 @@ mongoose.model(
     isMalware: { type: Boolean, required: true },
     name: { type: String },
     malwareScore: { type: Number, required: true },
+    // Kept for ?hash= lookups so a shared link can show which file was scanned.
+    fileName: { type: String },
+    fileSize: { type: Number },
     scannedAt: { type: Date, required: true, default: Date.now },
   }),
 );
@@ -206,6 +209,8 @@ app.post('/api/scan', scanLimiter, upload.single('file'), async (req, res) => {
         isMalware: result.isMalware,
         name: result.name ?? null,
         malwareScore: result.malwareScore,
+        fileName: req.file.originalname,
+        fileSize: req.file.size,
         scannedAt,
       },
       { upsert: true },
@@ -235,6 +240,46 @@ app.post('/api/scan', scanLimiter, upload.single('file'), async (req, res) => {
     activeScanCount--;
     fs.unlink(scanPath, () => {});
     if (scanPath !== tmpPath) fs.unlink(tmpPath, () => {});
+  }
+});
+
+// ---- Scan result lookup -----------------------------------------------------
+// Returns the stored result for an MD5 so the web UI can restore a result from
+// a ?hash= deep link without asking the user to upload the file again.
+app.get('/api/scan/:hash', legacyLimiter, async (req, res) => {
+  const { hash } = req.params;
+  if (!hash || !/^[0-9A-Fa-f]{32}$/.test(hash)) {
+    return res.status(400).json({ error: 'Invalid hash.' });
+  }
+  const normalHash = hash.toUpperCase();
+
+  try {
+    const [scan, votes] = await Promise.all([
+      mongoose.model('scanResults').findOne({ md5: normalHash }).lean(),
+      mongoose.model('submissions').findOne({ hash: normalHash }).lean(),
+    ]);
+
+    if (!scan) {
+      return res.status(404).json({ error: 'No scan result found for this hash.' });
+    }
+
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    res.json({
+      isMalware: scan.isMalware,
+      name: scan.name,
+      malwareScore: scan.malwareScore,
+      // Results stored before these fields existed only have the hash.
+      fileName: scan.fileName ?? null,
+      fileSize: scan.fileSize ?? null,
+      md5: normalHash,
+      votes: { allow: votes?.allow ?? 0, block: votes?.block ?? 0 },
+      cached: true,
+      scannedAt: scan.scannedAt,
+      canRescan: scan.scannedAt < oneDayAgo,
+    });
+  } catch (err) {
+    console.error('[Lookup] Failed:', err.message);
+    res.status(500).json({ error: 'Lookup failed.' });
   }
 });
 
