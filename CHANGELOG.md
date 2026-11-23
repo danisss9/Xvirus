@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [5.2.1]
+
+### Added
+
+- New setting `EnableAIScriptScan` — enables or disables the LLM-based AI script scanner
+  (`AIScript`, `scriptmodel.gguf`). Default: _false_ (opt-in). It works independently of
+  `EnableAIScan`, which controls only the ONNX PE engine.
+
+### Changed
+
+- Update checks skip the `scriptmodel.gguf` download while `EnableAIScriptScan` is disabled, and
+  `DatabaseVersion.ScriptAIModel` is left untouched so the model is fetched once the setting is
+  enabled. `UpdateMethod` gained an optional `IsEnabled` gate for conditional downloads.
+
 ## [5.2.0]
 
 ### Added

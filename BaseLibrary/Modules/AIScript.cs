@@ -13,7 +13,8 @@ namespace Xvirus
     /// <summary>
     /// Script focused AI scanner. Classifies .bat, .cmd, .ps1, .py, .js and .vbs files with a
     /// Qwen Coder GGUF model running on CPU via LLamaSharp. The model output is grammar
-    /// constrained to exactly one of "malicious", "suspicious" or "benign".
+    /// constrained to exactly one of "malicious", "suspicious" or "benign". Requires both
+    /// <see cref="SettingsDTO.EnableAIScan"/> and <see cref="SettingsDTO.EnableAIScriptScan"/>.
     /// </summary>
     public class AIScript
     {
@@ -30,8 +31,8 @@ namespace Xvirus
         private StatelessExecutor? executor;
 
         // LLamaSharp resolves its llama.cpp backend (libllama.so) through relative paths such as
-        // "runtimes/linux-x64/native/<variant>/libllama.so", which it only searches in the process
-        // base directory and the assembly location. Under NativeAOT the assembly location is empty
+        // "runtimes/linux-x64/native/<variant>/libllama.so" or "runtimes/linux-arm64/native/libllama.so",
+        // which it only searches in the process base directory and the assembly location. Under NativeAOT the assembly location is empty
         // and in an embedded node module the base directory is the node executable's, so without an
         // explicit search directory the backend is never found. Register the SDK base folder once,
         // before the first native call, so the backend is found wherever the engine is deployed.
@@ -67,7 +68,7 @@ namespace Xvirus
         {
             var path = Utils.RelativeToFullPath(settings.DatabaseFolder, ModelFileName);
 
-            if (!settings.EnableAIScan || !File.Exists(path))
+            if (!settings.EnableAIScriptScan || !File.Exists(path))
                 return;
 
             try

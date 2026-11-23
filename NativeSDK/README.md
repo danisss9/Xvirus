@@ -1,6 +1,6 @@
 # NativeSDK
 
-Xvirus Native SDK 5.2.0
+Xvirus Native SDK 5.2.1
 
 ## Table of Contents
 
@@ -143,7 +143,8 @@ Settings are located in the `settings.json` file next to the library. Available 
 
 - **EnableSignatures** - Enables signature-based scanning of files. Default: _true_
 - **EnableHeuristics** - Enables heuristics scanning of files. Default: _true_
-- **EnableAIScan** - Enables the XvirusAI scan engines: the ONNX PE model and the script AI model (`.bat`, `.cmd`, `.ps1`, `.py`, `.js`, `.vbs`). Default: _true_
+- **EnableAIScan** - Enables the XvirusAI ONNX PE scan engine. Default: _true_
+- **EnableAIScriptScan** - Enables the LLM-based AI script scanner (`.bat`, `.cmd`, `.ps1`, `.py`, `.js`, `.vbs`). When disabled, update checks skip the `scriptmodel.gguf` model download. Default: _false_
 - **EnableCloudScan** - Enables cloud reputation hash lookups after local engines. Lookups are fail-open: network errors do not block scanning. Default: _false_
 - **OnlyScanExecutables** - When enabled, non-executable files are short-circuited as Safe before hash computation and database lookups. Archives are exempt when `EnableArchiveScan` is on. Default: _false_
 
@@ -183,6 +184,7 @@ Example `settings.json`:
   "EnableSignatures": true,
   "EnableHeuristics": true,
   "EnableAIScan": true,
+  "EnableAIScriptScan": false,
   "EnableCloudScan": false,
   "OnlyScanExecutables": false,
   "HeuristicsLevel": 4,

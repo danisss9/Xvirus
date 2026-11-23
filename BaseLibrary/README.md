@@ -1,6 +1,6 @@
 # BaseLibrary
 
-Xvirus SDK Core Library 5.2.0
+Xvirus SDK Core Library 5.2.1
 
 ## Table of Contents
 
@@ -20,7 +20,7 @@ Xvirus SDK Core Library 5.2.0
 
 `BaseLibrary` is the shared core used by all Xvirus SDK bindings (C#, Native, Node). It provides the scanning engine, AI inference, database management, updater, settings, quarantine, and logging.
 
-**Version:** 5.2.0
+**Version:** 5.2.1
 **Target:** .NET 8 (AOT compatible)
 **Dependencies:** `Microsoft.ML.OnnxRuntime`, `SixLabors.ImageSharp`, `LLamaSharp`
 
@@ -30,19 +30,19 @@ Xvirus SDK Core Library 5.2.0
 
 ## Modules
 
-| Class        | Description                                                                                       |
-|--------------|---------------------------------------------------------------------------------------------------|
-| `Scanner`    | Main scan engine. Runs signature, heuristics, and AI checks against a file or a folder.           |
-| `AI`         | Loads and runs the ONNX model (`model.ai`). Converts PE files to grayscale images for inference.  |
+| Class        | Description                                                                                                                                                                     |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Scanner`    | Main scan engine. Runs signature, heuristics, and AI checks against a file or a folder.                                                                                         |
+| `AI`         | Loads and runs the ONNX model (`model.ai`). Converts PE files to grayscale images for inference.                                                                                |
 | `AIScript`   | Loads and runs the script AI model (`scriptmodel.gguf`, Qwen Coder 1.5B, CPU). Classifies `.bat`, `.cmd`, `.ps1`, `.py`, `.js` and `.vbs` files as malicious/suspicious/benign. |
-| `DB`         | Loads all database files (hash lists, heuristics patterns, vendor list) into memory.              |
-| `Updater`    | Downloads updated database files and AI model from the Xvirus update server.                      |
-| `Settings`   | Reads and writes `settings.json` and `appsettings.json`.                                          |
-| `Rules`      | Manages allow/block rules applied before scanning.                                                |
-| `Quarantine` | Moves detected files to a quarantine folder and tracks quarantine entries.                        |
-| `Logger`     | Logs exceptions to `errorlog.txt`.                                                                |
-| `Utils`      | Shared helpers: path resolution, file reading, certificate extraction, version info.              |
-| `Aho`        | Aho-Corasick pattern matcher used by the heuristics engine.                                       |
+| `DB`         | Loads all database files (hash lists, heuristics patterns, vendor list) into memory.                                                                                            |
+| `Updater`    | Downloads updated database files and AI model from the Xvirus update server.                                                                                                    |
+| `Settings`   | Reads and writes `settings.json` and `appsettings.json`.                                                                                                                        |
+| `Rules`      | Manages allow/block rules applied before scanning.                                                                                                                              |
+| `Quarantine` | Moves detected files to a quarantine folder and tracks quarantine entries.                                                                                                      |
+| `Logger`     | Logs exceptions to `errorlog.txt`.                                                                                                                                              |
+| `Utils`      | Shared helpers: path resolution, file reading, certificate extraction, version info.                                                                                            |
+| `Aho`        | Aho-Corasick pattern matcher used by the heuristics engine.                                                                                                                     |
 
 ### Scanner
 
@@ -80,7 +80,7 @@ float score = aiScript.ScanFile(filePath);      // 1.0 malicious, 0.5 suspicious
 bool isScript = AIScript.IsScriptFile(filePath); // .bat, .cmd, .ps1, .py, .js, .vbs
 ```
 
-Loads the Qwen Coder 1.5B GGUF model (`scriptmodel.gguf`) from the database folder when `EnableAIScan` is on and the file exists. Inference runs on CPU only (`GpuLayerCount = 0`) with a 4096 token context, greedy sampling (temperature 0) and a grammar that constrains the output to exactly one of `malicious`, `suspicious` or `benign`. Script content is truncated to 12000 characters to fit the context window. The `update` command downloads and updates the model from the Xvirus cloud.
+Loads the Qwen Coder 1.5B GGUF model (`scriptmodel.gguf`) from the database folder when `EnableAIScriptScan` is on and the file exists. Inference runs on CPU only (`GpuLayerCount = 0`) with a 4096 token context, greedy sampling (temperature 0) and a grammar that constrains the output to exactly one of `malicious`, `suspicious` or `benign`. Script content is truncated to 12000 characters to fit the context window. The `update` command downloads and updates the model from the Xvirus cloud only while `EnableAIScriptScan` is enabled; with the default _false_ the model download is skipped.
 
 ### Updater
 
@@ -128,7 +128,8 @@ Settings are stored in `settings.json` in the root folder of the consuming appli
 
 - **EnableSignatures** — Enables signature-based scanning. Default: _true_
 - **EnableHeuristics** — Enables heuristics scanning. Default: _true_
-- **EnableAIScan** — Enables the XvirusAI scan engines: the ONNX PE model and the script AI model (`.bat`, `.cmd`, `.ps1`, `.py`, `.js`, `.vbs`). Default: _true_
+- **EnableAIScan** — Enables the XvirusAI ONNX PE scan engine. Default: _true_
+- **EnableAIScriptScan** — Enables the LLM-based AI script scanner (`.bat`, `.cmd`, `.ps1`, `.py`, `.js`, `.vbs`). When disabled, update checks skip the `scriptmodel.gguf` model download. Default: _false_
 
 ### Scan Levels
 
@@ -156,6 +157,7 @@ Example `settings.json`:
   "EnableSignatures": true,
   "EnableHeuristics": true,
   "EnableAIScan": true,
+  "EnableAIScriptScan": false,
   "HeuristicsLevel": 4,
   "AILevel": 10,
   "MaxScanLength": null,

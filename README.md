@@ -1,6 +1,6 @@
 # Xvirus
 
-Xvirus SDK 5.2.0 — Anti-malware scanning engine and desktop protection suite.
+Xvirus SDK 5.2.1 — Anti-malware scanning engine and desktop protection suite.
 
 ## Repository Overview
 

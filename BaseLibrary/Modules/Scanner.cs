@@ -170,7 +170,7 @@ namespace Xvirus
                 }
             }
 
-            if (settings.EnableHeuristics || settings.EnableAIScan)
+            if (settings.EnableHeuristics || settings.EnableAIScan || settings.EnableAIScriptScan)
             {
                 ct.ThrowIfCancellationRequested();
 
@@ -244,7 +244,7 @@ namespace Xvirus
                     return new ScanResult(aiScore, $"AI.{aiScore * 100:00.00}", filePath, (100 - (double)settings.AILevel) / 100);
                 }
 
-                if (settings.EnableAIScan && AIScript.IsScriptFile(filePath) && (settings.MaxAIScriptScanLength == null || fileInfo.Length <= settings.MaxAIScriptScanLength))
+                if (settings.EnableAIScriptScan && AIScript.IsScriptFile(filePath) && (settings.MaxAIScriptScanLength == null || fileInfo.Length <= settings.MaxAIScriptScanLength))
                 {
                     ct.ThrowIfCancellationRequested();
 

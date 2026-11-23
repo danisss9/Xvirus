@@ -64,6 +64,7 @@ namespace Xvirus
                 GetUpdateInfoVersion = (UpdateInfo info) => info.Scriptmodel,
                 GetDatabaseInfoVersion = (DatabaseDTO info) => info.ScriptAIModel,
                 SetDatabaseInfoVersion = (DatabaseDTO info, long value) => info.ScriptAIModel = value,
+                IsEnabled = (SettingsDTO info) => info.EnableAIScriptScan,
             },
         };
 
@@ -86,6 +87,9 @@ namespace Xvirus
 
                 foreach (var updateMethod in UpdateList)
                 {
+                    if (updateMethod.IsEnabled != null && !updateMethod.IsEnabled(settings))
+                        continue;
+
                     var currVersion = updateMethod.GetDatabaseInfoVersion(settings.DatabaseVersion);
                     var versionInfo = updateMethod.GetUpdateInfoVersion(updateInfo);
                     if (versionInfo != null && currVersion != versionInfo.Version)

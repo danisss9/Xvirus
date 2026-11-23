@@ -8,6 +8,7 @@ namespace Xvirus.Model
         public bool EnableSignatures { get; set; } = true;
         public bool EnableHeuristics { get; set; } = true;
         public bool EnableAIScan { get; set; } = true;
+        public bool EnableAIScriptScan { get; set; } = false;
         public bool EnableCloudScan { get; set; } = false;
 
         // Scan Filters
