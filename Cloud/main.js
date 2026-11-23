@@ -146,12 +146,12 @@ app.post('/api/scan', scanLimiter, upload.single('file'), async (req, res) => {
   const force = req.query.force === 'true';
   activeScanCount++;
   const tmpPath = req.file.path;
-  // Multer writes uploads extensionless (e.g. /tmp/ab12cd). The engine gates the
-  // script-AI scanner on the file extension (AIScript.IsScriptFile: .bat/.cmd/
-  // .ps1/.py/.js/.vbs) and archive handling on zip extensions, so scanning the
-  // raw tmp path silently skips those engines — while the local CLI works because
-  // the file on disk keeps its extension. Re-attach the sanitized original
-  // extension before hashing/scanning so cloud matches CLI behaviour.
+  // Multer writes uploads extensionless (e.g. /tmp/ab12cd). The engine gates archive
+  // handling on zip extensions — and, when EnableAIScriptScan is enabled, the script-AI
+  // scanner on .bat/.cmd/.ps1/.py/.js/.vbs — so scanning the raw tmp path silently skips
+  // those engines, while the local CLI works because the file on disk keeps its extension.
+  // Re-attach the sanitized original extension before hashing/scanning so cloud matches
+  // CLI behaviour.
   const originalExt = path.extname(req.file.originalname || '').toLowerCase();
   const safeExt = /^\.[a-z0-9]{1,10}$/.test(originalExt) ? originalExt : '';
   let scanPath = tmpPath;
@@ -197,8 +197,8 @@ app.post('/api/scan', scanLimiter, upload.single('file'), async (req, res) => {
       });
     }
 
-    // Scan (scanPath carries the original extension so extension-gated
-    // engines — script AI, archive unpacking — behave as they do in the CLI).
+    // Scan (scanPath carries the original extension so extension-gated engines —
+    // archive unpacking, and script AI when enabled — behave as they do in the CLI).
     const result = sdk.scan(scanPath);
     const scannedAt = new Date();
 
@@ -469,7 +469,7 @@ app.get('/api/updateInfo', (req, res) => {
     default:
       result.aimodel.downloadUrl = 'https://cloud.xvirus.net/database/model.new.ai';
       result.app = {
-        version: '5.2.0.0',
+        version: '5.2.1.0',
         downloadUrl: 'https://github.com/danisss9/Xvirus/releases',
         description: 'Xvirus Anti-Malware SDK/CLI',
       };

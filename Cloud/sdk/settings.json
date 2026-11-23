@@ -2,6 +2,7 @@
   "EnableSignatures": true,
   "EnableHeuristics": true,
   "EnableAIScan": true,
+  "EnableAIScriptScan": false,
   "EnableCloudScan": false,
   "OnlyScanExecutables": false,
   "HeuristicsLevel": 5,
