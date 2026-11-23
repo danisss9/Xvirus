@@ -22,7 +22,7 @@ namespace XvirusService.Api
                 }
             });
 
-            app.MapPost("/update/check", (SettingsService settingsService, DB db, AI ai) =>
+            app.MapPost("/update/check", (SettingsService settingsService, DB db, AI ai, AIScript aiScript) =>
             {
                 try
                 {
@@ -30,6 +30,7 @@ namespace XvirusService.Api
                     settingsService.Reload();
                     db.Load(settingsService.Settings);
                     ai.Load(settingsService.Settings);
+                    aiScript.Load(settingsService.Settings);
 
                     var dto = new UpdateStatusDTO
                     {

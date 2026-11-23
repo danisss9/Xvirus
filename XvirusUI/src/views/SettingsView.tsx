@@ -11,6 +11,7 @@ export default function SettingsView() {
     enableSignatures: true,
     enableHeuristics: true,
     enableAIScan: true,
+    enableAIScriptScan: false,
     enableCloudScan: false,
     onlyScanExecutables: false,
     heuristicsLevel: 4,
@@ -19,9 +20,10 @@ export default function SettingsView() {
     maxHeuristicsPeScanLength: 20971520,
     maxHeuristicsOthersScanLength: 10485760,
     maxAIScanLength: 20971520,
+    maxAIScriptScanLength: 1048576,
     checkSDKUpdates: true,
     databaseFolder: 'Database',
-    databaseVersion: { aiModel: 0, mainDB: 0, dailyDB: 0, whiteDB: 0, dailywlDB: 0, heurDB: 0, heurDB2: 0, malvendorDB: 0 }
+    databaseVersion: { aiModel: 0, scriptAIModel: 0, mainDB: 0, dailyDB: 0, whiteDB: 0, dailywlDB: 0, heurDB: 0, heurDB2: 0, malvendorDB: 0 }
   });
 
   const [appSettings, setAppSettings] = useState<AppSettingsDTO>({
@@ -283,6 +285,16 @@ export default function SettingsView() {
                   <option value="20">Low</option>
                   <option value="0">Off</option>
                 </select>
+              </div>
+
+              <div class="setting-item">
+                <label class="setting-label">AI script scanning (LLM)</label>
+                <input
+                  type="checkbox"
+                  class="toggle-switch"
+                  checked={settings.enableAIScriptScan ?? false}
+                  onChange={(e: any) => { handleSettingChange('enableAIScriptScan', e.currentTarget.checked); saveAllSettings(); }}
+                />
               </div>
 
               <div class="setting-item">

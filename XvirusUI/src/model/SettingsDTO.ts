@@ -1,5 +1,6 @@
 export interface DatabaseVersionDTO {
   aiModel: number;
+  scriptAIModel: number;
   mainDB: number;
   dailyDB: number;
   whiteDB: number;
@@ -14,6 +15,7 @@ export interface SettingsDTO {
   enableSignatures: boolean;
   enableHeuristics: boolean;
   enableAIScan: boolean;
+  enableAIScriptScan: boolean;
   enableCloudScan: boolean;
 
   // scan filters
@@ -28,6 +30,7 @@ export interface SettingsDTO {
   maxHeuristicsPeScanLength: number | null;
   maxHeuristicsOthersScanLength: number | null;
   maxAIScanLength: number | null;
+  maxAIScriptScanLength: number | null;
 
   // updates
   checkSDKUpdates: boolean;
