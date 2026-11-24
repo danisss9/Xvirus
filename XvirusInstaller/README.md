@@ -27,7 +27,7 @@ XvirusInstaller/resources/
 ## Building
 
 ### Prerequisites
-- Node.js 16+ with npm
+- Node.js 26+ (current LTS) with npm
 - Neutralino CLI (`neu`)
 
 ### Build Commands

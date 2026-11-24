@@ -63,12 +63,12 @@ public static class XvirusNodeSDK
     /// Loads the Xvirus engine and all detection databases.
     /// Call this once before scanning. Pass <c>force=true</c> to reload.
     /// </summary>
-    public static void Load(bool force = false)
+    public static void Load(bool? force = null)
     {
-        if (force)
+        if (force == true)
             Unload();
 
-        if (force || Scanner == null)
+        if (Scanner == null)
         {
             var settings = Settings.Load();
             var database = new DB(settings);
@@ -84,8 +84,11 @@ public static class XvirusNodeSDK
     /// </summary>
     public static void Unload()
     {
+        // Dispose native inference handles (ONNX Runtime / llama.cpp) while the host process is
+        // still alive. Do not force a collection here: running finalizers during unload makes the
+        // ONNX Runtime SafeHandles crash the process.
+        Scanner?.Dispose();
         Scanner = null;
-        GC.Collect();
     }
 
     /// <summary>
@@ -160,12 +163,12 @@ public static class XvirusNodeSDK
     /// When <c>true</c>, reloads the engine databases after a successful update.
     /// </param>
     /// <returns>A JSON string describing available updates.</returns>
-    public static string CheckUpdates(bool loadDBAfterUpdate = false)
+    public static string CheckUpdates(bool? loadDBAfterUpdate = null)
     {
         var settings = Settings.Load();
         var result = Updater.CheckUpdates(settings);
 
-        if (loadDBAfterUpdate)
+        if (loadDBAfterUpdate == true)
             Load(true);
 
         return result;

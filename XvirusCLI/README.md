@@ -1,6 +1,6 @@
 # XvirusCLI
 
-Xvirus Command Line Interface 5.2.1
+Xvirus Command Line Interface 5.2.2
 
 ## Table of Contents
 

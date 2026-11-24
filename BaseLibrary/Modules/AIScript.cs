@@ -66,6 +66,9 @@ namespace Xvirus
 
         public void Load(SettingsDTO settings)
         {
+            // Release the previous model before loading a new one on reloads (or when disabled).
+            Unload();
+
             var path = Utils.RelativeToFullPath(settings.DatabaseFolder, ModelFileName);
 
             if (!settings.EnableAIScriptScan || !File.Exists(path))

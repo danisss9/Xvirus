@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using Xvirus.Model;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp;
@@ -12,9 +13,63 @@ using SixLabors.ImageSharp.Formats.Png;
 
 namespace Xvirus
 {
-    public class AI
+    public class AI : IDisposable
     {
         private InferenceSession? model;
+
+        private static readonly object NativeLoadLock = new();
+        private static bool NativeLoaded;
+
+        /// <summary>
+        /// Preloads the ONNX Runtime native libraries from the SDK base folder. On Windows the OS
+        /// ships its own (older) onnxruntime.dll in System32, which otherwise shadows the bundled
+        /// runtime and makes InferenceSession creation fail with an API-version mismatch.
+        /// </summary>
+        private static void LoadNativeRuntime()
+        {
+            lock (NativeLoadLock)
+            {
+                if (NativeLoaded)
+                    return;
+
+                foreach (var name in GetNativeLibraryNames())
+                {
+                    var path = Path.Combine(Utils.CurrentDir, name);
+                    if (!File.Exists(path))
+                        continue;
+
+                    try
+                    {
+                        NativeLibrary.Load(path);
+                    }
+                    catch
+                    {
+                        // Fall back to the default loader; InferenceSession will report the error.
+                    }
+                }
+
+                NativeLoaded = true;
+            }
+        }
+
+        private static IEnumerable<string> GetNativeLibraryNames()
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                yield return "onnxruntime_providers_shared.dll";
+                yield return "onnxruntime.dll";
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                yield return "libonnxruntime_providers_shared.dylib";
+                yield return "libonnxruntime.dylib";
+            }
+            else
+            {
+                yield return "libonnxruntime_providers_shared.so";
+                yield return "libonnxruntime.so";
+            }
+        }
 
         public AI(SettingsDTO settings)
         {
@@ -23,12 +78,17 @@ namespace Xvirus
 
         public void Load(SettingsDTO settings)
         {
+            // Release the previous session before loading a new one on reloads.
+            model?.Dispose();
+            model = null;
+
             var path = Utils.RelativeToFullPath(settings.DatabaseFolder, "model.ai");
 
             if (settings.EnableAIScan && File.Exists(path))
             {
                 try
                 {
+                    LoadNativeRuntime();
                     model = new InferenceSession(path);
                 }
                 catch
@@ -36,6 +96,12 @@ namespace Xvirus
                     model = null;
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            model?.Dispose();
+            model = null;
         }
 
         public float ScanFile(string filePath)

@@ -1,6 +1,6 @@
 # NativeSDK
 
-Xvirus Native SDK 5.2.1
+Xvirus Native SDK 5.2.2
 
 ## Table of Contents
 

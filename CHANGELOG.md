@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [5.2.2]
+
+### Changed
+
+- SDK and CLI builds now use Node.js 26 LTS. The GitHub release workflows, Cloud Docker image,
+  and CapRover deployments were updated accordingly.
+- XvirusUI and XvirusInstaller now use Neutralino.js 6.10.0.
+- NodeSDK updated to Microsoft.JavaScript.NodeApi 0.9 and ONNX Runtime 1.24.4.
+
+### Fixed
+
+- NodeSDK `unload()` no longer crashes the process on exit. The scanner now disposes its ONNX
+  Runtime session and LLamaSharp model while the host process is still alive instead of relying on
+  finalizers during teardown.
+- `checkUpdates()` and `checkUpdates(true)` no longer crash after a database download or engine
+  reload. Reloading the engine (`load(true)`) is also fixed.
+- NodeSDK now preloads the bundled ONNX Runtime from the SDK folder, preventing Windows from
+  loading the older `System32\onnxruntime.dll` and silently disabling AI scanning.
+- `load()` and `checkUpdates()` can be called without arguments; optional boolean parameters are
+  now handled correctly.
+- Cloud scanner updated to the 5.2.2 Linux NodeSDK binaries.
+
 ## [5.2.1]
 
 ### Added

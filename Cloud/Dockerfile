@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     libgomp1 \
     libstdc++6 \
     --no-install-recommends \
- && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
+ && curl -fsSL https://deb.nodesource.com/setup_26.x | bash - \
  && apt-get install -y nodejs \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*

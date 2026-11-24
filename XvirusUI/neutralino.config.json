@@ -38,7 +38,7 @@
   "cli": {
     "binaryName": "xvirus-firewall",
     "resourcesPath": "/browser/",
-    "binaryVersion": "6.5.0",
-    "clientVersion": "6.5.0"
+    "binaryVersion": "6.10.0",
+    "clientVersion": "6.10.0"
   }
 }

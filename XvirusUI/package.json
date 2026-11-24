@@ -12,7 +12,7 @@
     "prod:service:fw": "dotnet publish ../XvirusService/XvirusService.csproj /p:PublishProfile=Windows"
   },
   "dependencies": {
-    "@neutralinojs/lib": "^6.5.0",
+    "@neutralinojs/lib": "^6.10.0",
     "preact": "^10.28.4"
   },
   "devDependencies": {

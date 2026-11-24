@@ -1,6 +1,6 @@
 # BaseLibrary
 
-Xvirus SDK Core Library 5.2.1
+Xvirus SDK Core Library 5.2.2
 
 ## Table of Contents
 
@@ -20,7 +20,7 @@ Xvirus SDK Core Library 5.2.1
 
 `BaseLibrary` is the shared core used by all Xvirus SDK bindings (C#, Native, Node). It provides the scanning engine, AI inference, database management, updater, settings, quarantine, and logging.
 
-**Version:** 5.2.1
+**Version:** 5.2.2
 **Target:** .NET 8 (AOT compatible)
 **Dependencies:** `Microsoft.ML.OnnxRuntime`, `SixLabors.ImageSharp`, `LLamaSharp`
 

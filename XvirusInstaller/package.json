@@ -12,7 +12,7 @@
     "dev": "vite build && neu build && neu run"
   },
   "dependencies": {
-    "@neutralinojs/lib": "^6.5.0",
+    "@neutralinojs/lib": "^6.10.0",
     "preact": "^10.28.4"
   },
   "devDependencies": {

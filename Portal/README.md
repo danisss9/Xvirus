@@ -8,7 +8,7 @@ Serves the Xvirus Portal single-page application from the `public/` directory. A
 
 ## Minimum Requirements
 
-- Node.js 18 or later
+- Node.js 26 or later (current LTS)
 
 ## Get Started
 

@@ -11,7 +11,7 @@
 		<Nullable>enable</Nullable>
 		<InvariantGlobalization>true</InvariantGlobalization>
 		<AssemblyName>XvirusNodeSDK</AssemblyName>
-		<Version>5.2.1.0</Version>
+		<Version>5.2.2.0</Version>
 		<Authors>Xvirus</Authors>
 		<Company>Xvirus</Company>
 		<Product>XvirusNodeSDK</Product>
@@ -25,12 +25,45 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.JavaScript.NodeApi" Version="0.7.*" />
-		<PackageReference Include="Microsoft.JavaScript.NodeApi.Generator" Version="0.7.*" />
+		<PackageReference Include="Microsoft.JavaScript.NodeApi" Version="0.9.*" />
+		<PackageReference Include="Microsoft.JavaScript.NodeApi.Generator" Version="0.9.*" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\BaseLibrary\BaseLibrary.csproj" />
 	</ItemGroup>
+
+	<!--
+		NodeApi 0.9 generates an AOT module loader that imports the `node-api-dotnet` npm
+		package (with a TFM subpath). The package's built-in AOT transform only rewrites the
+		plain import and runs before the loader is copied to the publish directory, so rewrite
+		the published loader to use the direct AOT path (as 0.7 did).
+	-->
+	<UsingTask TaskName="PatchNodeApiAotLoaderTask" TaskFactory="RoslynCodeTaskFactory"
+		AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+		<ParameterGroup>
+			<TargetFile ParameterType="System.String" Required="true" />
+		</ParameterGroup>
+		<Task>
+			<Using Namespace="System.IO" />
+			<Using Namespace="System.Text.RegularExpressions" />
+			<Code Type="Fragment" Language="cs"><![CDATA[
+				if (File.Exists(TargetFile))
+				{
+					string js = File.ReadAllText(TargetFile);
+					js = Regex.Replace(js, "import dotnet from 'node-api-dotnet[^']*';", "const dotnet = undefined;");
+					js = Regex.Replace(js, "const dotnet = require\\('node-api-dotnet[^']*'\\);", "const dotnet = undefined;");
+					File.WriteAllText(TargetFile, js);
+				}
+			]]></Code>
+		</Task>
+	</UsingTask>
+
+	<Target Name="PatchNodeApiAotLoader" AfterTargets="RenameToDotNode"
+		Condition="'$(PublishNodeModule)' == 'true'">
+		<PatchNodeApiAotLoaderTask TargetFile="$(PublishDir)$(TargetName).js" />
+		<PatchNodeApiAotLoaderTask TargetFile="$(PublishDir)$(TargetName).cjs" />
+		<PatchNodeApiAotLoaderTask TargetFile="$(PublishDir)$(TargetName).mjs" />
+	</Target>
 
 </Project>

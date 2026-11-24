@@ -8,7 +8,7 @@ Hosts the Xvirus Cloud Scanner web UI and its API. Integrates the [NodeSDK](../N
 
 ## Minimum Requirements
 
-- Node.js 18 or later
+- Node.js 26 or later (current LTS)
 - MongoDB instance (URI via environment variable)
 - NodeSDK binary built for Linux x64 (see [Build SDK](#build-sdk))
 

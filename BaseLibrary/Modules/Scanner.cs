@@ -9,7 +9,7 @@ using Xvirus.Model;
 
 namespace Xvirus
 {
-    public class Scanner
+    public class Scanner : IDisposable
     {
         public readonly SettingsDTO settings;
         private readonly DB database;
@@ -30,6 +30,24 @@ namespace Xvirus
             this.ai = ai;
             this.aiScript = aiScript;
             this.rules = rules;
+        }
+
+        /// <summary>
+        /// Cancels any in-progress scans and releases native inference resources (ONNX Runtime and
+        /// llama.cpp). Call this before dropping the scanner so native handles are freed while the
+        /// host process is still alive.
+        /// </summary>
+        public void Dispose()
+        {
+            foreach (var kvp in _activeScans)
+            {
+                try { kvp.Value.Cancel(); } catch (ObjectDisposedException) { }
+                kvp.Value.Dispose();
+            }
+            _activeScans.Clear();
+
+            ai.Dispose();
+            aiScript.Unload();
         }
 
         private CancellationTokenSource RegisterScan(string path)

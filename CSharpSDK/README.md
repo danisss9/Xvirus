@@ -1,6 +1,6 @@
 # CSharpSDK
 
-Xvirus C# SDK 5.2.1
+Xvirus C# SDK 5.2.2
 
 ## Table of Contents
 

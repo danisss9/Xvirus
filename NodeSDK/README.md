@@ -1,6 +1,6 @@
 # Xvirus Node.js SDK
 
-Xvirus SDK 5.2.1 — Node.js native addon built with .NET Native AOT.
+Xvirus SDK 5.2.2 — Node.js native addon built with .NET Native AOT.
 
 The module ships as a pre-compiled `.node` binary paired with a generated `.js` ESM wrapper. No .NET runtime is required on the target machine.
 
@@ -29,7 +29,7 @@ To **build** the native module you need:
 
 To **run** the native module you need:
 
-- Node.js 18 or later
+- Node.js 18 or later (tested with Node.js 26 LTS)
 
 The following operating systems are supported:
 

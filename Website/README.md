@@ -8,7 +8,7 @@ Serves the Xvirus website and handles the contact form and file/URL submission e
 
 ## Minimum Requirements
 
-- Node.js 18 or later
+- Node.js 26 or later (current LTS)
 - MongoDB instance (URI via environment variable)
 - SMTP server for outbound email
 

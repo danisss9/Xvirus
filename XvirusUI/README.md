@@ -20,7 +20,7 @@ Xvirus User Interface 5.1.2
 
 To develop or build XvirusUI you need:
 
-- Node.js 20+ - [download](https://nodejs.org/)
+- Node.js 26+ (current LTS) - [download](https://nodejs.org/)
 - Neutralino CLI - [install](https://neutralino.js.org/docs/getting-started/installation)
 
 To run XvirusUI you need:
