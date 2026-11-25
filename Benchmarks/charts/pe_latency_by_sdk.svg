@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="420" viewBox="0 0 860 420" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif">
+<rect x="0.5" y="0.5" width="859" height="419" rx="10" fill="#FFFFFF" stroke="#E6E9EF"/>
+<rect x="0" y="0" width="6" height="420" rx="3" fill="#00A651"/>
+<text x="28" y="34" font-size="17" font-weight="700" fill="#0B1220">PE scan time by file size</text>
+<text x="28" y="55" font-size="12.5" fill="#4A5568">Default engines · median per scan, log–log · files &gt;20 MB skip heuristics/AI (MaxHeuristicsPeScanLength)</text>
+<text x="840" y="408" font-size="10.5" font-weight="700" fill="#00A651" text-anchor="end" letter-spacing="1">XVIRUS</text>
+<rect x="28" y="69" width="11" height="11" rx="3" fill="#00A651"/>
+<text x="44" y="78" font-size="12" fill="#4A5568">C# SDK</text>
+<rect x="109.2" y="69" width="11" height="11" rx="3" fill="#2F6FDB"/>
+<text x="125.2" y="78" font-size="12" fill="#4A5568">Native SDK</text>
+<rect x="219.2" y="69" width="11" height="11" rx="3" fill="#E8890C"/>
+<text x="235.2" y="78" font-size="12" fill="#4A5568">Node.js SDK</text>
+<rect x="336.4" y="69" width="11" height="11" rx="3" fill="#8A3FC7"/>
+<text x="352.4" y="78" font-size="12" fill="#4A5568">CLI</text>
+<line x1="78" y1="362.0" x2="720" y2="362.0" stroke="#E6E9EF"/>
+<text x="70" y="366.0" font-size="10.5" fill="#8A94A6" text-anchor="end">1.00 ms</text>
+<line x1="78" y1="272.0" x2="720" y2="272.0" stroke="#E6E9EF"/>
+<text x="70" y="276.0" font-size="10.5" fill="#8A94A6" text-anchor="end">10.0 ms</text>
+<line x1="78" y1="182.0" x2="720" y2="182.0" stroke="#E6E9EF"/>
+<text x="70" y="186.0" font-size="10.5" fill="#8A94A6" text-anchor="end">100 ms</text>
+<line x1="78" y1="92.0" x2="720" y2="92.0" stroke="#E6E9EF"/>
+<text x="70" y="96.0" font-size="10.5" fill="#8A94A6" text-anchor="end">1,000 ms</text>
+<text x="78.0" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">16KB</text>
+<text x="253.0" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">128KB</text>
+<text x="369.7" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">512KB</text>
+<text x="486.5" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">2MB</text>
+<text x="603.2" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">8MB</text>
+<text x="671.5" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">18MB</text>
+<text x="720.0" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">32MB</text>
+<line x1="78" y1="362" x2="720" y2="362" stroke="#8A94A6"/>
+<text x="18" y="227.0" font-size="11" fill="#4A5568" transform="rotate(-90 18 227.0)" text-anchor="middle">milliseconds</text>
+<polyline fill="none" stroke="#00A651" stroke-width="2" stroke-linejoin="round" points="78.0,311.8 253.0,286.2 369.7,251.2 486.5,201.5 603.2,152.0 671.5,120.1 720.0,181.0"/>
+<circle cx="78.0" cy="311.8" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>C# SDK · 16KB: 3.62 ms</title></circle>
+<circle cx="253.0" cy="286.2" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>C# SDK · 128KB: 6.96 ms</title></circle>
+<circle cx="369.7" cy="251.2" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>C# SDK · 512KB: 17.0 ms</title></circle>
+<circle cx="486.5" cy="201.5" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>C# SDK · 2MB: 60.8 ms</title></circle>
+<circle cx="603.2" cy="152.0" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>C# SDK · 8MB: 216 ms</title></circle>
+<circle cx="671.5" cy="120.1" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>C# SDK · 18MB: 487 ms</title></circle>
+<circle cx="720.0" cy="181.0" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>C# SDK · 32MB: 103 ms</title></circle>
+<polyline fill="none" stroke="#2F6FDB" stroke-width="2" stroke-linejoin="round" points="78.0,310.5 253.0,285.6 369.7,246.9 486.5,199.2 603.2,150.6 671.5,118.8 720.0,181.1"/>
+<circle cx="78.0" cy="310.5" r="4" fill="#2F6FDB" stroke="#FFFFFF" stroke-width="2"><title>Native SDK · 16KB: 3.74 ms</title></circle>
+<circle cx="253.0" cy="285.6" r="4" fill="#2F6FDB" stroke="#FFFFFF" stroke-width="2"><title>Native SDK · 128KB: 7.06 ms</title></circle>
+<circle cx="369.7" cy="246.9" r="4" fill="#2F6FDB" stroke="#FFFFFF" stroke-width="2"><title>Native SDK · 512KB: 19.0 ms</title></circle>
+<circle cx="486.5" cy="199.2" r="4" fill="#2F6FDB" stroke="#FFFFFF" stroke-width="2"><title>Native SDK · 2MB: 64.4 ms</title></circle>
+<circle cx="603.2" cy="150.6" r="4" fill="#2F6FDB" stroke="#FFFFFF" stroke-width="2"><title>Native SDK · 8MB: 223 ms</title></circle>
+<circle cx="671.5" cy="118.8" r="4" fill="#2F6FDB" stroke="#FFFFFF" stroke-width="2"><title>Native SDK · 18MB: 504 ms</title></circle>
+<circle cx="720.0" cy="181.1" r="4" fill="#2F6FDB" stroke="#FFFFFF" stroke-width="2"><title>Native SDK · 32MB: 102 ms</title></circle>
+<polyline fill="none" stroke="#E8890C" stroke-width="2" stroke-linejoin="round" points="78.0,309.8 253.0,285.1 369.7,248.7 486.5,199.9 603.2,150.2 671.5,118.1 720.0,180.9"/>
+<circle cx="78.0" cy="309.8" r="4" fill="#E8890C" stroke="#FFFFFF" stroke-width="2"><title>Node.js SDK · 16KB: 3.80 ms</title></circle>
+<circle cx="253.0" cy="285.1" r="4" fill="#E8890C" stroke="#FFFFFF" stroke-width="2"><title>Node.js SDK · 128KB: 7.16 ms</title></circle>
+<circle cx="369.7" cy="248.7" r="4" fill="#E8890C" stroke="#FFFFFF" stroke-width="2"><title>Node.js SDK · 512KB: 18.1 ms</title></circle>
+<circle cx="486.5" cy="199.9" r="4" fill="#E8890C" stroke="#FFFFFF" stroke-width="2"><title>Node.js SDK · 2MB: 63.3 ms</title></circle>
+<circle cx="603.2" cy="150.2" r="4" fill="#E8890C" stroke="#FFFFFF" stroke-width="2"><title>Node.js SDK · 8MB: 226 ms</title></circle>
+<circle cx="671.5" cy="118.1" r="4" fill="#E8890C" stroke="#FFFFFF" stroke-width="2"><title>Node.js SDK · 18MB: 513 ms</title></circle>
+<circle cx="720.0" cy="180.9" r="4" fill="#E8890C" stroke="#FFFFFF" stroke-width="2"><title>Node.js SDK · 32MB: 103 ms</title></circle>
+<polyline fill="none" stroke="#8A3FC7" stroke-width="2" stroke-linejoin="round" points="78.0,307.5 253.0,286.3 369.7,251.5 486.5,201.5 603.2,152.0 671.5,119.6 720.0,181.1"/>
+<circle cx="78.0" cy="307.5" r="4" fill="#8A3FC7" stroke="#FFFFFF" stroke-width="2"><title>CLI · 16KB: 4.03 ms</title></circle>
+<circle cx="253.0" cy="286.3" r="4" fill="#8A3FC7" stroke="#FFFFFF" stroke-width="2"><title>CLI · 128KB: 6.93 ms</title></circle>
+<circle cx="369.7" cy="251.5" r="4" fill="#8A3FC7" stroke="#FFFFFF" stroke-width="2"><title>CLI · 512KB: 16.9 ms</title></circle>
+<circle cx="486.5" cy="201.5" r="4" fill="#8A3FC7" stroke="#FFFFFF" stroke-width="2"><title>CLI · 2MB: 60.8 ms</title></circle>
+<circle cx="603.2" cy="152.0" r="4" fill="#8A3FC7" stroke="#FFFFFF" stroke-width="2"><title>CLI · 8MB: 215 ms</title></circle>
+<circle cx="671.5" cy="119.6" r="4" fill="#8A3FC7" stroke="#FFFFFF" stroke-width="2"><title>CLI · 18MB: 494 ms</title></circle>
+<circle cx="720.0" cy="181.1" r="4" fill="#8A3FC7" stroke="#FFFFFF" stroke-width="2"><title>CLI · 32MB: 102 ms</title></circle>
+<text x="729.0" y="184.9" font-size="11" fill="#4A5568">Node.js SDK: 103 ms</text>
+<text x="729.0" y="198.9" font-size="11" fill="#4A5568">C# SDK: 103 ms</text>
+<text x="729.0" y="212.9" font-size="11" fill="#4A5568">CLI: 102 ms</text>
+<text x="729.0" y="226.9" font-size="11" fill="#4A5568">Native SDK: 102 ms</text>
+</svg>

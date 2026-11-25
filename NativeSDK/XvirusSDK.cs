@@ -83,8 +83,11 @@ namespace Xvirus
                 var folderPathAux = Marshal.PtrToStringUni(folderPath);
                 var results = ScanFolderAux(folderPathAux!);
 
+                // One extra, all-zero element terminates the array (Path == NULL) so C
+                // callers know where it ends.
                 var structSize = Marshal.SizeOf<ScanResult>();
-                var unmanagedArray = Marshal.AllocHGlobal(results.Length * structSize);
+                var unmanagedArray = Marshal.AllocHGlobal((results.Length + 1) * structSize);
+                Marshal.StructureToPtr(new ScanResult(), new IntPtr(unmanagedArray.ToInt64() + results.Length * structSize), false);
 
                 for (int i = 0; i < results.Length; i++)
                 {
@@ -106,7 +109,7 @@ namespace Xvirus
                         };
 
                     var structPtr = new IntPtr(unmanagedArray.ToInt64() + i * structSize);
-                    Marshal.StructureToPtr(result, structPtr, false);
+                    Marshal.StructureToPtr(item, structPtr, false);
                 }
 
                 return unmanagedArray;
@@ -123,7 +126,7 @@ namespace Xvirus
             try
             {
                 var folderPathAux = Marshal.PtrToStringUni(folderPath);
-                var result = JsonSerializer.Serialize(ScanFolderAux(folderPathAux!), SourceGenerationContext.Default.ScanResult);
+                var result = JsonSerializer.Serialize(ScanFolderAux(folderPathAux!), SourceGenerationContext.Default.ScanResultArray);
                 return new ActionResult() { Sucess = true, Result = Marshal.StringToHGlobalUni(result) };
             }
             catch (Exception e)

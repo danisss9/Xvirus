@@ -1,0 +1,44 @@
+{
+ "sdk": "CLI",
+ "tag": "load_steady_CLI_2",
+ "process_wall_ms": 928.9901000011014,
+ "process": {
+  "cpu_ms": 1125.0,
+  "ws_mb": 0.04296875,
+  "peak_ws_mb": 446.94140625,
+  "private_mb": 0.0859375,
+  "peak_private_mb": 424.1171875
+ },
+ "ops": [
+  {
+   "op": "baseline",
+   "path": "",
+   "times_ms": [
+    0.5751999997301027
+   ],
+   "cpu_ms": 31.25,
+   "ws_mb": 21.3828125,
+   "peak_ws_mb": 21.3828125,
+   "private_mb": 6.0234375,
+   "peak_private_mb": 6.0234375,
+   "result": "",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "load",
+   "path": "",
+   "times_ms": [
+    851.9009000010556
+   ],
+   "cpu_ms": 1062.5,
+   "ws_mb": 433.0859375,
+   "peak_ws_mb": 446.94140625,
+   "private_mb": 409.3203125,
+   "result": "Load successful",
+   "files": 0,
+   "threads": 1
+  }
+ ],
+ "exit": 0
+}

@@ -1,0 +1,2 @@
+{"op":"baseline","path":"","times_ms":[],"cpu_ms":0,"ws_mb":23.796875,"peak_ws_mb":24.02734375,"private_mb":7.0390625,"result":"","files":0,"threads":1}
+{"op":"load","path":"","times_ms":[850.3918],"cpu_ms":984.375,"ws_mb":435.40234375,"peak_ws_mb":449.07421875,"private_mb":409.79296875,"result":"ok","files":0,"threads":1}

@@ -6,6 +6,7 @@ namespace BaseLibrary.Serializers
 {
     [JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Default)]
     [JsonSerializable(typeof(ScanResult))]
+    [JsonSerializable(typeof(ScanResult[]))]
     [JsonSerializable(typeof(SettingsDTO))]
     [JsonSerializable(typeof(AppSettingsDTO))]
     [JsonSerializable(typeof(DatabaseDTO))]

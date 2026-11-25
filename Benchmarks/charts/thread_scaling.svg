@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="420" viewBox="0 0 860 420" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif">
+<rect x="0.5" y="0.5" width="859" height="419" rx="10" fill="#FFFFFF" stroke="#E6E9EF"/>
+<rect x="0" y="0" width="6" height="420" rx="3" fill="#00A651"/>
+<text x="28" y="34" font-size="17" font-weight="700" fill="#0B1220">Multi-threaded scan scaling</text>
+<text x="28" y="55" font-size="12.5" fill="#4A5568">C# SDK · mixed folder, Parallel.ForEach over Scan() · files per second</text>
+<text x="840" y="408" font-size="10.5" font-weight="700" fill="#00A651" text-anchor="end" letter-spacing="1">XVIRUS</text>
+<line x1="78" y1="362.0" x2="720" y2="362.0" stroke="#E6E9EF"/>
+<text x="70" y="366.0" font-size="10.5" fill="#8A94A6" text-anchor="end">0</text>
+<line x1="78" y1="295.7" x2="720" y2="295.7" stroke="#E6E9EF"/>
+<text x="70" y="299.7" font-size="10.5" fill="#8A94A6" text-anchor="end">250</text>
+<line x1="78" y1="229.3" x2="720" y2="229.3" stroke="#E6E9EF"/>
+<text x="70" y="233.3" font-size="10.5" fill="#8A94A6" text-anchor="end">500</text>
+<line x1="78" y1="163.0" x2="720" y2="163.0" stroke="#E6E9EF"/>
+<text x="70" y="167.0" font-size="10.5" fill="#8A94A6" text-anchor="end">750</text>
+<line x1="78" y1="96.7" x2="720" y2="96.7" stroke="#E6E9EF"/>
+<text x="70" y="100.7" font-size="10.5" fill="#8A94A6" text-anchor="end">1,000</text>
+<text x="78.0" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">1T</text>
+<text x="136.4" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">2T</text>
+<text x="253.1" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">4T</text>
+<text x="369.8" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">6T</text>
+<text x="486.5" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">8T</text>
+<text x="720.0" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">12T</text>
+<line x1="78" y1="362" x2="720" y2="362" stroke="#8A94A6"/>
+<text x="18" y="218.0" font-size="11" fill="#4A5568" transform="rotate(-90 18 218.0)" text-anchor="middle">files per second</text>
+<polyline fill="none" stroke="#00A651" stroke-width="2" stroke-linejoin="round" points="78.0,301.1 136.4,255.2 253.1,189.9 369.8,156.3 486.5,116.9 720.0,100.2"/>
+<circle cx="78.0" cy="301.1" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>C# SDK · 1T: 230</title></circle>
+<circle cx="136.4" cy="255.2" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>C# SDK · 2T: 402</title></circle>
+<circle cx="253.1" cy="189.9" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>C# SDK · 4T: 649</title></circle>
+<circle cx="369.8" cy="156.3" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>C# SDK · 6T: 775</title></circle>
+<circle cx="486.5" cy="116.9" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>C# SDK · 8T: 924</title></circle>
+<circle cx="720.0" cy="100.2" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>C# SDK · 12T: 987</title></circle>
+<text x="729.0" y="104.2" font-size="11" fill="#4A5568">C# SDK: 987</text>
+</svg>

@@ -1,6 +1,7 @@
 ﻿using BaseLibrary.Serializers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using Xvirus.Model;
@@ -82,8 +83,11 @@ namespace Xvirus
 
         public static string ScanFolderString(string folderPath)
         {
-            var scanResultsString = JsonSerializer.Serialize(ScanFolder(folderPath), SourceGenerationContext.Default.ScanResult);
-            return scanResultsString.Replace("[", "[\n", StringComparison.Ordinal).Replace("]", "\n]", StringComparison.Ordinal);
+            // One result per line. Each item is serialized on its own so that brackets
+            // inside paths or names are never touched by the formatting.
+            var items = ScanFolder(folderPath).Select(r => JsonSerializer.Serialize(r, SourceGenerationContext.Default.ScanResult));
+            var body = string.Join(",\n", items);
+            return body.Length == 0 ? "[]" : "[\n" + body + "\n]";
         }
 
         public static string CheckUpdates(bool loadDBAfterUpdate = false)

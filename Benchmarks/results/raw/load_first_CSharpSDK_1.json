@@ -1,0 +1,41 @@
+{
+ "sdk": "CSharpSDK",
+ "tag": "load_first_CSharpSDK_1",
+ "process_wall_ms": 969.2316000000574,
+ "process": {
+  "cpu_ms": 1062.5,
+  "ws_mb": 0.0390625,
+  "peak_ws_mb": 449.3203125,
+  "private_mb": 0.08203125,
+  "peak_private_mb": 424.23828125
+ },
+ "ops": [
+  {
+   "op": "baseline",
+   "path": "",
+   "times_ms": [],
+   "cpu_ms": 0,
+   "ws_mb": 23.78125,
+   "peak_ws_mb": 24.01171875,
+   "private_mb": 7.05078125,
+   "result": "",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "load",
+   "path": "",
+   "times_ms": [
+    853.6929
+   ],
+   "cpu_ms": 953.125,
+   "ws_mb": 436.86328125,
+   "peak_ws_mb": 449.3203125,
+   "private_mb": 411.1328125,
+   "result": "ok",
+   "files": 0,
+   "threads": 1
+  }
+ ],
+ "exit": 0
+}

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="350" viewBox="0 0 860 350" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif">
+<rect x="0.5" y="0.5" width="859" height="349" rx="10" fill="#FFFFFF" stroke="#E6E9EF"/>
+<rect x="0" y="0" width="6" height="350" rx="3" fill="#00A651"/>
+<text x="28" y="34" font-size="17" font-weight="700" fill="#0B1220">Check for updates (database already current)</text>
+<text x="28" y="55" font-size="12.5" fill="#4A5568">Round-trip to cloud.xvirus.net incl. version comparison · median of 5 · lower is better</text>
+<text x="840" y="338" font-size="10.5" font-weight="700" fill="#00A651" text-anchor="end" letter-spacing="1">XVIRUS</text>
+<rect x="28" y="71" width="11" height="11" rx="3" fill="#00A651"/>
+<text x="44" y="80" font-size="12" fill="#4A5568">First call in process</text>
+<rect x="217.20000000000002" y="71" width="11" height="11" rx="3" fill="#2F6FDB"/>
+<text x="233.20000000000002" y="80" font-size="12" fill="#4A5568">Subsequent calls (median)</text>
+<line x1="190.0" y1="96" x2="190.0" y2="316" stroke="#E6E9EF"/>
+<text x="190.0" y="330" font-size="10.5" fill="#8A94A6" text-anchor="middle">0</text>
+<line x1="411.7" y1="96" x2="411.7" y2="316" stroke="#E6E9EF"/>
+<text x="411.7" y="330" font-size="10.5" fill="#8A94A6" text-anchor="middle">100</text>
+<line x1="633.4" y1="96" x2="633.4" y2="316" stroke="#E6E9EF"/>
+<text x="633.4" y="330" font-size="10.5" fill="#8A94A6" text-anchor="middle">200</text>
+<line x1="190" y1="96" x2="190" y2="316" stroke="#8A94A6"/>
+<text x="178" y="123.0" font-size="12.5" fill="#0B1220" text-anchor="end">C# SDK</text>
+<rect x="190" y="102" width="550.9" height="16" rx="4" fill="#00A651"><title>First call in process · C# SDK: 248 ms</title></rect>
+<text x="746.9" y="114.5" font-size="11.5" fill="#4A5568">248 ms</text>
+<rect x="190" y="120" width="398.9" height="16" rx="4" fill="#2F6FDB"><title>Subsequent calls (median) · C# SDK: 180 ms</title></rect>
+<text x="594.9" y="132.5" font-size="11.5" fill="#4A5568">180 ms</text>
+<text x="178" y="175.0" font-size="12.5" fill="#0B1220" text-anchor="end">Native SDK</text>
+<rect x="190" y="154" width="451.4" height="16" rx="4" fill="#00A651"><title>First call in process · Native SDK: 204 ms</title></rect>
+<text x="647.4" y="166.5" font-size="11.5" fill="#4A5568">204 ms</text>
+<rect x="190" y="172" width="400.3" height="16" rx="4" fill="#2F6FDB"><title>Subsequent calls (median) · Native SDK: 181 ms</title></rect>
+<text x="596.3" y="184.5" font-size="11.5" fill="#4A5568">181 ms</text>
+<text x="178" y="227.0" font-size="12.5" fill="#0B1220" text-anchor="end">Node.js SDK</text>
+<rect x="190" y="206" width="450.4" height="16" rx="4" fill="#00A651"><title>First call in process · Node.js SDK: 203 ms</title></rect>
+<text x="646.4" y="218.5" font-size="11.5" fill="#4A5568">203 ms</text>
+<rect x="190" y="224" width="382.6" height="16" rx="4" fill="#2F6FDB"><title>Subsequent calls (median) · Node.js SDK: 173 ms</title></rect>
+<text x="578.6" y="236.5" font-size="11.5" fill="#4A5568">173 ms</text>
+<text x="178" y="279.0" font-size="12.5" fill="#0B1220" text-anchor="end">CLI</text>
+<rect x="190" y="258" width="552.4" height="16" rx="4" fill="#00A651"><title>First call in process · CLI: 249 ms</title></rect>
+<text x="748.4" y="270.5" font-size="11.5" fill="#4A5568">249 ms</text>
+<rect x="190" y="276" width="405.4" height="16" rx="4" fill="#2F6FDB"><title>Subsequent calls (median) · CLI: 183 ms</title></rect>
+<text x="601.4" y="288.5" font-size="11.5" fill="#4A5568">183 ms</text>
+</svg>

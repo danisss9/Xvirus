@@ -175,18 +175,17 @@ namespace Xvirus
 
             ct.ThrowIfCancellationRequested();
 
+            // A certificate from a known-malicious vendor is a detection even when the signature
+            // itself is broken. Otherwise a signed file only skips heuristics/AI when its embedded
+            // signature actually verifies; a certificate copied onto a tampered file does not count.
             var certName = Utils.GetCertificateSubjectName(filePath);
-            if (certName != null)
-            {
-                if (database.malVendorList.TryGetValue(certName, out string? value))
-                {
-                    return new ScanResult(1, value, filePath);
-                }
-                else
-                {
-                    return new ScanResult(0, "Safe", filePath);
-                }
-            }
+            if (certName != null && database.malVendorList.TryGetValue(certName, out string? value))
+                return new ScanResult(1, value, filePath);
+
+            // Most files shipped with Windows are signed through security catalogs rather than an
+            // embedded signature, so executables without one are looked up in the catalogs.
+            if (SignatureVerifier.IsTrusted(filePath, certName != null, checkCatalog: isExecutable))
+                return new ScanResult(0, "Safe", filePath);
 
             if (settings.EnableHeuristics || settings.EnableAIScan || settings.EnableAIScriptScan)
             {

@@ -1,0 +1,2 @@
+{"op":"baseline","path":"","times_ms":[],"cpu_ms":0,"ws_mb":34.51953125,"peak_ws_mb":34.5078125,"private_mb":null,"result":"","files":0,"threads":1}
+{"op":"update","path":"","times_ms":[3373.1999],"cpu_ms":94,"ws_mb":49.45703125,"peak_ws_mb":49.45703125,"private_mb":null,"result":"Database was updated!","files":0,"threads":1}

@@ -6,12 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [5.2.2]
 
+### Added
+
+- Performance and resource usage report for the C#, Native and Node.js SDKs and the CLI
+  (`Benchmarks/BENCHMARK_REPORT.md`), with the harness used to produce it.
+- NativeSDK README now documents how to read and free `scanFolder` results.
+
 ### Changed
 
 - SDK and CLI builds now use Node.js 26 LTS. The GitHub release workflows, Cloud Docker image,
   and CapRover deployments were updated accordingly.
 - XvirusUI and XvirusInstaller now use Neutralino.js 6.10.0.
 - NodeSDK updated to Microsoft.JavaScript.NodeApi 0.9 and ONNX Runtime 1.24.4.
+- `checkUpdates()` now returns `"There is a new SDK version available!"` when a newer SDK exists,
+  matching the documentation (it previously returned `"There is a new version available!"`).
 
 ### Fixed
 
@@ -25,6 +33,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `load()` and `checkUpdates()` can be called without arguments; optional boolean parameters are
   now handled correctly.
 - Cloud scanner updated to the 5.2.2 Linux NodeSDK binaries.
+- CLI `sf` no longer crashes, and `ScanFolderString()` (C# SDK) and `scanFolderAsString`
+  (NativeSDK) now return every result as a JSON array. Paths containing `[` or `]` are no longer
+  corrupted.
+- NativeSDK `scanFolder` now returns the actual scan results. The array ends with an all-zero
+  `ScanResult` (`Path == NULL`) so callers can tell where it ends.
+- The SDKs no longer add every running process to `rules.json` as an allow rule on the first
+  `load()`.
+- AI Script scanning in the NativeAOT SDKs (Native, Node.js) now loads the llama.cpp backend that
+  matches the CPU's AVX support instead of the slowest no-AVX one, making it about 30× faster. It
+  also no longer hangs when called from the Node.js main thread.
+- Windows system files signed through security catalogs are now recognised as trusted instead of
+  being passed to the AI engine, which flagged some of them as malware.
+
+### Security
+
+- Embedded Authenticode signatures are now verified with the Windows trust provider before a file
+  is trusted. Previously any embedded certificate was enough to mark a file as Safe and skip
+  heuristics and AI, so a tampered or self-signed file could bypass scanning.
 
 ## [5.2.1]
 

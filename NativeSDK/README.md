@@ -83,7 +83,7 @@ All functions use C-compatible calling conventions. Strings are passed and retur
 | `unload`             | —                        | `ActionResult` | Unloads the scan engine from memory.                                                  |
 | `scan`               | `wchar_t* filePath`      | `ScanResult`   | Scans a single file. Returns a `ScanResult` struct.                                   |
 | `scanAsString`       | `wchar_t* filePath`      | `ActionResult` | Scans a single file. Returns result as a JSON string in `ActionResult`.               |
-| `scanFolder`         | `wchar_t* folderPath`    | `ScanResult*`  | Scans all files in a folder. Returns a pointer to an array of `ScanResult`.           |
+| `scanFolder`         | `wchar_t* folderPath`    | `ScanResult*`  | Scans all files in a folder. Returns a terminated array of `ScanResult` (see below).  |
 | `scanFolderAsString` | `wchar_t* folderPath`    | `ActionResult` | Scans all files in a folder. Returns results as a JSON string.                        |
 | `cancelScan`         | `wchar_t* path`          | `ActionResult` | Cancels the in-progress scan of the given file/folder path. Call from another thread. |
 | `cancelAllScans`     | —                        | `ActionResult` | Cancels every scan currently in progress. Call from another thread.                   |
@@ -92,6 +92,22 @@ All functions use C-compatible calling conventions. Strings are passed and retur
 | `logging`            | `bool? enableLogging`    | `bool`         | Gets or sets logging state.                                                           |
 | `baseFolder`         | `wchar_t* baseFolder`    | `wchar_t*`     | Gets or sets the base folder used to resolve relative paths.                          |
 | `version`            | —                        | `wchar_t*`     | Returns the SDK version string.                                                       |
+
+### Reading `scanFolder` results
+
+`scanFolder` returns one `ScanResult` per file, followed by an all-zero terminator element (`Path == NULL`). It returns `NULL` if the folder scan fails. Every string in the array and the array itself are allocated with `LocalAlloc`, so free them with `LocalFree`:
+
+```c
+ScanResult *results = scanFolder(L"C:\\folder");
+if (results) {
+    for (ScanResult *r = results; r->Path != NULL; r++) {
+        // r->Sucess ? use r->IsMalware / r->Name / r->MalwareScore : use r->Error
+        LocalFree(r->Sucess ? r->Name : r->Error);
+        LocalFree(r->Path);
+    }
+    LocalFree(results);
+}
+```
 
 `checkUpdates` result string is one of:
 

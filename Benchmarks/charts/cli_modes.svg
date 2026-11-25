@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="298" viewBox="0 0 860 298" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif">
+<rect x="0.5" y="0.5" width="859" height="297" rx="10" fill="#FFFFFF" stroke="#E6E9EF"/>
+<rect x="0" y="0" width="6" height="298" rx="3" fill="#00A651"/>
+<text x="28" y="34" font-size="17" font-weight="700" fill="#0B1220">CLI: one-shot vs. interactive mode</text>
+<text x="28" y="55" font-size="12.5" fill="#4A5568">Wall time per scan (ms) · one-shot includes process start + engine load · log scale</text>
+<text x="840" y="286" font-size="10.5" font-weight="700" fill="#00A651" text-anchor="end" letter-spacing="1">XVIRUS</text>
+<rect x="28" y="71" width="11" height="11" rx="3" fill="#00A651"/>
+<text x="44" y="80" font-size="12" fill="#4A5568">One-shot (XvirusCLI s &lt;file&gt;)</text>
+<rect x="274.8" y="71" width="11" height="11" rx="3" fill="#2F6FDB"/>
+<text x="290.8" y="80" font-size="12" fill="#4A5568">Interactive (engine kept loaded)</text>
+<line x1="190" y1="96" x2="190" y2="264" stroke="#8A94A6"/>
+<text x="178" y="123.0" font-size="12.5" fill="#0B1220" text-anchor="end">PE 2 MB</text>
+<rect x="190" y="102" width="577.9" height="16" rx="4" fill="#00A651"><title>One-shot (XvirusCLI s &lt;file&gt;) · PE 2 MB: 976 ms</title></rect>
+<text x="773.9" y="114.5" font-size="11.5" fill="#4A5568">976 ms</text>
+<rect x="190" y="120" width="344.8" height="16" rx="4" fill="#2F6FDB"><title>Interactive (engine kept loaded) · PE 2 MB: 60.8 ms</title></rect>
+<text x="540.8" y="132.5" font-size="11.5" fill="#4A5568">60.8 ms</text>
+<text x="178" y="175.0" font-size="12.5" fill="#0B1220" text-anchor="end">PE 512 KB</text>
+<rect x="190" y="154" width="574.2" height="16" rx="4" fill="#00A651"><title>One-shot (XvirusCLI s &lt;file&gt;) · PE 512 KB: 933 ms</title></rect>
+<text x="770.2" y="166.5" font-size="11.5" fill="#4A5568">933 ms</text>
+<rect x="190" y="172" width="237.3" height="16" rx="4" fill="#2F6FDB"><title>Interactive (engine kept loaded) · PE 512 KB: 16.9 ms</title></rect>
+<text x="433.3" y="184.5" font-size="11.5" fill="#4A5568">16.9 ms</text>
+<text x="178" y="227.0" font-size="12.5" fill="#0B1220" text-anchor="end">Text 64 KB</text>
+<rect x="190" y="206" width="569.2" height="16" rx="4" fill="#00A651"><title>One-shot (XvirusCLI s &lt;file&gt;) · Text 64 KB: 879 ms</title></rect>
+<text x="765.2" y="218.5" font-size="11.5" fill="#4A5568">879 ms</text>
+<rect x="190" y="224" width="84.6" height="16" rx="4" fill="#2F6FDB"><title>Interactive (engine kept loaded) · Text 64 KB: 2.74 ms</title></rect>
+<text x="280.6" y="236.5" font-size="11.5" fill="#4A5568">2.74 ms</text>
+</svg>

@@ -1,0 +1,41 @@
+{
+ "sdk": "NodeSDK",
+ "tag": "load_first_NodeSDK_2",
+ "process_wall_ms": 716.3964999999735,
+ "process": {
+  "cpu_ms": 781.25,
+  "ws_mb": 0.14453125,
+  "peak_ws_mb": 459.625,
+  "private_mb": 0.1875,
+  "peak_private_mb": 440.67578125
+ },
+ "ops": [
+  {
+   "op": "baseline",
+   "path": "",
+   "times_ms": [],
+   "cpu_ms": 0,
+   "ws_mb": 34.6171875,
+   "peak_ws_mb": 34.60546875,
+   "private_mb": null,
+   "result": "",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "load",
+   "path": "",
+   "times_ms": [
+    654.6054
+   ],
+   "cpu_ms": 719,
+   "ws_mb": 445.78125,
+   "peak_ws_mb": 459.625,
+   "private_mb": null,
+   "result": "ok",
+   "files": 0,
+   "threads": 1
+  }
+ ],
+ "exit": 0
+}

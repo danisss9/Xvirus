@@ -1,0 +1,523 @@
+{
+ "sdk": "NativeSDK",
+ "tag": "profile_heur_NativeSDK",
+ "process_wall_ms": 16918.89540000011,
+ "process": {
+  "cpu_ms": 15734.375,
+  "ws_mb": 0.03515625,
+  "peak_ws_mb": 750.3359375,
+  "private_mb": 0.078125,
+  "peak_private_mb": 713.44140625
+ },
+ "ops": [
+  {
+   "op": "baseline",
+   "path": "",
+   "times_ms": [],
+   "cpu_ms": 0.0,
+   "ws_mb": 3.68,
+   "peak_ws_mb": 3.68,
+   "private_mb": 0.57,
+   "result": "",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "load",
+   "path": "",
+   "times_ms": [
+    579.2885
+   ],
+   "cpu_ms": 609.375,
+   "ws_mb": 385.0,
+   "peak_ws_mb": 385.0,
+   "private_mb": 379.379,
+   "result": "Loaded Successfully",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/pe_16KB.dll",
+   "times_ms": [
+    1.2058,
+    1.1576,
+    1.1429,
+    1.1328,
+    1.1337,
+    1.1326,
+    1.205
+   ],
+   "cpu_ms": 0.0,
+   "ws_mb": 387.66,
+   "peak_ws_mb": 387.66,
+   "private_mb": 380.262,
+   "result": "Safe|warm=7.959",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/pe_128KB.dll",
+   "times_ms": [
+    4.0238,
+    4.0077,
+    3.9969,
+    3.9321,
+    12.0565,
+    4.3438,
+    4.0206
+   ],
+   "cpu_ms": 46.875,
+   "ws_mb": 388.254,
+   "peak_ws_mb": 388.414,
+   "private_mb": 380.906,
+   "result": "Safe|warm=4.116",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/pe_512KB.dll",
+   "times_ms": [
+    14.2934,
+    14.2723,
+    14.2279,
+    14.1835,
+    14.1762,
+    14.2269,
+    14.1731
+   ],
+   "cpu_ms": 93.75,
+   "ws_mb": 388.824,
+   "peak_ws_mb": 389.77,
+   "private_mb": 381.48,
+   "result": "Safe|warm=14.260",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/pe_2MB.dll",
+   "times_ms": [
+    57.7229,
+    58.0356,
+    57.8337,
+    57.6784,
+    57.4903
+   ],
+   "cpu_ms": 265.625,
+   "ws_mb": 389.262,
+   "peak_ws_mb": 393.207,
+   "private_mb": 381.922,
+   "result": "Safe|warm=57.997",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/pe_8MB.dll",
+   "times_ms": [
+    209.8605,
+    210.0691,
+    210.2641
+   ],
+   "cpu_ms": 625.0,
+   "ws_mb": 390.012,
+   "peak_ws_mb": 405.957,
+   "private_mb": 382.668,
+   "result": "Safe|warm=212.247",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/pe_18MB.dll",
+   "times_ms": [
+    487.88,
+    484.153,
+    488.6155
+   ],
+   "cpu_ms": 1468.75,
+   "ws_mb": 501.863,
+   "peak_ws_mb": 522.305,
+   "private_mb": 497.402,
+   "result": "Safe|warm=491.773",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/pe_32MB.dll",
+   "times_ms": [
+    109.1172,
+    101.427,
+    126.5856
+   ],
+   "cpu_ms": 328.125,
+   "ws_mb": 550.395,
+   "peak_ws_mb": 614.902,
+   "private_mb": 545.629,
+   "result": "Safe|warm=103.484",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/text_4KB.log",
+   "times_ms": [
+    2.3616,
+    2.1646,
+    2.5262,
+    2.222,
+    2.1616,
+    2.4921,
+    2.1382
+   ],
+   "cpu_ms": 15.625,
+   "ws_mb": 553.977,
+   "peak_ws_mb": 614.902,
+   "private_mb": 546.715,
+   "result": "Safe|warm=10.418",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/binary_4KB.bin",
+   "times_ms": [
+    2.5815,
+    2.5311,
+    2.5585,
+    2.6366,
+    2.4995,
+    2.4973,
+    2.4872
+   ],
+   "cpu_ms": 0.0,
+   "ws_mb": 554.027,
+   "peak_ws_mb": 614.902,
+   "private_mb": 546.719,
+   "result": "Safe|warm=3.023",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/text_64KB.log",
+   "times_ms": [
+    3.3802,
+    3.3315,
+    2.9786,
+    2.9984,
+    2.9942,
+    3.262,
+    3.358
+   ],
+   "cpu_ms": 15.625,
+   "ws_mb": 554.086,
+   "peak_ws_mb": 614.902,
+   "private_mb": 546.719,
+   "result": "Safe|warm=3.069",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/binary_64KB.bin",
+   "times_ms": [
+    3.964,
+    4.3027,
+    4.2593,
+    3.9753,
+    4.4691,
+    3.9689,
+    3.875
+   ],
+   "cpu_ms": 15.625,
+   "ws_mb": 554.664,
+   "peak_ws_mb": 614.902,
+   "private_mb": 547.289,
+   "result": "Safe|warm=4.010",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/text_512KB.log",
+   "times_ms": [
+    9.6819,
+    9.474,
+    9.3973,
+    9.4103,
+    9.8612,
+    9.839,
+    9.4682
+   ],
+   "cpu_ms": 62.5,
+   "ws_mb": 555.422,
+   "peak_ws_mb": 614.902,
+   "private_mb": 548.355,
+   "result": "Safe|warm=9.463",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/binary_512KB.bin",
+   "times_ms": [
+    17.3562,
+    17.3664,
+    17.238,
+    17.0072,
+    17.098,
+    17.0683,
+    16.6835
+   ],
+   "cpu_ms": 109.375,
+   "ws_mb": 556.246,
+   "peak_ws_mb": 614.902,
+   "private_mb": 548.922,
+   "result": "Safe|warm=17.012",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/text_2MB.log",
+   "times_ms": [
+    30.7167,
+    30.6358,
+    31.105,
+    31.5708,
+    31.4894,
+    31.1004,
+    30.9494
+   ],
+   "cpu_ms": 218.75,
+   "ws_mb": 556.812,
+   "peak_ws_mb": 614.902,
+   "private_mb": 549.488,
+   "result": "Safe|warm=32.101",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/binary_2MB.bin",
+   "times_ms": [
+    60.8692,
+    61.0847,
+    61.3535,
+    60.5916,
+    60.8455,
+    60.5147,
+    60.7561
+   ],
+   "cpu_ms": 406.25,
+   "ws_mb": 557.434,
+   "peak_ws_mb": 614.902,
+   "private_mb": 550.113,
+   "result": "Safe|warm=61.364",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/text_8MB.log",
+   "times_ms": [
+    118.0487,
+    117.936,
+    117.8379,
+    118.5762,
+    118.1735
+   ],
+   "cpu_ms": 593.75,
+   "ws_mb": 557.812,
+   "peak_ws_mb": 614.902,
+   "private_mb": 550.488,
+   "result": "Safe|warm=119.186",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/binary_8MB.bin",
+   "times_ms": [
+    239.1853,
+    238.2801,
+    237.7404,
+    238.6286,
+    240.966
+   ],
+   "cpu_ms": 1171.875,
+   "ws_mb": 558.25,
+   "peak_ws_mb": 614.902,
+   "private_mb": 550.926,
+   "result": "Safe|warm=239.493",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/text_32MB.log",
+   "times_ms": [
+    81.2429,
+    81.1677,
+    80.5407
+   ],
+   "cpu_ms": 234.375,
+   "ws_mb": 622.285,
+   "peak_ws_mb": 686.289,
+   "private_mb": 616.148,
+   "result": "Safe|warm=81.633",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/binary_32MB.bin",
+   "times_ms": [
+    85.4392,
+    83.5666,
+    85.4672
+   ],
+   "cpu_ms": 265.625,
+   "ws_mb": 686.332,
+   "peak_ws_mb": 750.336,
+   "private_mb": 681.305,
+   "result": "Safe|warm=84.265",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/signed_pe.exe",
+   "times_ms": [
+    3.5553,
+    3.3647,
+    3.3217,
+    3.4236,
+    3.3368,
+    3.3222,
+    3.2964
+   ],
+   "cpu_ms": 15.625,
+   "ws_mb": 687.426,
+   "peak_ws_mb": 750.336,
+   "private_mb": 681.488,
+   "result": "Safe|warm=15.791",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/scripts/backup.ps1",
+   "times_ms": [
+    1.6894,
+    1.665,
+    1.64,
+    1.679,
+    1.718,
+    1.6072,
+    1.6152
+   ],
+   "cpu_ms": 0.0,
+   "ws_mb": 688.066,
+   "peak_ws_mb": 750.336,
+   "private_mb": 682.059,
+   "result": "Safe|warm=2.250",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/scripts/build.bat",
+   "times_ms": [
+    1.5991,
+    1.627,
+    1.6141,
+    1.6749,
+    1.5896,
+    1.5977,
+    1.5933
+   ],
+   "cpu_ms": 15.625,
+   "ws_mb": 688.629,
+   "peak_ws_mb": 750.336,
+   "private_mb": 682.625,
+   "result": "Safe|warm=1.653",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/scripts/server.js",
+   "times_ms": [
+    0.8759,
+    0.8872,
+    0.8484,
+    0.87,
+    0.7847,
+    0.8403,
+    0.8345
+   ],
+   "cpu_ms": 0.0,
+   "ws_mb": 689.242,
+   "peak_ws_mb": 750.336,
+   "private_mb": 683.191,
+   "result": "Safe|warm=1.765",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/scripts/report.py",
+   "times_ms": [
+    2.082,
+    2.0841,
+    2.0735,
+    2.0953,
+    2.0722,
+    2.0665,
+    2.061
+   ],
+   "cpu_ms": 0.0,
+   "ws_mb": 689.805,
+   "peak_ws_mb": 750.336,
+   "private_mb": 683.754,
+   "result": "Safe|warm=2.150",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "folder",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/mixed",
+   "times_ms": [
+    4296.4806
+   ],
+   "cpu_ms": 3765.625,
+   "ws_mb": 678.629,
+   "peak_ws_mb": 750.336,
+   "private_mb": 672.047,
+   "result": "malware=0",
+   "files": 1000,
+   "threads": 1
+  },
+  {
+   "op": "folder",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/mixed",
+   "times_ms": [
+    4295.8596
+   ],
+   "cpu_ms": 3812.5,
+   "ws_mb": 679.395,
+   "peak_ws_mb": 750.336,
+   "private_mb": 674.148,
+   "result": "malware=0",
+   "files": 1000,
+   "threads": 1
+  }
+ ],
+ "exit": 0
+}

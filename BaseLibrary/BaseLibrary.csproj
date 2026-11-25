@@ -16,4 +16,8 @@
     <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.24.4" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
   </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Xvirus.Tests" />
+  </ItemGroup>
 </Project>

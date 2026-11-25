@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="494" viewBox="0 0 860 494" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif">
+<rect x="0.5" y="0.5" width="859" height="493" rx="10" fill="#FFFFFF" stroke="#E6E9EF"/>
+<rect x="0" y="0" width="6" height="494" rx="3" fill="#00A651"/>
+<text x="28" y="34" font-size="17" font-weight="700" fill="#0B1220">AI Script (LLM) scan time per script</text>
+<text x="28" y="55" font-size="12.5" fill="#4A5568">Median per scan, seconds · runs fully on the CPU · lower is better</text>
+<text x="840" y="482" font-size="10.5" font-weight="700" fill="#00A651" text-anchor="end" letter-spacing="1">XVIRUS</text>
+<rect x="28" y="71" width="11" height="11" rx="3" fill="#00A651"/>
+<text x="44" y="80" font-size="12" fill="#4A5568">C# SDK</text>
+<rect x="109.2" y="71" width="11" height="11" rx="3" fill="#2F6FDB"/>
+<text x="125.2" y="80" font-size="12" fill="#4A5568">Native SDK</text>
+<rect x="219.2" y="71" width="11" height="11" rx="3" fill="#E8890C"/>
+<text x="235.2" y="80" font-size="12" fill="#4A5568">Node.js SDK</text>
+<rect x="336.4" y="71" width="11" height="11" rx="3" fill="#8A3FC7"/>
+<text x="352.4" y="80" font-size="12" fill="#4A5568">CLI</text>
+<line x1="190.0" y1="96" x2="190.0" y2="460" stroke="#E6E9EF"/>
+<text x="190.0" y="474" font-size="10.5" fill="#8A94A6" text-anchor="middle">0</text>
+<line x1="328.3" y1="96" x2="328.3" y2="460" stroke="#E6E9EF"/>
+<text x="328.3" y="474" font-size="10.5" fill="#8A94A6" text-anchor="middle">0.25</text>
+<line x1="466.7" y1="96" x2="466.7" y2="460" stroke="#E6E9EF"/>
+<text x="466.7" y="474" font-size="10.5" fill="#8A94A6" text-anchor="middle">0.50</text>
+<line x1="605.0" y1="96" x2="605.0" y2="460" stroke="#E6E9EF"/>
+<text x="605.0" y="474" font-size="10.5" fill="#8A94A6" text-anchor="middle">0.75</text>
+<line x1="743.4" y1="96" x2="743.4" y2="460" stroke="#E6E9EF"/>
+<text x="743.4" y="474" font-size="10.5" fill="#8A94A6" text-anchor="middle">1.00</text>
+<line x1="190" y1="96" x2="190" y2="460" stroke="#8A94A6"/>
+<text x="178" y="141.0" font-size="12.5" fill="#0B1220" text-anchor="end">backup.ps1</text>
+<rect x="190" y="102" width="524.1" height="16" rx="4" fill="#00A651"><title>C# SDK · backup.ps1: 0.95 s</title></rect>
+<text x="720.1" y="114.5" font-size="11.5" fill="#4A5568">0.95 s</text>
+<rect x="190" y="120" width="503.7" height="16" rx="4" fill="#2F6FDB"><title>Native SDK · backup.ps1: 0.91 s</title></rect>
+<text x="699.7" y="132.5" font-size="11.5" fill="#4A5568">0.91 s</text>
+<rect x="190" y="138" width="466.5" height="16" rx="4" fill="#E8890C"><title>Node.js SDK · backup.ps1: 0.84 s</title></rect>
+<text x="662.5" y="150.5" font-size="11.5" fill="#4A5568">0.84 s</text>
+<rect x="190" y="156" width="484.4" height="16" rx="4" fill="#8A3FC7"><title>CLI · backup.ps1: 0.88 s</title></rect>
+<text x="680.4" y="168.5" font-size="11.5" fill="#4A5568">0.88 s</text>
+<text x="178" y="229.0" font-size="12.5" fill="#0B1220" text-anchor="end">build.bat</text>
+<rect x="190" y="190" width="388.9" height="16" rx="4" fill="#00A651"><title>C# SDK · build.bat: 0.70 s</title></rect>
+<text x="584.9" y="202.5" font-size="11.5" fill="#4A5568">0.70 s</text>
+<rect x="190" y="208" width="396.4" height="16" rx="4" fill="#2F6FDB"><title>Native SDK · build.bat: 0.72 s</title></rect>
+<text x="592.4" y="220.5" font-size="11.5" fill="#4A5568">0.72 s</text>
+<rect x="190" y="226" width="362.3" height="16" rx="4" fill="#E8890C"><title>Node.js SDK · build.bat: 0.65 s</title></rect>
+<text x="558.3" y="238.5" font-size="11.5" fill="#4A5568">0.65 s</text>
+<rect x="190" y="244" width="384.6" height="16" rx="4" fill="#8A3FC7"><title>CLI · build.bat: 0.69 s</title></rect>
+<text x="580.6" y="256.5" font-size="11.5" fill="#4A5568">0.69 s</text>
+<text x="178" y="317.0" font-size="12.5" fill="#0B1220" text-anchor="end">server.js</text>
+<rect x="190" y="278" width="538.6" height="16" rx="4" fill="#00A651"><title>C# SDK · server.js: 0.97 s</title></rect>
+<text x="734.6" y="290.5" font-size="11.5" fill="#4A5568">0.97 s</text>
+<rect x="190" y="296" width="552.4" height="16" rx="4" fill="#2F6FDB"><title>Native SDK · server.js: 1.00 s</title></rect>
+<text x="748.4" y="308.5" font-size="11.5" fill="#4A5568">1.00 s</text>
+<rect x="190" y="314" width="508.1" height="16" rx="4" fill="#E8890C"><title>Node.js SDK · server.js: 0.92 s</title></rect>
+<text x="704.1" y="326.5" font-size="11.5" fill="#4A5568">0.92 s</text>
+<rect x="190" y="332" width="534.9" height="16" rx="4" fill="#8A3FC7"><title>CLI · server.js: 0.97 s</title></rect>
+<text x="730.9" y="344.5" font-size="11.5" fill="#4A5568">0.97 s</text>
+<text x="178" y="405.0" font-size="12.5" fill="#0B1220" text-anchor="end">report.py</text>
+<rect x="190" y="366" width="427.3" height="16" rx="4" fill="#00A651"><title>C# SDK · report.py: 0.77 s</title></rect>
+<text x="623.3" y="378.5" font-size="11.5" fill="#4A5568">0.77 s</text>
+<rect x="190" y="384" width="419.7" height="16" rx="4" fill="#2F6FDB"><title>Native SDK · report.py: 0.76 s</title></rect>
+<text x="615.7" y="396.5" font-size="11.5" fill="#4A5568">0.76 s</text>
+<rect x="190" y="402" width="419.9" height="16" rx="4" fill="#E8890C"><title>Node.js SDK · report.py: 0.76 s</title></rect>
+<text x="615.9" y="414.5" font-size="11.5" fill="#4A5568">0.76 s</text>
+<rect x="190" y="420" width="436.4" height="16" rx="4" fill="#8A3FC7"><title>CLI · report.py: 0.79 s</title></rect>
+<text x="632.4" y="432.5" font-size="11.5" fill="#4A5568">0.79 s</text>
+</svg>

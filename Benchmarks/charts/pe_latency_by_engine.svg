@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="420" viewBox="0 0 860 420" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif">
+<rect x="0.5" y="0.5" width="859" height="419" rx="10" fill="#FFFFFF" stroke="#E6E9EF"/>
+<rect x="0" y="0" width="6" height="420" rx="3" fill="#00A651"/>
+<text x="28" y="34" font-size="17" font-weight="700" fill="#0B1220">PE scan time by engine configuration</text>
+<text x="28" y="55" font-size="12.5" fill="#4A5568">C# SDK · median per scan, log–log · files &gt;20 MB are hash-checked only</text>
+<text x="840" y="408" font-size="10.5" font-weight="700" fill="#00A651" text-anchor="end" letter-spacing="1">XVIRUS</text>
+<rect x="28" y="69" width="11" height="11" rx="3" fill="#00A651"/>
+<text x="44" y="78" font-size="12" fill="#4A5568">Sig + Heur + AI</text>
+<rect x="174.0" y="69" width="11" height="11" rx="3" fill="#2F6FDB"/>
+<text x="190.0" y="78" font-size="12" fill="#4A5568">Sig + Heuristics</text>
+<rect x="327.2" y="69" width="11" height="11" rx="3" fill="#E8890C"/>
+<text x="343.2" y="78" font-size="12" fill="#4A5568">Sig + AI</text>
+<rect x="422.79999999999995" y="69" width="11" height="11" rx="3" fill="#8A3FC7"/>
+<text x="438.79999999999995" y="78" font-size="12" fill="#4A5568">Signatures only</text>
+<line x1="78" y1="362.0" x2="720" y2="362.0" stroke="#E6E9EF"/>
+<text x="70" y="366.0" font-size="10.5" fill="#8A94A6" text-anchor="end">0.10 ms</text>
+<line x1="78" y1="294.5" x2="720" y2="294.5" stroke="#E6E9EF"/>
+<text x="70" y="298.5" font-size="10.5" fill="#8A94A6" text-anchor="end">1.00 ms</text>
+<line x1="78" y1="227.0" x2="720" y2="227.0" stroke="#E6E9EF"/>
+<text x="70" y="231.0" font-size="10.5" fill="#8A94A6" text-anchor="end">10.0 ms</text>
+<line x1="78" y1="159.5" x2="720" y2="159.5" stroke="#E6E9EF"/>
+<text x="70" y="163.5" font-size="10.5" fill="#8A94A6" text-anchor="end">100 ms</text>
+<line x1="78" y1="92.0" x2="720" y2="92.0" stroke="#E6E9EF"/>
+<text x="70" y="96.0" font-size="10.5" fill="#8A94A6" text-anchor="end">1,000 ms</text>
+<text x="78.0" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">16KB</text>
+<text x="253.0" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">128KB</text>
+<text x="369.7" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">512KB</text>
+<text x="486.5" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">2MB</text>
+<text x="603.2" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">8MB</text>
+<text x="671.5" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">18MB</text>
+<text x="720.0" y="380" font-size="10.5" fill="#8A94A6" text-anchor="middle">32MB</text>
+<line x1="78" y1="362" x2="720" y2="362" stroke="#8A94A6"/>
+<text x="18" y="227.0" font-size="11" fill="#4A5568" transform="rotate(-90 18 227.0)" text-anchor="middle">milliseconds</text>
+<polyline fill="none" stroke="#00A651" stroke-width="2" stroke-linejoin="round" points="78.0,256.8 253.0,237.6 369.7,211.4 486.5,174.1 603.2,137.0 671.5,113.1 720.0,158.7"/>
+<circle cx="78.0" cy="256.8" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>Sig + Heur + AI · 16KB: 3.62 ms</title></circle>
+<circle cx="253.0" cy="237.6" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>Sig + Heur + AI · 128KB: 6.96 ms</title></circle>
+<circle cx="369.7" cy="211.4" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>Sig + Heur + AI · 512KB: 17.0 ms</title></circle>
+<circle cx="486.5" cy="174.1" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>Sig + Heur + AI · 2MB: 60.8 ms</title></circle>
+<circle cx="603.2" cy="137.0" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>Sig + Heur + AI · 8MB: 216 ms</title></circle>
+<circle cx="671.5" cy="113.1" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>Sig + Heur + AI · 18MB: 487 ms</title></circle>
+<circle cx="720.0" cy="158.7" r="4" fill="#00A651" stroke="#FFFFFF" stroke-width="2"><title>Sig + Heur + AI · 32MB: 103 ms</title></circle>
+<polyline fill="none" stroke="#2F6FDB" stroke-width="2" stroke-linejoin="round" points="78.0,287.3 253.0,254.4 369.7,217.6 486.5,176.6 603.2,138.2 671.5,114.2 720.0,158.6"/>
+<circle cx="78.0" cy="287.3" r="4" fill="#2F6FDB" stroke="#FFFFFF" stroke-width="2"><title>Sig + Heuristics · 16KB: 1.28 ms</title></circle>
+<circle cx="253.0" cy="254.4" r="4" fill="#2F6FDB" stroke="#FFFFFF" stroke-width="2"><title>Sig + Heuristics · 128KB: 3.92 ms</title></circle>
+<circle cx="369.7" cy="217.6" r="4" fill="#2F6FDB" stroke="#FFFFFF" stroke-width="2"><title>Sig + Heuristics · 512KB: 13.8 ms</title></circle>
+<circle cx="486.5" cy="176.6" r="4" fill="#2F6FDB" stroke="#FFFFFF" stroke-width="2"><title>Sig + Heuristics · 2MB: 55.8 ms</title></circle>
+<circle cx="603.2" cy="138.2" r="4" fill="#2F6FDB" stroke="#FFFFFF" stroke-width="2"><title>Sig + Heuristics · 8MB: 207 ms</title></circle>
+<circle cx="671.5" cy="114.2" r="4" fill="#2F6FDB" stroke="#FFFFFF" stroke-width="2"><title>Sig + Heuristics · 18MB: 470 ms</title></circle>
+<circle cx="720.0" cy="158.6" r="4" fill="#2F6FDB" stroke="#FFFFFF" stroke-width="2"><title>Sig + Heuristics · 32MB: 103 ms</title></circle>
+<polyline fill="none" stroke="#E8890C" stroke-width="2" stroke-linejoin="round" points="78.0,258.0 253.0,255.0 369.7,245.2 486.5,218.3 603.2,187.2 671.5,165.6 720.0,158.6"/>
+<circle cx="78.0" cy="258.0" r="4" fill="#E8890C" stroke="#FFFFFF" stroke-width="2"><title>Sig + AI · 16KB: 3.48 ms</title></circle>
+<circle cx="253.0" cy="255.0" r="4" fill="#E8890C" stroke="#FFFFFF" stroke-width="2"><title>Sig + AI · 128KB: 3.85 ms</title></circle>
+<circle cx="369.7" cy="245.2" r="4" fill="#E8890C" stroke="#FFFFFF" stroke-width="2"><title>Sig + AI · 512KB: 5.38 ms</title></circle>
+<circle cx="486.5" cy="218.3" r="4" fill="#E8890C" stroke="#FFFFFF" stroke-width="2"><title>Sig + AI · 2MB: 13.5 ms</title></circle>
+<circle cx="603.2" cy="187.2" r="4" fill="#E8890C" stroke="#FFFFFF" stroke-width="2"><title>Sig + AI · 8MB: 38.8 ms</title></circle>
+<circle cx="671.5" cy="165.6" r="4" fill="#E8890C" stroke="#FFFFFF" stroke-width="2"><title>Sig + AI · 18MB: 81.2 ms</title></circle>
+<circle cx="720.0" cy="158.6" r="4" fill="#E8890C" stroke="#FFFFFF" stroke-width="2"><title>Sig + AI · 32MB: 103 ms</title></circle>
+<polyline fill="none" stroke="#8A3FC7" stroke-width="2" stroke-linejoin="round" points="78.0,298.8 253.0,290.1 369.7,269.5 486.5,236.1 603.2,197.8 671.5,175.0 720.0,158.6"/>
+<circle cx="78.0" cy="298.8" r="4" fill="#8A3FC7" stroke="#FFFFFF" stroke-width="2"><title>Signatures only · 16KB: 0.86 ms</title></circle>
+<circle cx="253.0" cy="290.1" r="4" fill="#8A3FC7" stroke="#FFFFFF" stroke-width="2"><title>Signatures only · 128KB: 1.16 ms</title></circle>
+<circle cx="369.7" cy="269.5" r="4" fill="#8A3FC7" stroke="#FFFFFF" stroke-width="2"><title>Signatures only · 512KB: 2.35 ms</title></circle>
+<circle cx="486.5" cy="236.1" r="4" fill="#8A3FC7" stroke="#FFFFFF" stroke-width="2"><title>Signatures only · 2MB: 7.33 ms</title></circle>
+<circle cx="603.2" cy="197.8" r="4" fill="#8A3FC7" stroke="#FFFFFF" stroke-width="2"><title>Signatures only · 8MB: 27.0 ms</title></circle>
+<circle cx="671.5" cy="175.0" r="4" fill="#8A3FC7" stroke="#FFFFFF" stroke-width="2"><title>Signatures only · 18MB: 59.0 ms</title></circle>
+<circle cx="720.0" cy="158.6" r="4" fill="#8A3FC7" stroke="#FFFFFF" stroke-width="2"><title>Signatures only · 32MB: 103 ms</title></circle>
+<text x="729.0" y="162.6" font-size="11" fill="#4A5568">Sig + AI: 103 ms</text>
+<text x="729.0" y="176.6" font-size="11" fill="#4A5568">Signatures only: 103 ms</text>
+<text x="729.0" y="190.6" font-size="11" fill="#4A5568">Sig + Heuristics: 103 ms</text>
+<text x="729.0" y="204.6" font-size="11" fill="#4A5568">Sig + Heur + AI: 103 ms</text>
+</svg>

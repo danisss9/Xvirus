@@ -124,7 +124,7 @@ namespace Xvirus
 
                 if (settings.CheckSDKUpdates && updateInfo.App.Version != AppInfo.GetVersion())
                 {
-                    return "There is a new version available!";
+                    return "There is a new SDK version available!";
                 }
 
                 return newUpdates ? "Database was updated!" : "Database is up-to-date!";

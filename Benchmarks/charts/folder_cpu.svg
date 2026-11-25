@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="494" viewBox="0 0 860 494" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif">
+<rect x="0.5" y="0.5" width="859" height="493" rx="10" fill="#FFFFFF" stroke="#E6E9EF"/>
+<rect x="0" y="0" width="6" height="494" rx="3" fill="#00A651"/>
+<text x="28" y="34" font-size="17" font-weight="700" fill="#0B1220">CPU usage during folder scan</text>
+<text x="28" y="55" font-size="12.5" fill="#4A5568">CPU time ÷ wall time, % of one logical core (100% = one core fully busy)</text>
+<text x="840" y="482" font-size="10.5" font-weight="700" fill="#00A651" text-anchor="end" letter-spacing="1">XVIRUS</text>
+<rect x="28" y="71" width="11" height="11" rx="3" fill="#00A651"/>
+<text x="44" y="80" font-size="12" fill="#4A5568">C# SDK</text>
+<rect x="109.2" y="71" width="11" height="11" rx="3" fill="#2F6FDB"/>
+<text x="125.2" y="80" font-size="12" fill="#4A5568">Native SDK</text>
+<rect x="219.2" y="71" width="11" height="11" rx="3" fill="#E8890C"/>
+<text x="235.2" y="80" font-size="12" fill="#4A5568">Node.js SDK</text>
+<rect x="336.4" y="71" width="11" height="11" rx="3" fill="#8A3FC7"/>
+<text x="352.4" y="80" font-size="12" fill="#4A5568">CLI</text>
+<line x1="190.0" y1="96" x2="190.0" y2="460" stroke="#E6E9EF"/>
+<text x="190.0" y="474" font-size="10.5" fill="#8A94A6" text-anchor="middle">0</text>
+<line x1="332.8" y1="96" x2="332.8" y2="460" stroke="#E6E9EF"/>
+<text x="332.8" y="474" font-size="10.5" fill="#8A94A6" text-anchor="middle">100</text>
+<line x1="475.6" y1="96" x2="475.6" y2="460" stroke="#E6E9EF"/>
+<text x="475.6" y="474" font-size="10.5" fill="#8A94A6" text-anchor="middle">200</text>
+<line x1="618.3" y1="96" x2="618.3" y2="460" stroke="#E6E9EF"/>
+<text x="618.3" y="474" font-size="10.5" fill="#8A94A6" text-anchor="middle">300</text>
+<line x1="761.1" y1="96" x2="761.1" y2="460" stroke="#E6E9EF"/>
+<text x="761.1" y="474" font-size="10.5" fill="#8A94A6" text-anchor="middle">400</text>
+<line x1="190" y1="96" x2="190" y2="460" stroke="#8A94A6"/>
+<text x="178" y="141.0" font-size="12.5" fill="#0B1220" text-anchor="end">Sig + Heur + AI</text>
+<rect x="190" y="102" width="533.3" height="16" rx="4" fill="#00A651"><title>C# SDK · Sig + Heur + AI: 374%</title></rect>
+<text x="729.3" y="114.5" font-size="11.5" fill="#4A5568">374%</text>
+<rect x="190" y="120" width="483.8" height="16" rx="4" fill="#2F6FDB"><title>Native SDK · Sig + Heur + AI: 339%</title></rect>
+<text x="679.8" y="132.5" font-size="11.5" fill="#4A5568">339%</text>
+<rect x="190" y="138" width="476.7" height="16" rx="4" fill="#E8890C"><title>Node.js SDK · Sig + Heur + AI: 334%</title></rect>
+<text x="672.7" y="150.5" font-size="11.5" fill="#4A5568">334%</text>
+<rect x="190" y="156" width="524.2" height="16" rx="4" fill="#8A3FC7"><title>CLI · Sig + Heur + AI: 367%</title></rect>
+<text x="720.2" y="168.5" font-size="11.5" fill="#4A5568">367%</text>
+<text x="178" y="229.0" font-size="12.5" fill="#0B1220" text-anchor="end">Sig + Heuristics</text>
+<rect x="190" y="190" width="126.6" height="16" rx="4" fill="#00A651"><title>C# SDK · Sig + Heuristics: 88.6%</title></rect>
+<text x="322.6" y="202.5" font-size="11.5" fill="#4A5568">88.6%</text>
+<rect x="190" y="208" width="126.7" height="16" rx="4" fill="#2F6FDB"><title>Native SDK · Sig + Heuristics: 88.7%</title></rect>
+<text x="322.7" y="220.5" font-size="11.5" fill="#4A5568">88.7%</text>
+<rect x="190" y="226" width="124.8" height="16" rx="4" fill="#E8890C"><title>Node.js SDK · Sig + Heuristics: 87.4%</title></rect>
+<text x="320.8" y="238.5" font-size="11.5" fill="#4A5568">87.4%</text>
+<rect x="190" y="244" width="128.2" height="16" rx="4" fill="#8A3FC7"><title>CLI · Sig + Heuristics: 89.8%</title></rect>
+<text x="324.2" y="256.5" font-size="11.5" fill="#4A5568">89.8%</text>
+<text x="178" y="317.0" font-size="12.5" fill="#0B1220" text-anchor="end">Sig + AI</text>
+<rect x="190" y="278" width="552.4" height="16" rx="4" fill="#00A651"><title>C# SDK · Sig + AI: 387%</title></rect>
+<text x="748.4" y="290.5" font-size="11.5" fill="#4A5568">387%</text>
+<rect x="190" y="296" width="470.6" height="16" rx="4" fill="#2F6FDB"><title>Native SDK · Sig + AI: 330%</title></rect>
+<text x="666.6" y="308.5" font-size="11.5" fill="#4A5568">330%</text>
+<rect x="190" y="314" width="450.3" height="16" rx="4" fill="#E8890C"><title>Node.js SDK · Sig + AI: 315%</title></rect>
+<text x="646.3" y="326.5" font-size="11.5" fill="#4A5568">315%</text>
+<rect x="190" y="332" width="537.8" height="16" rx="4" fill="#8A3FC7"><title>CLI · Sig + AI: 377%</title></rect>
+<text x="733.8" y="344.5" font-size="11.5" fill="#4A5568">377%</text>
+<text x="178" y="405.0" font-size="12.5" fill="#0B1220" text-anchor="end">Signatures only</text>
+<rect x="190" y="366" width="112.7" height="16" rx="4" fill="#00A651"><title>C# SDK · Signatures only: 78.9%</title></rect>
+<text x="308.7" y="378.5" font-size="11.5" fill="#4A5568">78.9%</text>
+<rect x="190" y="384" width="108.8" height="16" rx="4" fill="#2F6FDB"><title>Native SDK · Signatures only: 76.2%</title></rect>
+<text x="304.8" y="396.5" font-size="11.5" fill="#4A5568">76.2%</text>
+<rect x="190" y="402" width="110.7" height="16" rx="4" fill="#E8890C"><title>Node.js SDK · Signatures only: 77.5%</title></rect>
+<text x="306.7" y="414.5" font-size="11.5" fill="#4A5568">77.5%</text>
+<rect x="190" y="420" width="113.6" height="16" rx="4" fill="#8A3FC7"><title>CLI · Signatures only: 79.6%</title></rect>
+<text x="309.6" y="432.5" font-size="11.5" fill="#4A5568">79.6%</text>
+</svg>

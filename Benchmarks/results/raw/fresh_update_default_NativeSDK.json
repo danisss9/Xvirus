@@ -1,0 +1,41 @@
+{
+ "sdk": "NativeSDK",
+ "tag": "fresh_update_default_NativeSDK",
+ "process_wall_ms": 2707.32380000004,
+ "process": {
+  "cpu_ms": 125.0,
+  "ws_mb": 0.03515625,
+  "peak_ws_mb": 20.8359375,
+  "private_mb": 0.078125,
+  "peak_private_mb": 7.87109375
+ },
+ "ops": [
+  {
+   "op": "baseline",
+   "path": "",
+   "times_ms": [],
+   "cpu_ms": 0.0,
+   "ws_mb": 3.68,
+   "peak_ws_mb": 3.68,
+   "private_mb": 0.566,
+   "result": "",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "update",
+   "path": "",
+   "times_ms": [
+    2691.6918
+   ],
+   "cpu_ms": 125.0,
+   "ws_mb": 20.324,
+   "peak_ws_mb": 20.324,
+   "private_mb": 7.871,
+   "result": "Database was updated!",
+   "files": 0,
+   "threads": 1
+  }
+ ],
+ "exit": 0
+}

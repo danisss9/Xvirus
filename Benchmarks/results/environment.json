@@ -1,0 +1,38 @@
+{
+  "date": "2026-11-25",
+  "os": "Windows-11-10.0.26300-SP0",
+  "python": "3.15.2",
+  "cpu": "AMD Ryzen 5 7600 6-Core Processor",
+  "cores_logical": 12,
+  "ram_gb": 31.1,
+  "dotnet": "10.0.404",
+  "node": "v26.13.0",
+  "db_versions": {
+    "AIModel": 3,
+    "ScriptAIModel": 1,
+    "MainDB": 108,
+    "DailyDB": 15310,
+    "WhiteDB": 380,
+    "DailywlDB": 3039,
+    "HeurDB": 737,
+    "HeurDB2": 104,
+    "MalvendorDB": 89
+  },
+  "db_files": {
+    "dailylist.db": 825418,
+    "dailywl.db": 331432,
+    "heurlist.db": 123828,
+    "heurlist2.db": 1073,
+    "malvendor.db": 27437,
+    "model.ai": 8878521,
+    "scriptmodel.gguf": 986048800,
+    "viruslist.db": 70540684,
+    "whitelist.db": 8788729
+  },
+  "binaries": {
+    "CSharpSDK": 119918000,
+    "NativeSDK": 122180984,
+    "NodeSDK": 122559384,
+    "CLI": 120090633
+  }
+}

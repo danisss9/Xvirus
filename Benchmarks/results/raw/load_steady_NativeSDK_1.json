@@ -1,0 +1,41 @@
+{
+ "sdk": "NativeSDK",
+ "tag": "load_steady_NativeSDK_1",
+ "process_wall_ms": 682.8837000011845,
+ "process": {
+  "cpu_ms": 734.375,
+  "ws_mb": 0.03515625,
+  "peak_ws_mb": 429.33203125,
+  "private_mb": 0.078125,
+  "peak_private_mb": 415.79296875
+ },
+ "ops": [
+  {
+   "op": "baseline",
+   "path": "",
+   "times_ms": [],
+   "cpu_ms": 0.0,
+   "ws_mb": 3.68,
+   "peak_ws_mb": 3.68,
+   "private_mb": 0.566,
+   "result": "",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "load",
+   "path": "",
+   "times_ms": [
+    648.5051
+   ],
+   "cpu_ms": 703.125,
+   "ws_mb": 416.793,
+   "peak_ws_mb": 429.332,
+   "private_mb": 402.672,
+   "result": "Loaded Successfully",
+   "files": 0,
+   "threads": 1
+  }
+ ],
+ "exit": 0
+}

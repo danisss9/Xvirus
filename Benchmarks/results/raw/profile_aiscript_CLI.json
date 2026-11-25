@@ -1,0 +1,186 @@
+{
+ "sdk": "CLI",
+ "tag": "profile_aiscript_CLI",
+ "process_wall_ms": 16501.220699999976,
+ "process": {
+  "cpu_ms": 91078.125,
+  "ws_mb": 0.55078125,
+  "peak_ws_mb": 2216.34375,
+  "private_mb": 0.59375,
+  "peak_private_mb": 1575.69921875
+ },
+ "ops": [
+  {
+   "op": "baseline",
+   "path": "",
+   "times_ms": [
+    0.4656999990402255
+   ],
+   "cpu_ms": 62.5,
+   "ws_mb": 21.3671875,
+   "peak_ws_mb": 21.3671875,
+   "private_mb": 6.01171875,
+   "peak_private_mb": 6.01171875,
+   "result": "",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "load",
+   "path": "",
+   "times_ms": [
+    1817.9397999992943
+   ],
+   "cpu_ms": 1750.0,
+   "ws_mb": 1682.54296875,
+   "peak_ws_mb": 1799.21484375,
+   "private_mb": 1062.05078125,
+   "result": "Load successful",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/pe_2MB.dll",
+   "times_ms": [
+    62.268699999549426,
+    61.32690000049479,
+    61.75190000067232,
+    61.371499999950174,
+    61.69439999939641
+   ],
+   "cpu_ms": 718.75,
+   "ws_mb": 1709.86328125,
+   "peak_ws_mb": 1799.21484375,
+   "private_mb": 1087.8046875,
+   "result": "AI.100.00|warm=128.516",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/text_2MB.log",
+   "times_ms": [
+    29.6213000001444,
+    29.02650000032736,
+    28.774499998689862,
+    28.601600000911276,
+    29.362100000071223,
+    29.475700001057703,
+    29.062100000373903
+   ],
+   "cpu_ms": 218.75,
+   "ws_mb": 1713.8984375,
+   "peak_ws_mb": 1799.21484375,
+   "private_mb": 1088.75,
+   "result": "Safe|warm=38.436",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/binary_2MB.bin",
+   "times_ms": [
+    59.600699998554774,
+    58.927400001266506,
+    59.07420000039565,
+    60.149499999170075,
+    59.36370000017632,
+    59.67580000105954,
+    59.610100001009414
+   ],
+   "cpu_ms": 437.5,
+   "ws_mb": 1714.5,
+   "peak_ws_mb": 1799.21484375,
+   "private_mb": 1089.3125,
+   "result": "Safe|warm=60.385",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/files/signed_pe.exe",
+   "times_ms": [
+    3.6832999994658167,
+    3.370599999470869,
+    3.6306000001786742,
+    3.4023999996861676,
+    3.344499999002437,
+    3.349799999341485,
+    3.359100001034676
+   ],
+   "cpu_ms": 15.625,
+   "ws_mb": 1715.48828125,
+   "peak_ws_mb": 1799.21484375,
+   "private_mb": 1089.5234375,
+   "result": "Safe|warm=17.825",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/scripts/backup.ps1",
+   "times_ms": [
+    865.2500000007421,
+    923.4517000004416,
+    875.284499999907
+   ],
+   "cpu_ms": 17593.75,
+   "ws_mb": 2056.92578125,
+   "peak_ws_mb": 2211.65625,
+   "private_mb": 1094.64453125,
+   "result": "Safe|warm=894.230",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/scripts/build.bat",
+   "times_ms": [
+    694.9172000004182,
+    665.18090000136,
+    700.3559000004316
+   ],
+   "cpu_ms": 13578.125,
+   "ws_mb": 2058.2421875,
+   "peak_ws_mb": 2211.65625,
+   "private_mb": 1094.4375,
+   "result": "Safe|warm=679.959",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/scripts/server.js",
+   "times_ms": [
+    966.531500000201,
+    952.8532000003906,
+    997.6140999988274
+   ],
+   "cpu_ms": 18781.25,
+   "ws_mb": 2059.421875,
+   "peak_ws_mb": 2216.34375,
+   "private_mb": 1096.2734375,
+   "result": "Safe|warm=956.035",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "scan",
+   "path": "C:/Users/Dani/AppData/Local/Temp/claude/46b884e0aa27c672/4decb2ab-6de4-4171-b2d4-40e037f7228a/scratchpad/corpus/scripts/report.py",
+   "times_ms": [
+    788.5406999994302,
+    802.005099998496,
+    777.3126000010961
+   ],
+   "cpu_ms": 15312.5,
+   "ws_mb": 2061.14453125,
+   "peak_ws_mb": 2216.34375,
+   "private_mb": 1097.359375,
+   "result": "Safe|warm=775.031",
+   "files": 0,
+   "threads": 1
+  }
+ ],
+ "exit": 0
+}

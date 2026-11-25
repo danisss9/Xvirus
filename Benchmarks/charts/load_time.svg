@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="350" viewBox="0 0 860 350" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif">
+<rect x="0.5" y="0.5" width="859" height="349" rx="10" fill="#FFFFFF" stroke="#E6E9EF"/>
+<rect x="0" y="0" width="6" height="350" rx="3" fill="#00A651"/>
+<text x="28" y="34" font-size="17" font-weight="700" fill="#0B1220">Engine load time</text>
+<text x="28" y="55" font-size="12.5" fill="#4A5568">Time for Load() to make the engine ready to scan · median, lower is better</text>
+<text x="840" y="338" font-size="10.5" font-weight="700" fill="#00A651" text-anchor="end" letter-spacing="1">XVIRUS</text>
+<rect x="28" y="71" width="11" height="11" rx="3" fill="#00A651"/>
+<text x="44" y="80" font-size="12" fill="#4A5568">Steady state</text>
+<rect x="152.4" y="71" width="11" height="11" rx="3" fill="#2F6FDB"/>
+<text x="168.4" y="80" font-size="12" fill="#4A5568">First run (no rules.json)</text>
+<line x1="190.0" y1="96" x2="190.0" y2="316" stroke="#E6E9EF"/>
+<text x="190.0" y="330" font-size="10.5" fill="#8A94A6" text-anchor="middle">0</text>
+<line x1="317.7" y1="96" x2="317.7" y2="316" stroke="#E6E9EF"/>
+<text x="317.7" y="330" font-size="10.5" fill="#8A94A6" text-anchor="middle">200</text>
+<line x1="445.4" y1="96" x2="445.4" y2="316" stroke="#E6E9EF"/>
+<text x="445.4" y="330" font-size="10.5" fill="#8A94A6" text-anchor="middle">400</text>
+<line x1="573.1" y1="96" x2="573.1" y2="316" stroke="#E6E9EF"/>
+<text x="573.1" y="330" font-size="10.5" fill="#8A94A6" text-anchor="middle">600</text>
+<line x1="700.8" y1="96" x2="700.8" y2="316" stroke="#E6E9EF"/>
+<text x="700.8" y="330" font-size="10.5" fill="#8A94A6" text-anchor="middle">800</text>
+<line x1="190" y1="96" x2="190" y2="316" stroke="#8A94A6"/>
+<text x="178" y="123.0" font-size="12.5" fill="#0B1220" text-anchor="end">C# SDK</text>
+<rect x="190" y="102" width="543.4" height="16" rx="4" fill="#00A651"><title>Steady state · C# SDK: 851 ms</title></rect>
+<text x="739.4" y="114.5" font-size="11.5" fill="#4A5568">851 ms</text>
+<rect x="190" y="120" width="542.9" height="16" rx="4" fill="#2F6FDB"><title>First run (no rules.json) · C# SDK: 850 ms</title></rect>
+<text x="738.9" y="132.5" font-size="11.5" fill="#4A5568">850 ms</text>
+<text x="178" y="175.0" font-size="12.5" fill="#0B1220" text-anchor="end">Native SDK</text>
+<rect x="190" y="154" width="413.1" height="16" rx="4" fill="#00A651"><title>Steady state · Native SDK: 647 ms</title></rect>
+<text x="609.1" y="166.5" font-size="11.5" fill="#4A5568">647 ms</text>
+<rect x="190" y="172" width="425.9" height="16" rx="4" fill="#2F6FDB"><title>First run (no rules.json) · Native SDK: 667 ms</title></rect>
+<text x="621.9" y="184.5" font-size="11.5" fill="#4A5568">667 ms</text>
+<text x="178" y="227.0" font-size="12.5" fill="#0B1220" text-anchor="end">Node.js SDK</text>
+<rect x="190" y="206" width="418.0" height="16" rx="4" fill="#00A651"><title>Steady state · Node.js SDK: 655 ms</title></rect>
+<text x="614.0" y="218.5" font-size="11.5" fill="#4A5568">655 ms</text>
+<rect x="190" y="224" width="417.9" height="16" rx="4" fill="#2F6FDB"><title>First run (no rules.json) · Node.js SDK: 655 ms</title></rect>
+<text x="613.9" y="236.5" font-size="11.5" fill="#4A5568">655 ms</text>
+<text x="178" y="279.0" font-size="12.5" fill="#0B1220" text-anchor="end">CLI</text>
+<rect x="190" y="258" width="552.4" height="16" rx="4" fill="#00A651"><title>Steady state · CLI: 865 ms</title></rect>
+<text x="748.4" y="270.5" font-size="11.5" fill="#4A5568">865 ms</text>
+<rect x="190" y="276" width="552.1" height="16" rx="4" fill="#2F6FDB"><title>First run (no rules.json) · CLI: 865 ms</title></rect>
+<text x="748.1" y="288.5" font-size="11.5" fill="#4A5568">865 ms</text>
+</svg>

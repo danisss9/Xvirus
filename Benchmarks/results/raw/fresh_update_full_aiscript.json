@@ -1,0 +1,41 @@
+{
+ "sdk": "CSharpSDK",
+ "tag": "fresh_update_full_aiscript",
+ "process_wall_ms": 23665.04550000002,
+ "process": {
+  "cpu_ms": 1734.375,
+  "ws_mb": 0.0390625,
+  "peak_ws_mb": 45.90234375,
+  "private_mb": 0.08203125,
+  "peak_private_mb": 13.28125
+ },
+ "ops": [
+  {
+   "op": "baseline",
+   "path": "",
+   "times_ms": [],
+   "cpu_ms": 0,
+   "ws_mb": 23.8046875,
+   "peak_ws_mb": 24.015625,
+   "private_mb": 7.05859375,
+   "result": "",
+   "files": 0,
+   "threads": 1
+  },
+  {
+   "op": "update",
+   "path": "",
+   "times_ms": [
+    23556.7848
+   ],
+   "cpu_ms": 1640.625,
+   "ws_mb": 44.8125,
+   "peak_ws_mb": 45.90234375,
+   "private_mb": 12.01953125,
+   "result": "Database was updated!",
+   "files": 0,
+   "threads": 1
+  }
+ ],
+ "exit": 0
+}
