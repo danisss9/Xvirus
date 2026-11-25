@@ -151,7 +151,13 @@ namespace Xvirus
                 var patterns = File.ReadAllLines(fullPath)
                     .Select(line => line.Split(splitChar))
                     .SelectMany(splitLines => splitLines.Length > 2 ? splitLines.Take(1).Concat(splitLines[2].Split(andChar)) : splitLines.Take(1))
+                    // Dependencies are written as plain hex, except for the '!' prefix that
+                    // marks a negative dependency. The Aho tree must contain the positive
+                    // pattern so Scanner can tell whether the negated pattern is present.
+                    .Select(line => line.StartsWith('!') ? line[1..] : line)
                     .Select(line => line.Replace("-", "", StringComparison.Ordinal))
+                    .Where(line => line.Length > 0)
+                    .Distinct(StringComparer.Ordinal)
                     .ToArray();
                 return new AhoCorasickTree(patterns);
             }

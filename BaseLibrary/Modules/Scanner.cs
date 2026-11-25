@@ -208,13 +208,20 @@ namespace Xvirus
                         int score = 0;
                         foreach (var match in matches)
                         {
+                            // Dependencies are support patterns and may not have a verdict name
+                            // of their own. Never let them contribute to the heuristic score.
+                            if (!database.heurList.TryGetValue(match, out var name))
+                                continue;
+
                             if (database.heurListDeps.TryGetValue(match, out var matchDeps))
                             {
-                                if (matchDeps.All(dep => dep[0] == '!' ? !matchesKeys.Contains(dep.Substring(1)) : matchesKeys.Contains(dep)))
-                                {
-                                    var nameDeps = database.heurList[match];
-                                    return new ScanResult(1, nameDeps, filePath);
-                                }
+                                // Dependencies are hard requirements. An anchor whose dependencies
+                                // are absent must not fall through to the score-based path.
+                                if (!matchDeps.All(dep => dep.Length > 0 &&
+                                                          (dep[0] == '!' ? !matchesKeys.Contains(dep[1..]) : matchesKeys.Contains(dep))))
+                                    continue;
+
+                                return new ScanResult(1, name, filePath);
                             }
 
                             if (score < (5 - settings.HeuristicsLevel))
@@ -223,10 +230,7 @@ namespace Xvirus
                                 continue;
                             }
 
-                            if (database.heurList.TryGetValue(match, out var name))
-                            {
-                                return new ScanResult(1, name, filePath);
-                            }
+                            return new ScanResult(1, name, filePath);
                         }
                     }
                     else if (!isExecutable && database.heurScriptListPatterns != null && (settings.MaxHeuristicsOthersScanLength == null || fileInfo.Length <= settings.MaxHeuristicsOthersScanLength)) // 10MBs
@@ -237,13 +241,16 @@ namespace Xvirus
                         int score = 0;
                         foreach (var match in matches)
                         {
+                            if (!database.heurScriptList.TryGetValue(match, out var name))
+                                continue;
+
                             if (database.heurScriptListDeps.TryGetValue(match, out var matchDeps))
                             {
-                                if (matchDeps.All(dep => dep[0] == '!' ? !matchesKeys.Contains(dep.Substring(1)) : matchesKeys.Contains(dep)))
-                                {
-                                    var nameDeps = database.heurScriptList[match];
-                                    return new ScanResult(1, nameDeps, filePath);
-                                }
+                                if (!matchDeps.All(dep => dep.Length > 0 &&
+                                                          (dep[0] == '!' ? !matchesKeys.Contains(dep[1..]) : matchesKeys.Contains(dep))))
+                                    continue;
+
+                                return new ScanResult(1, name, filePath);
                             }
 
                             if (score < (5 - settings.HeuristicsLevel))
@@ -252,10 +259,7 @@ namespace Xvirus
                                 continue;
                             }
 
-                            if (database.heurScriptList.TryGetValue(match, out var name))
-                            {
-                                return new ScanResult(1, name, filePath);
-                            }
+                            return new ScanResult(1, name, filePath);
                         }
                     }
                 }

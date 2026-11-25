@@ -230,3 +230,6 @@ resources/
 Cloud/public/database/scriptmodel.gguf
 Cloud/sdk/Database/scriptmodel.gguf
 **/.vscode-debug-eval.cs
+
+# YaraTranslator generated output
+YaraTranslator/out/

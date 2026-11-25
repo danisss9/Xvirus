@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BaseLibrary\BaseLibrary.csproj" />
     <ProjectReference Include="..\XvirusService\XvirusService.csproj" />
+    <ProjectReference Include="..\YaraTranslator\YaraTranslator.csproj" />
   </ItemGroup>
 
 </Project>

@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Added
+
+- `YaraTranslator`, a .NET 8 tool that converts YARA 4.x rules into Xvirus heuristic
+  database entries (`heurlist.db` / `heurlist2.db`). It includes a parser, string and
+  condition lowering, DNF-based line planning, database merge/prune support, validation,
+  JSON reports and a per-rule manifest. See `YaraTranslator/README.md`.
+
+### Changed
+
+- Heuristic dependencies are now hard requirements in `Scanner`: an anchor with missing
+  dependencies no longer falls through to score-based detection, and unnamed support
+  patterns no longer contribute score. `DB.LoadAhoCorasick` also strips the `!` prefix
+  from negative dependencies so they can be detected as present. Existing databases have
+  no dependency entries, so their behaviour is unchanged.
+
 ## [5.2.2]
 
 ### Added

@@ -12,6 +12,7 @@ Xvirus SDK 5.2.2 — Anti-malware scanning engine and desktop protection suite.
 | [NodeSDK](NodeSDK/README.md)                 | Node.js native addon (`.node` + ESM wrapper). Use this to integrate from Node.js or TypeScript.                                                                                                       |
 | [XvirusCLI](XvirusCLI/README.md)             | Command-line interface for scanning files and folders, managing updates, and configuring settings from a terminal.                                                                                    |
 | [AITrainer](AITrainer/README.md)             | Tool to train and export the XvirusAI ONNX model from a dataset of malware and benign PE files.                                                                                                       |
+| [YaraTranslator](YaraTranslator/README.md)   | Tool to translate YARA 4.x rules into Xvirus heuristic database entries (`heurlist.db` / `heurlist2.db`) with per-rule fidelity reports.                                                              |
 | [XvirusService](XvirusService/README.md)     | Windows background service (ASP.NET Core, Native AOT). Hosts the HTTP API on port 5236, real-time process monitoring, network protection, and automatic updates.                                      |
 | [XvirusUI](XvirusUI/README.md)               | Desktop UI (Preact + Neutralino.js). Connects to XvirusService and supports both antimalware and firewall modes.                                                                                      |
 | [XvirusInstaller](XvirusInstaller/README.md) | Installer wizard (Preact + Neutralino.js). Bundles all product resources as base64, runs an elevated PowerShell install script, and shows real-time progress. Builds in antimalware or firewall mode. |
@@ -42,6 +43,7 @@ Supported operating systems:
 | Install the desktop product on an end-user machine     | [XvirusInstaller](XvirusInstaller/README.md) |
 | Uninstall the desktop product                          | [XvirusUnin](XvirusUnin/README.md)           |
 | Train or retrain the AI model                          | [AITrainer](AITrainer/README.md)             |
+| Translate YARA rules into Xvirus heuristics            | [YaraTranslator](YaraTranslator/README.md)   |
 | Run the cloud scanner API and web UI                   | [Cloud](Cloud/README.md)                     |
 | Serve the Xvirus website                               | [Website](Website/README.md)                 |
 | Serve the Xvirus web portal                            | [Portal](Portal/README.md)                   |
