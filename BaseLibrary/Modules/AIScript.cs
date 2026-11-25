@@ -4,6 +4,9 @@ using LLama.Native;
 using LLama.Sampling;
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using Xvirus.Model;
@@ -55,9 +58,83 @@ namespace Xvirus
                 }
                 catch (InvalidOperationException) { }
 
+                try
+                {
+                    var avxLevel = DetectAvxLevelForAot();
+                    if (avxLevel != null)
+                        NativeLibraryConfig.All.WithAvx(avxLevel.Value);
+                }
+                catch (InvalidOperationException) { }
+
                 nativeSearchConfigured = true;
             }
         }
+
+        // LLamaSharp picks the llama.cpp CPU backend (runtimes/<rid>/native/{noavx,avx,avx2,avx512})
+        // from Avx.IsSupported / Avx2.IsSupported / Avx512F.IsSupported. Under NativeAOT those are
+        // compile-time constants for the ISAs the binary was compiled for (x64 baseline by default),
+        // so they are always false and LLamaSharp silently loads the "noavx" backend, which is ~30x
+        // slower. Detect the level at runtime from CPUID plus the OS-enabled register state instead,
+        // mirroring LLamaSharp's own rules. Returns null to keep LLamaSharp's detection (JIT, where
+        // IsSupported reflects the actual CPU, or on platforms where the OS state cannot be read).
+        private static AvxLevel? DetectAvxLevelForAot()
+        {
+            if (RuntimeFeature.IsDynamicCodeCompiled || !X86Base.IsSupported)
+                return null;
+
+            ulong osState; // XCR0-style mask of register state the OS saves/restores
+            if (OperatingSystem.IsWindows())
+                osState = GetEnabledXStateFeatures();
+            else if (OperatingSystem.IsLinux())
+                osState = ReadLinuxCpuFlagsAsXState();
+            else
+                return null;
+
+            var (maxLeaf, _, _, _) = X86Base.CpuId(0, 0);
+            var (_, _, ecx1, _) = X86Base.CpuId(1, 0);
+            var (_, ebx7, ecx7, _) = maxLeaf >= 7 ? X86Base.CpuId(7, 0) : (0, 0, 0, 0);
+
+            const ulong YmmState = 0b110;       // SSE + AVX (XCR0 bits 1, 2)
+            const ulong ZmmState = 0b1110_0110; // + opmask, ZMM_Hi256, Hi16_ZMM (XCR0 bits 5, 6, 7)
+
+            bool osXsave = (ecx1 & (1 << 27)) != 0;
+            bool avx = osXsave && (ecx1 & (1 << 28)) != 0 && (osState & YmmState) == YmmState;
+            bool avx2 = avx && (ebx7 & (1 << 5)) != 0;
+            bool avx512 = avx2 && (osState & ZmmState) == ZmmState
+                && (ebx7 & (1 << 16)) != 0  // AVX512F
+                && (ebx7 & (1 << 30)) != 0  // AVX512BW
+                && (ecx7 & (1 << 1)) != 0   // AVX512_VBMI
+                && (ecx7 & (1 << 11)) != 0; // AVX512_VNNI
+
+            return avx512 ? AvxLevel.Avx512 : avx2 ? AvxLevel.Avx2 : avx ? AvxLevel.Avx : AvxLevel.None;
+        }
+
+        // Linux only reports avx/avx512f in /proc/cpuinfo when the kernel enabled the matching
+        // register state, so translate those flags into the equivalent XCR0 bits.
+        private static ulong ReadLinuxCpuFlagsAsXState()
+        {
+            try
+            {
+                foreach (var line in File.ReadLines("/proc/cpuinfo"))
+                {
+                    if (!line.StartsWith("flags", StringComparison.Ordinal))
+                        continue;
+
+                    var flags = line.Substring(line.IndexOf(':') + 1).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    ulong state = 0;
+                    if (Array.IndexOf(flags, "avx") != -1)
+                        state |= 0b110;
+                    if (Array.IndexOf(flags, "avx512f") != -1)
+                        state |= 0b1110_0000;
+                    return state;
+                }
+            }
+            catch (Exception) { }
+            return 0;
+        }
+
+        [DllImport("kernel32.dll")]
+        private static extern ulong GetEnabledXStateFeatures();
 
         public AIScript(SettingsDTO settings)
         {
@@ -130,7 +207,12 @@ namespace Xvirus
 
                 lock (inferenceLock)
                 {
-                    var verdict = Classify(prompt).GetAwaiter().GetResult();
+                    // Run the async inference on the thread pool and block on it there. LLamaSharp
+                    // awaits internally without ConfigureAwait(false), so blocking directly on a
+                    // thread that has a SynchronizationContext (the Node.js main thread under
+                    // node-api-dotnet, a UI thread) deadlocks: the continuation after the prompt
+                    // decode is posted back to the blocked thread and never runs.
+                    var verdict = Task.Run(() => Classify(prompt)).GetAwaiter().GetResult();
                     return verdict switch
                     {
                         "malicious" => 1f,
@@ -160,7 +242,7 @@ namespace Xvirus
             };
 
             var output = new StringBuilder();
-            await foreach (var token in executor!.InferAsync(prompt, inferenceParams))
+            await foreach (var token in executor!.InferAsync(prompt, inferenceParams).ConfigureAwait(false))
                 output.Append(token);
 
             return output.ToString().Trim().ToLowerInvariant();
