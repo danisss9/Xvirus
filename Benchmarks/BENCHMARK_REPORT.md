@@ -692,6 +692,7 @@ py -3 run_benchmarks.py scaling
 # 3. Aggregate, chart and tabulate
 py -3 make_report.py
 py -3 make_tables.py
+py -3 make_pdf.py      # PDF version of this report (uses Microsoft Edge)
 ```
 
 Results depend on CPU, storage, other security software and network conditions. Relative comparisons between products and engine profiles are more portable than absolute numbers.
