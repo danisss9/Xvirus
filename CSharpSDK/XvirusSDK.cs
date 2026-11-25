@@ -33,7 +33,7 @@ namespace Xvirus
                 var database = new DB(settings);
                 var ai = new AI(settings);
                 var aiScript = new AIScript(settings);
-                var rules = new Rules();
+                var rules = new Rules("rules.json", seedRunningProcesses: false);
                 Scanner = new Scanner(settings, database, ai, aiScript, rules);
             }
         }

@@ -43,7 +43,7 @@ public class WindowsStartupService
         try
         {
             var installDir = AppContext.BaseDirectory.TrimEnd('\\', '/');
-            var productName = Path.GetFileName(installDir);
+            var productName = Xvirus.AppInfo.ProductName;
 
             using var runKey = Registry.LocalMachine.OpenSubKey(
                 @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run",

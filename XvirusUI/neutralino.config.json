@@ -13,7 +13,13 @@
     "enabled": false,
     "writeToLogFile": false
   },
-  "nativeAllowList": ["app.*", "os.*", "window.*", "computer.*", "debug.log"],
+  "nativeAllowList": [
+    "app.*",
+    "os.*",
+    "window.*",
+    "computer.*",
+    "debug.log"
+  ],
   "globalVariables": {
     "IS_FIREWALL": true,
     "IS_ANTIMALWARE": false

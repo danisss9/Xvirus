@@ -22,15 +22,17 @@ namespace XvirusService.Api
                 }
             });
 
-            app.MapPost("/update/check", (SettingsService settingsService, DB db, AI ai, AIScript aiScript) =>
+            app.MapPost("/update/check", (SettingsService settingsService, Scanner scanner, NetworkService networkService, DB db, AI ai, AIScript aiScript) =>
             {
                 try
                 {
                     var message = Updater.CheckUpdates(settingsService.Settings);
                     settingsService.Reload();
+                    scanner.UpdateSettings(settingsService.Settings);
                     db.Load(settingsService.Settings);
                     ai.Load(settingsService.Settings);
                     aiScript.Load(settingsService.Settings);
+                    networkService.InvalidateCache();
 
                     var dto = new UpdateStatusDTO
                     {

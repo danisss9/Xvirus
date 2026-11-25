@@ -48,14 +48,16 @@ if (existsSync(resourcesDir)) {
 mkdirSync(resourcesDir, { recursive: true });
 
 // XvirusUI binary + resources
-// neu build always outputs to dist/<binaryName>/ — find the folder
+// neu build outputs to dist/<binaryName>/ — pick the folder matching this build mode
 const distRoot = join(sdkRoot, 'XvirusUI', 'dist');
 const distFolders = readdirSync(distRoot);
 if (distFolders.length === 0) {
   console.error('Error: XvirusUI/dist/ is empty after build.');
   process.exit(1);
 }
-const distDir = join(distRoot, distFolders[0]);
+const expectedDistFolder = mode === 'fw' ? 'xvirus-firewall' : 'xvirus-antimalware';
+const chosenDistFolder = distFolders.includes(expectedDistFolder) ? expectedDistFolder : distFolders[0];
+const distDir = join(distRoot, chosenDistFolder);
 
 const neuBinaryFiles = readdirSync(distDir).filter((f) => f.endsWith('-win_x64.exe'));
 if (neuBinaryFiles.length === 0) {

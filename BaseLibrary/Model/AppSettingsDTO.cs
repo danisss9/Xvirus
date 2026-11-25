@@ -20,6 +20,7 @@ namespace Xvirus.Model
         public string ThreatAction { get; set; } = "ask"; // auto, ask
         public bool BehaviorProtection { get; set; } = true;
         public bool NetworkProtection { get; set; } = true;
+        public string FirewallProfile { get; set; } = "any"; // any, private, domain, public
         public bool SelfDefense { get; set; } = false;
         public bool ShowNotifications { get; set; } = true;
     }

@@ -17,6 +17,7 @@ export interface AppSettingsDTO {
   threatAction: 'auto' | 'ask';
   behaviorProtection: boolean;
   networkProtection: boolean;
+  firewallProfile: 'any' | 'private' | 'domain' | 'public';
   selfDefense: boolean;
   showNotifications: boolean;
 }

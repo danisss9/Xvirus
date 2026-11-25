@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 import { onServerEvent } from '../services/neutralino';
+import { SERVICE_BASE_URL } from '../services/env';
 
 export default function ScanningView({ onComplete, scanPath = 'C:\\' }: {
   onComplete: () => void;
@@ -25,7 +26,7 @@ export default function ScanningView({ onComplete, scanPath = 'C:\\' }: {
     // Start a full scan; the POST resolves only when the scan finishes/cancels.
     const startScan = async () => {
       try {
-        const response = await fetch('http://localhost:5236/scan', {
+        const response = await fetch(`${SERVICE_BASE_URL}/scan`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ path: scanPath })
@@ -47,7 +48,7 @@ export default function ScanningView({ onComplete, scanPath = 'C:\\' }: {
   const handleStop = async () => {
     setIsRunning(false);
     try {
-      await fetch('http://localhost:5236/scan/cancel', {
+      await fetch(`${SERVICE_BASE_URL}/scan/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path: scanPath })

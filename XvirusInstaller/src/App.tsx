@@ -75,7 +75,7 @@ const App: FunctionComponent = () => {
       )}
 
       {currentStep === 'done' && installResult && (
-        <DoneView success={installResult.success} error={installResult.error} />
+        <DoneView success={installResult.success} error={installResult.error} installPath={config?.installPath} />
       )}
     </>
   );

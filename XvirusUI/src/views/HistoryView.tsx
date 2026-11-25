@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { HistoryEntry } from '../model/HistoryEntry';
-import { Rule } from '../model/Rule';
+import { Rule, RuleKind } from '../model/Rule';
 import { QuarantineEntry } from '../model/QuarantineEntry';
 import { fetchHistory, clearHistory as apiClearHistory } from '../api/historyApi';
-import { fetchRules, addAllowRule, addBlockRule, removeRule } from '../api/rulesApi';
+import { fetchRules, addAllowRule, addBlockRule, createRule, removeRule } from '../api/rulesApi';
 import { fetchQuarantine, deleteQuarantine as apiDeleteQuarantine, restoreQuarantine as apiRestoreQuarantine } from '../api/quarantineApi';
 import { getFilePath } from '../services/neutralino';
+import { isFirewall } from '../services/env';
 
 const IconTrash = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
@@ -76,6 +77,14 @@ export default function HistoryView() {
 
   const [ruleMenuOpen, setRuleMenuOpen] = useState(false);
   const ruleMenuRef = useRef<HTMLDivElement | null>(null);
+  const [netRuleModalOpen, setNetRuleModalOpen] = useState(false);
+  const [netRuleKind, setNetRuleKind] = useState<RuleKind>('ip');
+  const [netRuleType, setNetRuleType] = useState<'block' | 'allow'>('block');
+  const [netRuleTarget, setNetRuleTarget] = useState('');
+  const [netRuleProtocol, setNetRuleProtocol] = useState('any');
+  const [netRuleDirection, setNetRuleDirection] = useState('both');
+  const [netRuleProfile, setNetRuleProfile] = useState('any');
+  const [netRuleError, setNetRuleError] = useState<string | null>(null);
 
   const sliderRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
@@ -182,6 +191,13 @@ export default function HistoryView() {
     } catch (e) { console.error(e); }
   };
 
+  const upsertRule = (rule: Rule) => {
+    setRules(prev => {
+      const exists = prev.some(r => r.id === rule.id);
+      return exists ? prev.map(r => (r.id === rule.id ? rule : r)) : [...prev, rule];
+    });
+  };
+
   const addRule = async (type: 'allow' | 'block' = 'allow') => {
     const path = await getFilePath();
     if (!path) return;
@@ -189,9 +205,32 @@ export default function HistoryView() {
       const newRule = type === 'allow'
         ? await addAllowRule(path)
         : await addBlockRule(path);
-      const ruleWithType = { ...newRule, type };
-      setRules(prev => [...prev, ruleWithType]);
+      upsertRule({ ...newRule, type });
     } catch (e) { console.error(e); }
+  };
+
+  const submitNetworkRule = async () => {
+    const trimmed = netRuleTarget.trim();
+    if (!trimmed) {
+      setNetRuleError('Please enter a target value.');
+      return;
+    }
+    try {
+      setNetRuleError(null);
+      const created = await createRule({
+        kind: netRuleKind,
+        path: trimmed,
+        type: netRuleType,
+        protocol: netRuleKind === 'port' && netRuleProtocol === 'any' ? 'tcp' : netRuleProtocol,
+        direction: netRuleDirection,
+        profile: netRuleProfile,
+      });
+      upsertRule(created);
+      setNetRuleModalOpen(false);
+      setNetRuleTarget('');
+    } catch (e: any) {
+      setNetRuleError(e?.message || 'Failed to add rule');
+    }
   };
 
   const handleConfirm = () => {
@@ -240,7 +279,8 @@ export default function HistoryView() {
   );
   const filteredRules = rules.filter(r =>
     r.path.toLowerCase().includes(q) ||
-    (r.type ?? '').toLowerCase().includes(q)
+    (r.type ?? '').toLowerCase().includes(q) ||
+    (r.kind ?? 'program').toLowerCase().includes(q)
   );
   const filteredQuarantine = quarantine.filter(f =>
     f.originalFileName.toLowerCase().includes(q) ||
@@ -316,6 +356,19 @@ export default function HistoryView() {
                     <span class="rule-dropdown-badge badge-block">block</span>
                     Add block rule
                   </button>
+                  {isFirewall && (
+                    <button
+                      class="rule-dropdown-item"
+                      onClick={() => {
+                        setNetRuleError(null);
+                        setNetRuleModalOpen(true);
+                        setRuleMenuOpen(false);
+                      }}
+                    >
+                      <span class="rule-dropdown-badge badge-kind">net</span>
+                      Add IP / Port / Domain…
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -364,9 +417,23 @@ export default function HistoryView() {
               ) : filteredRules.map((rule) => (
                 <div key={rule.id} class="list-item row-center-gap">
                   <div class="flex-1">
-                    {rule.type && (
-                      <span class={`rule-type badge badge-${rule.type}`}>{rule.type}</span>
-                    )}
+                    <div class="rule-badges">
+                      {rule.type && (
+                        <span class={`rule-type badge badge-${rule.type}`}>{rule.type}</span>
+                      )}
+                      {rule.kind && rule.kind !== 'program' && (
+                        <span class="badge badge-kind">{rule.kind}</span>
+                      )}
+                      {rule.protocol && rule.protocol !== 'any' && (
+                        <span class="badge badge-meta">{rule.protocol}</span>
+                      )}
+                      {rule.direction && rule.direction !== 'both' && (
+                        <span class="badge badge-meta">{rule.direction}</span>
+                      )}
+                      {rule.profile && rule.profile !== 'any' && (
+                        <span class="badge badge-meta">{rule.profile}</span>
+                      )}
+                    </div>
                     <p class="item-path">{rule.path}</p>
                   </div>
                   <button
@@ -456,6 +523,80 @@ export default function HistoryView() {
           ))}
         </div>
       </div>
+
+      {/* Network rule modal (IP / Port / Domain) */}
+      {netRuleModalOpen && (
+        <div class="confirm-modal-backdrop" onClick={() => setNetRuleModalOpen(false)}>
+          <div class="confirm-modal net-rule-modal" onClick={(e: any) => e.stopPropagation()}>
+            <p class="confirm-modal-title">Add Network Rule</p>
+            <div class="net-rule-form">
+              <div class="net-rule-row">
+                <label>Kind</label>
+                <select class="dropdown" value={netRuleKind} onChange={(e: any) => setNetRuleKind(e.currentTarget.value)}>
+                  <option value="ip">IP / CIDR</option>
+                  <option value="port">Port / Range</option>
+                  <option value="domain">Domain</option>
+                </select>
+              </div>
+              <div class="net-rule-row">
+                <label>Action</label>
+                <select class="dropdown" value={netRuleType} onChange={(e: any) => setNetRuleType(e.currentTarget.value)}>
+                  <option value="block">Block</option>
+                  <option value="allow">Allow</option>
+                </select>
+              </div>
+              <div class="net-rule-row">
+                <label>{netRuleKind === 'ip' ? 'IP / CIDR' : netRuleKind === 'port' ? 'Port' : 'Domain'}</label>
+                <input
+                  type="text"
+                  class="search-input net-rule-input"
+                  placeholder={netRuleKind === 'ip' ? 'e.g. 1.2.3.4 or 10.0.0.0/8' : netRuleKind === 'port' ? 'e.g. 445 or 8000-8080' : 'e.g. malware.example.com'}
+                  value={netRuleTarget}
+                  onInput={(e: any) => setNetRuleTarget(e.currentTarget.value)}
+                />
+              </div>
+              {netRuleKind !== 'domain' && (
+                <>
+                  <div class="net-rule-row">
+                    <label>Protocol</label>
+                    <select class="dropdown" value={netRuleProtocol} onChange={(e: any) => setNetRuleProtocol(e.currentTarget.value)}>
+                      <option value="any">Any</option>
+                      <option value="tcp">TCP</option>
+                      <option value="udp">UDP</option>
+                    </select>
+                  </div>
+                  <div class="net-rule-row">
+                    <label>Direction</label>
+                    <select class="dropdown" value={netRuleDirection} onChange={(e: any) => setNetRuleDirection(e.currentTarget.value)}>
+                      <option value="both">Both</option>
+                      <option value="out">Outbound</option>
+                      <option value="in">Inbound</option>
+                    </select>
+                  </div>
+                </>
+              )}
+              <div class="net-rule-row">
+                <label>Profile</label>
+                <select class="dropdown" value={netRuleProfile} onChange={(e: any) => setNetRuleProfile(e.currentTarget.value)}>
+                  <option value="any">All Networks</option>
+                  <option value="private">Private (Home)</option>
+                  <option value="domain">Domain (Work)</option>
+                  <option value="public">Public</option>
+                </select>
+              </div>
+              {netRuleError && <p class="net-rule-error">{netRuleError}</p>}
+            </div>
+            <div class="confirm-modal-actions">
+              <button class="confirm-modal-btn confirm-modal-btn-cancel" onClick={() => setNetRuleModalOpen(false)}>
+                Cancel
+              </button>
+              <button class="confirm-modal-btn confirm-modal-btn-teal" onClick={submitNetworkRule}>
+                Save Rule
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Confirm modal */}
       {confirmInfo && (

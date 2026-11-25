@@ -32,8 +32,15 @@ export interface SettingsDTO {
   maxAIScanLength: number | null;
   maxAIScriptScanLength: number | null;
 
+  // archive scanning
+  enableArchiveScan?: boolean;
+  maxArchiveDepth?: number | null;
+  maxArchiveTotalSize?: number | null;
+  maxArchiveFileCount?: number | null;
+
   // updates
   checkSDKUpdates: boolean;
   databaseFolder: string;
+  lastUpdateCheck?: string | null;
   databaseVersion: DatabaseVersionDTO;
 }

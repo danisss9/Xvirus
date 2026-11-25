@@ -1,5 +1,6 @@
 import Neutralino from '@neutralinojs/lib';
 import { ThreatPayload } from '../model/ThreatPayload';
+import { SERVICE_BASE_URL } from './env';
 
 // Neutralino injects these globals before the app JS runs
 declare const NL_PATH: string;
@@ -78,8 +79,6 @@ export async function getFilePath(): Promise<string | undefined> {
 // SSE subscription to C# backend (mirrors the old bun/index.ts logic)
 // ---------------------------------------------------------------------------
 
-const SERVICE_BASE_URL = 'http://localhost:5236';
-
 async function subscribeToServiceEvents(): Promise<void> {
   while (true) {
     try {
@@ -146,8 +145,8 @@ async function subscribeToServiceEvents(): Promise<void> {
             const isQuarantined =
               payload.action === 'quarantined' || payload.action === 'quarantine-pending-reboot';
 
-            if (payload.showNotification) {
-              if (isQuarantined) {
+            if (isQuarantined) {
+              if (payload.showNotification) {
                 const status =
                   payload.action === 'quarantine-pending-reboot'
                     ? 'will be quarantined on next reboot'
@@ -156,15 +155,22 @@ async function subscribeToServiceEvents(): Promise<void> {
                   'Xvirus – Threat Removed',
                   `${(payload.fileName as string) ?? 'A threat'} ${status}.`,
                 );
-              } else {
-                // Process suspended — show alert in UI and bring window forward
-                dispatchServerEvent({
-                  type: 'threat',
-                  payload: payload as unknown as ThreatPayload,
-                });
-                await Neutralino.window.show();
-                await Neutralino.window.focus();
               }
+            } else {
+              // Process suspended / awaiting user decision — always show AlertView so
+              // suspended processes are never left frozen when OS notifications are off.
+              dispatchServerEvent({
+                type: 'threat',
+                payload: payload as unknown as ThreatPayload,
+              });
+              if (payload.showNotification) {
+                Neutralino.os.showNotification(
+                  'Xvirus – Threat Detected',
+                  `${(payload.fileName as string) ?? 'A suspicious file'} requires your action.`,
+                );
+              }
+              await Neutralino.window.show();
+              await Neutralino.window.focus();
             }
           }
         }

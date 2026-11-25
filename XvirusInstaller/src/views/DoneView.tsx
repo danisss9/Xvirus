@@ -5,13 +5,14 @@ import { Neutralino } from '../services/neutralino';
 interface DoneViewProps {
   success: boolean;
   error?: string;
+  installPath?: string;
 }
 
-const DoneView: FunctionComponent<DoneViewProps> = ({ success, error }) => {
+const DoneView: FunctionComponent<DoneViewProps> = ({ success, error, installPath }) => {
   const handleLaunch = async () => {
     try {
-      const installPath = `C:\\Program Files\\${PRODUCT_INFO.installFolder}`;
-      await Neutralino.os.execCommand(`cmd /c timeout /t 3 /nobreak >nul && start "" "${installPath}\\${PRODUCT_INFO.uiExeName}"`,  { background: true },);
+      const targetDir = (installPath || `C:\\Program Files\\${PRODUCT_INFO.installFolder}`).replace(/[\\\/]+$/, '');
+      await Neutralino.os.execCommand(`cmd /c timeout /t 3 /nobreak >nul && start "" "${targetDir}\\${PRODUCT_INFO.uiExeName}"`, { background: true });
     } catch (e) {
       console.error('Failed to launch app:', e);
     }

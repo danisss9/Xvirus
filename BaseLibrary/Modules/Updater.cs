@@ -122,7 +122,7 @@ namespace Xvirus
                 settings.LastUpdateCheck = DateTime.UtcNow;
                 Settings.Save(settings);
 
-                if (settings.CheckSDKUpdates && updateInfo.App.Version != AppInfo.GetVersion())
+                if (settings.CheckSDKUpdates && updateInfo.App != null && IsNewerVersion(updateInfo.App.Version, AppInfo.GetVersion()))
                 {
                     return "There is a new SDK version available!";
                 }
@@ -134,6 +134,25 @@ namespace Xvirus
                 Logger.LogException(ex);
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Returns true only when <paramref name="remoteVersion"/> is strictly greater than
+        /// <paramref name="localVersion"/>. Prevents newer builds (e.g. Firewall 5.0.0.0 while
+        /// cloud advertises 4.5.0.0) from showing false "new version available" prompts.
+        /// </summary>
+        public static bool IsNewerVersion(string? remoteVersion, string? localVersion)
+        {
+            if (string.IsNullOrWhiteSpace(remoteVersion) || string.IsNullOrWhiteSpace(localVersion))
+                return false;
+
+            if (Version.TryParse(remoteVersion.Trim(), out var remote) &&
+                Version.TryParse(localVersion.Trim(), out var local))
+            {
+                return remote > local;
+            }
+
+            return !string.Equals(remoteVersion.Trim(), localVersion.Trim(), StringComparison.OrdinalIgnoreCase);
         }
     }
 }

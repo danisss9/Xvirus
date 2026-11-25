@@ -1,94 +1,153 @@
 using System.Diagnostics;
 using System.Runtime.Versioning;
-using System.Threading;
 using Xvirus;
+using Xvirus.Model;
 
 namespace XvirusService.Services;
 
 [SupportedOSPlatform("windows")]
-public class NetworkRealTimeProtection(
-    SettingsService settings,
-    Scanner scanner,
-    Quarantine quarantine,
-    ServerEventService events,
-    ThreatAlertService alertService,
-    Rules rules) : IDisposable
+public class NetworkRealTimeProtection : IDisposable
 {
-    // 750ms — between the 500ms floor and 1s ceiling from the todo. Fast enough to
-    // catch a 1s-lived connection that the old 3s netstat poll routinely missed,
-    // without burning noticeable CPU on GetExtendedTcpTable/UdpTable (typically
-    // <1ms for a few hundred endpoints).
     private static readonly TimeSpan PollInterval = TimeSpan.FromMilliseconds(750);
+    private const int MaxCachedPids = 4096;
 
+    private readonly SettingsService _settings;
+    private readonly Scanner _scanner;
+    private readonly Quarantine _quarantine;
+    private readonly ServerEventService _events;
+    private readonly ThreatAlertService _alertService;
+    private readonly Rules _rules;
+
+    private readonly object _lifecycleLock = new();
     private CancellationTokenSource? _cts;
     private Task? _monitorTask;
     private EtwNetworkListener? _etwListener;
+    private volatile bool _running;
 
-    // Paths already scanned this session – avoids re-scanning the same
-    // executable every poll tick. Keyed on full path (case-insensitive).
+    // Paths already scanned this session — invalidated when rules change.
     private readonly HashSet<string> _scannedPaths = new(StringComparer.OrdinalIgnoreCase);
     private readonly object _scannedLock = new();
 
-    // PIDs we've already handed off to a scan task this session, so a process
-    // that holds many connections is only scanned once per session (matching
-    // the previous netstat-based behavior).
-    private readonly HashSet<int> _scannedPids = new();
+    // PIDs already inspected, keyed on (pid, startTimeTicks) so Windows PID reuse
+    // never skips a brand-new process that received a recycled PID.
+    private readonly HashSet<(int pid, long startTicks)> _scannedPids = new();
     private readonly object _pidLock = new();
 
     private bool _disposed;
+
+    public bool IsRunning => _running;
+
+    public NetworkRealTimeProtection(
+        SettingsService settings,
+        Scanner scanner,
+        Quarantine quarantine,
+        ServerEventService events,
+        ThreatAlertService alertService,
+        Rules rules)
+    {
+        _settings = settings;
+        _scanner = scanner;
+        _quarantine = quarantine;
+        _events = events;
+        _alertService = alertService;
+        _rules = rules;
+
+        _rules.RulesChanged += OnRuleChanged;
+    }
 
     // -----------------------------------------------------------------------
 
     public void Start()
     {
-        if (!settings.AppSettings.NetworkProtection)
+        lock (_lifecycleLock)
         {
-            Console.WriteLine("NetworkRealTimeProtection: disabled in settings, not starting.");
-            return;
+            if (_running) return;
+
+            if (!_settings.AppSettings.NetworkProtection)
+            {
+                Console.WriteLine("NetworkRealTimeProtection: disabled in settings, not starting.");
+                return;
+            }
+
+            Console.WriteLine("NetworkRealTimeProtection: starting IPHelper + ETW network monitor...");
+
+            var sessionName = $"{AppInfo.EtwSessionPrefix}Network";
+            _etwListener = new EtwNetworkListener(OnEtwNetworkPid);
+            if (_etwListener.Start(sessionName))
+                Console.WriteLine($"NetworkRealTimeProtection: ETW Kernel-Network listener active ({sessionName}).");
+            else
+                Console.WriteLine("NetworkRealTimeProtection: ETW listener unavailable — relying on IPHelper poll.");
+
+            _cts = new CancellationTokenSource();
+            var ct = _cts.Token;
+            _running = true;
+            _monitorTask = Task.Run(() => MonitorLoopAsync(ct));
         }
-
-        Console.WriteLine("NetworkRealTimeProtection: starting IPHelper network connection monitor...");
-
-        // Start the ETW Kernel-Network listener for sub-100ms PID notification.
-        // If it can't start (not elevated, provider unavailable), we silently
-        // fall back to the IPHelper poll alone.
-        _etwListener = new EtwNetworkListener(OnEtwNetworkPid);
-        if (_etwListener.Start("XvirusNetworkMonitor"))
-            Console.WriteLine("NetworkRealTimeProtection: ETW Kernel-Network listener active.");
-        else
-            Console.WriteLine("NetworkRealTimeProtection: ETW listener unavailable — relying on IPHelper poll.");
-
-        _cts = new CancellationTokenSource();
-        _monitorTask = Task.Run(() => MonitorLoopAsync(_cts.Token));
     }
 
     public void Stop()
     {
-        _cts?.Cancel();
-        _etwListener?.Stop();
+        CancellationTokenSource? cts;
+        EtwNetworkListener? etw;
+        Task? monitorTask;
+
+        lock (_lifecycleLock)
+        {
+            if (!_running) return;
+            _running = false;
+            cts = _cts;
+            _cts = null;
+            etw = _etwListener;
+            _etwListener = null;
+            monitorTask = _monitorTask;
+            _monitorTask = null;
+        }
+
+        cts?.Cancel();
+        etw?.Dispose();
+        try { monitorTask?.Wait(1500); } catch { /* best effort */ }
+        cts?.Dispose();
+
+        // Reset session caches so re-enabling protection performs a fresh pass.
+        lock (_pidLock) _scannedPids.Clear();
+        lock (_scannedLock) _scannedPaths.Clear();
+
         Console.WriteLine("NetworkRealTimeProtection: stopped.");
+    }
+
+    /// <summary>Starts or stops monitoring to match the latest <see cref="SettingsService.AppSettings"/>.</summary>
+    public void ApplySettings()
+    {
+        if (_settings.AppSettings.NetworkProtection)
+            Start();
+        else
+            Stop();
+    }
+
+    /// <summary>Removes a path from the session scan cache so it will be re-evaluated on next activity.</summary>
+    public void InvalidatePath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return;
+        lock (_scannedLock) _scannedPaths.Remove(path.Trim());
+    }
+
+    private void OnRuleChanged(Rule rule)
+    {
+        if (rule.Kind == RuleKind.Program)
+            InvalidatePath(rule.Path);
     }
 
     // -----------------------------------------------------------------------
     // ETW fast-path — called from the ETW processing thread
     // -----------------------------------------------------------------------
 
-    /// <summary>
-    /// Invoked by <see cref="EtwNetworkListener"/> the moment the kernel reports
-    /// a TCP/UDP operation for a PID we haven't scanned yet. This is the
-    /// "near-real-time" path; the IPHelper poll is the safety net.
-    /// </summary>
     private void OnEtwNetworkPid(int pid)
     {
-        // Claim the PID under the lock; do all scan work outside the lock.
-        string? path;
-        lock (_pidLock)
-        {
-            if (!_scannedPids.Add(pid)) return;
-            path = ProcessControl.ResolveProcessPath(pid);
-        }
+        if (!_running) return;
 
-        if (string.IsNullOrEmpty(path)) return;
+        string? path;
+        if (!TryClaimPid(pid, out path) || string.IsNullOrEmpty(path))
+            return;
 
         lock (_scannedLock)
         {
@@ -122,8 +181,6 @@ public class NetworkRealTimeProtection(
     {
         try
         {
-            // GetConnectedPids is a single in-process IPHelper call (no process spawn,
-            // no text parsing) — this is what makes the 750ms cadence affordable.
             HashSet<int> pids;
             try { pids = IpHelper.GetConnectedPids(); }
             catch (Exception ex)
@@ -132,36 +189,24 @@ public class NetworkRealTimeProtection(
                 return;
             }
 
-            // Claim the PIDs we haven't scanned yet under the lock, then release the
-            // lock before doing any scan work so concurrent ticks don't block.
             List<(int pid, string path)> toScan = new();
-            lock (_pidLock)
+            foreach (var pid in pids)
             {
-                foreach (var pid in pids)
+                if (!TryClaimPid(pid, out var path) || string.IsNullOrEmpty(path))
+                    continue;
+
+                lock (_scannedLock)
                 {
-                    if (!_scannedPids.Add(pid)) continue;
-
-                    string? path = ProcessControl.ResolveProcessPath(pid);
-                    if (string.IsNullOrEmpty(path)) continue;
-
-                    lock (_scannedLock)
-                    {
-                        if (!_scannedPaths.Add(path))
-                        {
-                            // Already scanned this binary via another PID — skip but
-                            // keep the PID marked so we don't keep resolving it.
-                            continue;
-                        }
-                    }
-
-                    toScan.Add((pid, path));
+                    if (!_scannedPaths.Add(path))
+                        continue;
                 }
+
+                toScan.Add((pid, path));
             }
 
             foreach (var (pid, path) in toScan)
             {
                 if (ct.IsCancellationRequested) return;
-                // Fire-and-forget per process so we don't block the poll tick
                 _ = HandleConnectionAsync(pid, path, ct);
             }
 
@@ -174,6 +219,37 @@ public class NetworkRealTimeProtection(
         }
     }
 
+    private bool TryClaimPid(int pid, out string? path)
+    {
+        path = null;
+        long startTicks = GetProcessStartTicks(pid);
+
+        lock (_pidLock)
+        {
+            if (_scannedPids.Count >= MaxCachedPids)
+                _scannedPids.Clear();
+
+            if (!_scannedPids.Add((pid, startTicks)))
+                return false;
+        }
+
+        path = ProcessControl.ResolveProcessPath(pid);
+        return !string.IsNullOrEmpty(path);
+    }
+
+    private static long GetProcessStartTicks(int pid)
+    {
+        try
+        {
+            using var proc = Process.GetProcessById(pid);
+            return proc.StartTime.ToUniversalTime().Ticks;
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
     // -----------------------------------------------------------------------
     // Per-process scan → threat response
     // -----------------------------------------------------------------------
@@ -182,26 +258,32 @@ public class NetworkRealTimeProtection(
     {
         try
         {
-            var result = await Task.Run(() => scanner.ScanFile(executablePath), ct);
+            var result = await Task.Run(() => _scanner.ScanFile(executablePath), ct);
             if (!result.IsMalware)
                 return;
 
             Console.WriteLine($"NetworkRealTimeProtection: threat on network – '{executablePath}' (score {result.MalwareScore:F2})");
 
-            // Firewall product: cut the program's network access immediately via a
-            // persisted block rule (enforced through netsh) so it can't reconnect.
-            if (settings.IsFirewall)
+            // Firewall product in automatic mode: block the program's network access
+            // immediately AND proceed to kill & quarantine via ProcessControl.HandleThreatAsync.
+            // In "ask" mode, defer persisting a permanent block rule until the user responds
+            // so choosing "Allow (once)" does not leave the app permanently blocked.
+            if (_settings.IsFirewall && _settings.AppSettings.ThreatAction == "auto")
             {
-                try { rules.AddBlockRule(executablePath); }
+                try { _rules.AddBlockRule(executablePath); }
                 catch (Exception ex) { Console.WriteLine($"NetworkRealTimeProtection: failed to block '{executablePath}' – {ex.Message}"); }
             }
 
             string processName;
-            try { processName = Process.GetProcessById(pid).ProcessName; }
+            try
+            {
+                using var proc = Process.GetProcessById(pid);
+                processName = proc.ProcessName;
+            }
             catch { processName = Path.GetFileNameWithoutExtension(executablePath); }
 
             await ProcessControl.HandleThreatAsync(
-                quarantine, settings.AppSettings, events, alertService,
+                _quarantine, _settings.AppSettings, _events, _alertService,
                 result, pid, executablePath, processName,
                 "NetworkRealTimeProtection");
         }
@@ -218,11 +300,8 @@ public class NetworkRealTimeProtection(
     {
         if (_disposed) return;
         _disposed = true;
-
-        _cts?.Cancel();
-        _cts?.Dispose();
-        _etwListener?.Dispose();
-
+        _rules.RulesChanged -= OnRuleChanged;
+        Stop();
         GC.SuppressFinalize(this);
     }
 }

@@ -12,6 +12,9 @@ namespace BaseLibrary.Serializers
     [JsonSerializable(typeof(DatabaseDTO))]
     [JsonSerializable(typeof(HistoryEntry))]
     [JsonSerializable(typeof(Rule))]
+    [JsonSerializable(typeof(RuleKind))]
+    [JsonSerializable(typeof(RuleType))]
+    [JsonSerializable(typeof(List<Rule>))]
     [JsonSerializable(typeof(QuarantineEntry))]
     public partial class SourceGenerationContext : JsonSerializerContext { }
 

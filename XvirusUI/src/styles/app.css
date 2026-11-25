@@ -1384,12 +1384,14 @@ body {
   text-transform: uppercase;
 }
 
-.nm-proto-tcp {
+.nm-proto-tcp,
+.nm-proto-tcp6 {
   background: rgba(58, 191, 160, 0.15);
   color: var(--teal);
 }
 
-.nm-proto-udp {
+.nm-proto-udp,
+.nm-proto-udp6 {
   background: rgba(99, 132, 220, 0.15);
   color: #6384dc;
 }
@@ -1487,4 +1489,127 @@ body.dark .score-warn {
 
 *::-webkit-scrollbar-thumb:hover {
   background: var(--teal);
+}
+
+/* Firewall enhancements — filters, DNS domain, connection actions, and network rule modal */
+.nm-auto-btn {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0 8px;
+  min-width: 44px;
+}
+
+.nm-auto-btn.active {
+  background: rgba(58, 191, 160, 0.18);
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+.nm-filter-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.nm-filter-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nm-filter-pill.active {
+  border-color: var(--teal);
+  color: var(--teal);
+  background: rgba(58, 191, 160, 0.12);
+}
+
+.nm-toast {
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(58, 191, 160, 0.14);
+  color: var(--teal);
+  margin-bottom: 6px;
+}
+
+.nm-domain {
+  color: var(--teal);
+  font-weight: 500;
+}
+
+.nm-row-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  justify-content: flex-end;
+}
+
+.nm-kill-btn:hover {
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.rule-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.badge-kind {
+  background: rgba(99, 132, 220, 0.18);
+  color: #6384dc;
+}
+
+.badge-meta {
+  background: rgba(136, 153, 170, 0.15);
+  color: var(--text-secondary);
+}
+
+.net-rule-modal {
+  text-align: left;
+  max-width: 380px;
+  width: 92%;
+}
+
+.net-rule-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 12px 0 16px;
+}
+
+.net-rule-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.net-rule-row label {
+  color: var(--text-secondary);
+  min-width: 72px;
+}
+
+.net-rule-input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.net-rule-error {
+  color: var(--red);
+  font-size: 12px;
 }

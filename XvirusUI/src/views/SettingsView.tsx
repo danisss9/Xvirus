@@ -21,8 +21,13 @@ export default function SettingsView() {
     maxHeuristicsOthersScanLength: 10485760,
     maxAIScanLength: 20971520,
     maxAIScriptScanLength: 1048576,
+    enableArchiveScan: false,
+    maxArchiveDepth: null,
+    maxArchiveTotalSize: null,
+    maxArchiveFileCount: null,
     checkSDKUpdates: true,
     databaseFolder: 'Database',
+    lastUpdateCheck: null,
     databaseVersion: { aiModel: 0, scriptAIModel: 0, mainDB: 0, dailyDB: 0, whiteDB: 0, dailywlDB: 0, heurDB: 0, heurDB2: 0, malvendorDB: 0 }
   });
 
@@ -31,13 +36,14 @@ export default function SettingsView() {
     darkMode: true,
     startWithWindows: true,
     enableContextMenu: false,
-    enableLogs: false,
+    enableLogs: true,
     autoQuarantine: false,
     scheduledScan: 'off',
     realTimeProtection: true,
     threatAction: 'ask',
     behaviorProtection: false,
     networkProtection: true,
+    firewallProfile: 'any',
     selfDefense: false,
     showNotifications: true
   });
@@ -245,17 +251,15 @@ export default function SettingsView() {
                 </div>
               )}
 
-              {!isFirewall && (
-                <div class="setting-item">
-                  <label class="setting-label">Enable logging</label>
-                  <input
-                    type="checkbox"
-                    class="toggle-switch"
-                    checked={appSettings.enableLogs}
-                    onChange={(e: any) => { handleAppSettingChange('enableLogs', e.currentTarget.checked); saveAllSettings(); }}
-                  />
-                </div>
-              )}
+              <div class="setting-item">
+                <label class="setting-label">Enable logging</label>
+                <input
+                  type="checkbox"
+                  class="toggle-switch"
+                  checked={appSettings.enableLogs}
+                  onChange={(e: any) => { handleAppSettingChange('enableLogs', e.currentTarget.checked); saveAllSettings(); }}
+                />
+              </div>
             </section>
 
             {!isFirewall && (<section class="settings-page">
@@ -376,12 +380,7 @@ export default function SettingsView() {
                   class="toggle-switch"
                   checked={isRealTimeProtectionEnabled}
                   onChange={(e: any) => {
-                    const enabled = e.currentTarget.checked;
-                    handleAppSettingChange('realTimeProtection', enabled);
-                    // keep engines in sync as before
-                    handleSettingChange('enableSignatures', enabled);
-                    handleSettingChange('enableHeuristics', enabled);
-                    handleSettingChange('enableAIScan', enabled);
+                    handleAppSettingChange('realTimeProtection', e.currentTarget.checked);
                     saveAllSettings();
                   }}
                 />
@@ -391,10 +390,10 @@ export default function SettingsView() {
                 <label class="setting-label">If a threat is found</label>
                 <select
                   class="dropdown"
-                  value={appSettings.threatAction || 'auto'}
+                  value={appSettings.threatAction || 'ask'}
                   onChange={(e: any) => { handleAppSettingChange('threatAction', e.currentTarget.value); saveAllSettings(); }}
                 >
-                  <option value="auto">Automatically quarantine</option>
+                  <option value="auto">{isFirewall ? 'Block & quarantine' : 'Automatically quarantine'}</option>
                   <option value="ask">Ask me</option>
                 </select>
               </div>
@@ -433,17 +432,31 @@ export default function SettingsView() {
                 />
               </div>
 
-              {!isFirewall && (
+              {isFirewall && (
                 <div class="setting-item">
-                  <label class="setting-label">Self-defense (protect app from tampering)</label>
-                  <input
-                    type="checkbox"
-                    class="toggle-switch"
-                    checked={appSettings.selfDefense ?? true}
-                    onChange={(e: any) => { handleAppSettingChange('selfDefense', e.currentTarget.checked); saveAllSettings(); }}
-                  />
+                  <label class="setting-label">Firewall profile</label>
+                  <select
+                    class="dropdown"
+                    value={appSettings.firewallProfile || 'any'}
+                    onChange={(e: any) => { handleAppSettingChange('firewallProfile', e.currentTarget.value); saveAllSettings(); }}
+                  >
+                    <option value="any">All Networks</option>
+                    <option value="private">Private (Home)</option>
+                    <option value="domain">Domain (Work)</option>
+                    <option value="public">Public</option>
+                  </select>
                 </div>
               )}
+
+              <div class="setting-item">
+                <label class="setting-label">Self-defense (protect app from tampering)</label>
+                <input
+                  type="checkbox"
+                  class="toggle-switch"
+                  checked={appSettings.selfDefense ?? false}
+                  onChange={(e: any) => { handleAppSettingChange('selfDefense', e.currentTarget.checked); saveAllSettings(); }}
+                />
+              </div>
 
               <div class="setting-item">
                 <label class="setting-label">Show notifications</label>

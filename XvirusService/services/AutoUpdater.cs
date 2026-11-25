@@ -13,14 +13,18 @@ public class AutoUpdater : IHostedService
 {
     private readonly SettingsService _settings;
     private readonly ServerEventService _events;
+    private readonly Scanner _scanner;
+    private readonly NetworkService _networkService;
     private readonly DB _db;
     private readonly AI _ai;
     private readonly AIScript _aiScript;
 
-    public AutoUpdater(SettingsService settings, DB db, AI ai, AIScript aiScript, ServerEventService events)
+    public AutoUpdater(SettingsService settings, Scanner scanner, NetworkService networkService, DB db, AI ai, AIScript aiScript, ServerEventService events)
     {
         _settings = settings;
         _events = events;
+        _scanner = scanner;
+        _networkService = networkService;
         _db = db;
         _ai = ai;
         _aiScript = aiScript;
@@ -52,9 +56,11 @@ public class AutoUpdater : IHostedService
                 cancellationToken);
 
             _settings.Reload();
+            _scanner.UpdateSettings(_settings.Settings);
             _db.Load(_settings.Settings);
             _ai.Load(_settings.Settings);
             _aiScript.Load(_settings.Settings);
+            _networkService.InvalidateCache();
 
             Console.WriteLine($"AutoUpdater: complete – {message}");
 

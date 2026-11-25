@@ -11,7 +11,7 @@ namespace Xvirus
 {
     public class Scanner : IDisposable
     {
-        public readonly SettingsDTO settings;
+        public SettingsDTO settings { get; private set; }
         private readonly DB database;
         private readonly AI ai;
         private readonly AIScript aiScript;
@@ -30,6 +30,13 @@ namespace Xvirus
             this.ai = ai;
             this.aiScript = aiScript;
             this.rules = rules;
+        }
+
+        /// <summary>Replaces the active settings reference so runtime settings edits take effect immediately.</summary>
+        public void UpdateSettings(SettingsDTO newSettings)
+        {
+            if (newSettings != null)
+                settings = newSettings;
         }
 
         /// <summary>

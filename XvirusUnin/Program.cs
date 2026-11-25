@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
 // P/Invoke declarations for MessageBox and window manipulation
@@ -120,13 +121,18 @@ internal class Program
             Console.WriteLine("Removing shortcuts...");
             DeleteShortcuts(config);
 
-            // Remove the "Scan with Xvirus" context-menu entry
-            Console.WriteLine("Removing context-menu entry...");
-            RemoveContextMenu();
+            // Remove product-specific integrations without disturbing a co-installed sibling product.
+            if (mode == "am")
+            {
+                Console.WriteLine("Removing context-menu entry...");
+                RemoveContextMenu();
+            }
 
-            // Remove any firewall block rules this product created
-            Console.WriteLine("Removing firewall rules...");
-            RemoveFirewallRules();
+            if (mode == "fw")
+            {
+                Console.WriteLine("Removing firewall rules...");
+                RemoveFirewallRules();
+            }
 
             // Schedule folder and self-deletion
             Console.WriteLine("Scheduling cleanup...");
@@ -299,11 +305,39 @@ internal class Program
 
     static void RemoveFirewallRules()
     {
-        // Block rules are named Xvirus_Block_* (firewall product). Best-effort wildcard removal.
-        RunCommand(
-            "powershell.exe",
-            "-NoProfile -Command \"Get-NetFirewallRule -DisplayName 'Xvirus_Block_*' -ErrorAction SilentlyContinue | Remove-NetFirewallRule -ErrorAction SilentlyContinue\"",
-            ignoreErrors: true);
+        // Fast netsh enumeration + deletion (avoids cold-starting PowerShell and the 5s timeout).
+        try
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = "netsh.exe",
+                Arguments = "advfirewall firewall show rule name=all",
+                WindowStyle = ProcessWindowStyle.Hidden,
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+
+            using var proc = Process.Start(psi);
+            if (proc == null) return;
+
+            var errTask = proc.StandardError.ReadToEndAsync();
+            var output = proc.StandardOutput.ReadToEnd();
+            errTask.GetAwaiter().GetResult();
+            proc.WaitForExit(30000);
+
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            foreach (Match m in Regex.Matches(output, @"Xvirus_Block_[0-9A-F]{16}"))
+            {
+                if (seen.Add(m.Value))
+                    RunCommand("netsh.exe", $"advfirewall firewall delete rule name={m.Value}", ignoreErrors: true);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Could not remove firewall rules: {ex.Message}");
+        }
     }
 
     static void ScheduleSelfDeletion(ProductConfig config)

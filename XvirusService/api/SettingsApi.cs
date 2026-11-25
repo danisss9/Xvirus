@@ -21,22 +21,45 @@ namespace XvirusService.Api
                 }
             });
 
-            app.MapPut("/settings", (SettingsResponseDTO newSettings, SettingsService settingsService, WindowsStartupService startupService, ContextMenuService contextMenuService, SelfDefenseService selfDefenseService) =>
+            app.MapPut("/settings", (
+                SettingsResponseDTO newSettings,
+                SettingsService settingsService,
+                Scanner scanner,
+                Rules rules,
+                NetworkService networkService,
+                RealTimeProtection realTimeProtection,
+                NetworkRealTimeProtection networkRealTimeProtection,
+                WindowsStartupService startupService,
+                ContextMenuService contextMenuService,
+                SelfDefenseService selfDefenseService) =>
             {
                 try
                 {
                     bool startWithWindowsChanged = settingsService.AppSettings.StartWithWindows != newSettings.AppSettings.StartWithWindows;
                     bool contextMenuChanged = settingsService.AppSettings.EnableContextMenu != newSettings.AppSettings.EnableContextMenu;
                     bool selfDefenseChanged = settingsService.AppSettings.SelfDefense != newSettings.AppSettings.SelfDefense;
+                    bool firewallProfileChanged = !string.Equals(
+                        settingsService.AppSettings.FirewallProfile,
+                        newSettings.AppSettings.FirewallProfile,
+                        StringComparison.OrdinalIgnoreCase);
 
                     Settings.Save(newSettings.Settings);
                     Settings.SaveAppSettings(newSettings.AppSettings);
                     settingsService.Reload();
 
+                    // Propagate updated settings to live singletons immediately.
+                    scanner.UpdateSettings(settingsService.Settings);
+                    networkService.InvalidateCache();
+                    realTimeProtection.ApplySettings();
+                    networkRealTimeProtection.ApplySettings();
+
+                    if (firewallProfileChanged)
+                        rules.SyncEnforcement(settingsService.AppSettings.FirewallProfile, forceReapply: true);
+
                     if (startWithWindowsChanged)
                         startupService.Apply(newSettings.AppSettings.StartWithWindows);
 
-                    if (contextMenuChanged)
+                    if (contextMenuChanged && !AppInfo.IsFirewall)
                         contextMenuService.Apply(newSettings.AppSettings.EnableContextMenu);
 
                     if (selfDefenseChanged)

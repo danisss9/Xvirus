@@ -39,19 +39,27 @@ async function getTempPath(): Promise<string> {
 /**
  * Generate PowerShell install script
  */
-function generatePowerShellScript(config: InstallConfig, zipPath: string, product: ProductInfo): string {
+function generatePowerShellScript(
+  config: InstallConfig,
+  zipPath: string,
+  progressFile: string,
+  product: ProductInfo
+): string {
   const installPath = config.installPath.replace(/"/g, '\\"');
   const zipPathEsc = zipPath.replace(/"/g, '\\"');
+  const progressFileEsc = progressFile.replace(/"/g, '\\"');
 
   // In a TS template literal, $identifier (no braces) is NOT interpolated — only ${expr} is.
   // So PowerShell variables like $installPath are written as-is; no \$ escaping needed.
   // \\  in the template  →  \  in the PS1 file (used for Windows path separators).
   // \`" in the template  →  `" in the PS1 file (PowerShell escape for a literal quote char).
   return `# Auto-generated Xvirus installer script
-# Mode: AM/FW
+# Mode: ${product.mode}
 # Generated: ${new Date().toISOString()}
 
 param()
+
+$ErrorActionPreference = "Stop"
 
 $installPath = "${installPath}"
 $zipPath = "${zipPathEsc}"
@@ -63,7 +71,8 @@ $version = "${product.version}"
 $publisher = "${product.publisher}"
 $productName = "${product.name}"
 $uiExeName = "${product.uiExeName}"
-$progressFile = "$env:TEMP\\xvirus_progress.json"
+$uiProcName = [System.IO.Path]::GetFileNameWithoutExtension($uiExeName)
+$progressFile = "${progressFileEsc}"
 
 function Write-Progress-Step {
     param($step, $pct)
@@ -71,7 +80,22 @@ function Write-Progress-Step {
 }
 
 try {
-    Write-Progress-Step "Extracting files..." 10
+    Write-Progress-Step "Preparing installation..." 10
+
+    # Stop any running UI or existing service cleanly so upgrades do not hit locked files.
+    Stop-Process -Name $uiProcName -Force -ErrorAction SilentlyContinue
+    $existingSvc = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
+    if ($existingSvc) {
+        Write-Progress-Step "Stopping existing service..." 15
+        & sc.exe stop $serviceName | Out-Null
+        for ($i = 0; $i -lt 20; $i++) {
+            $svc = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
+            if (-not $svc -or $svc.Status -eq 'Stopped') { break }
+            Start-Sleep -Milliseconds 250
+        }
+    }
+
+    Write-Progress-Step "Extracting files..." 25
     New-Item -Path $installPath -ItemType Directory -Force | Out-Null
     Expand-Archive -Path $zipPath -DestinationPath $installPath -Force
 
@@ -81,12 +105,16 @@ try {
         Rename-Item -Path "$installPath\\$neuBinary" -NewName $uiExeName -Force
     }
 
-    Write-Progress-Step "Registering service..." 40
-    & sc.exe create $serviceName binPath= "\`"$installPath\\XvirusService.exe\`"" start= auto DisplayName= "\`"$serviceDisplayName\`""
+    Write-Progress-Step "Registering service..." 45
+    if ($existingSvc) {
+        & sc.exe config $serviceName binPath= "\`"$installPath\\XvirusService.exe\`"" start= auto DisplayName= "\`"$serviceDisplayName\`""
+    } else {
+        & sc.exe create $serviceName binPath= "\`"$installPath\\XvirusService.exe\`"" start= auto DisplayName= "\`"$serviceDisplayName\`""
+    }
     & sc.exe description $serviceName $serviceDisplayName
     & sc.exe start $serviceName
 
-    Write-Progress-Step "Creating registry entries..." 60
+    Write-Progress-Step "Creating registry entries..." 65
     $regPath = "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$productName"
     New-Item -Path $regPath -Force | Out-Null
     Set-ItemProperty -Path $regPath -Name DisplayName -Value $productName
@@ -102,7 +130,7 @@ try {
     # Add startup entry for XvirusUI
     Set-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" -Name $productName -Value "$installPath\\$uiExeName"
 
-    Write-Progress-Step "Creating shortcuts..." 80
+    Write-Progress-Step "Creating shortcuts..." 85
     if ($desktopShortcut) {
         $ws = New-Object -ComObject WScript.Shell
         $lnk = $ws.CreateShortcut("$env:PUBLIC\\Desktop\\$productName.lnk")
@@ -141,7 +169,7 @@ export async function executeInstall(
     const timestamp = Date.now();
     const zipFile = `${tempPath}\\xvirus_install_${timestamp}.zip`;
     const psFile = `${tempPath}\\xvirus_install_${timestamp}.ps1`;
-    const progressFile = `${tempPath}\\xvirus_progress.json`;
+    const progressFile = `${tempPath}\\xvirus_progress_${timestamp}.json`;
 
     // 1. Decode and write zip file
     onProgressUpdate({ step: 'Preparing installation...', progress: 5, done: false });
@@ -150,7 +178,7 @@ export async function executeInstall(
     await Neutralino.filesystem.writeBinaryFile(zipFile, zipBuffer);
 
     // 2. Generate and write PowerShell script
-    const psScript = generatePowerShellScript(config, zipFile, PRODUCT_INFO);
+    const psScript = generatePowerShellScript(config, zipFile, progressFile, PRODUCT_INFO);
     await Neutralino.filesystem.writeFile(psFile, psScript);
 
     onProgressUpdate({ step: 'Launching installer...', progress: 10, done: false });
@@ -178,7 +206,7 @@ export async function executeInstall(
 
               // Cleanup temp files
               try {
-                await Neutralino.os.execCommand(`powershell -Command "Remove-Item '${psFile}' -Force -ErrorAction SilentlyContinue"`);
+                await Neutralino.os.execCommand(`powershell -Command "Remove-Item '${psFile}','${progressFile}' -Force -ErrorAction SilentlyContinue"`);
               } catch {
                 // Ignore cleanup errors
               }
