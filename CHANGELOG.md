@@ -20,6 +20,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   patterns no longer contribute score. `DB.LoadAhoCorasick` also strips the `!` prefix
   from negative dependencies so they can be detected as present. Existing databases have
   no dependency entries, so their behaviour is unchanged.
+- XvirusUI and XvirusInstaller now use Tauri 2 instead of Neutralino.js. Building them
+  requires a Rust toolchain; the Neutralino CLI is no longer needed.
+  - XvirusUI: window placement, hide-on-close and the system tray are handled natively.
+    The AM/FW mode is chosen at build time (`npm run prod:am` / `prod:fw`) instead of by
+    rewriting `neutralino.config.json`. The app registers its AppUserModelID so Windows
+    shows its notifications.
+  - XvirusInstaller: the files to install are embedded in the installer binary instead of
+    as a base64 string in the frontend bundle. The output is now
+    `XvirusInstaller/dist/xvirus-installer.exe`, and declining the UAC prompt now shows an
+    error straight away instead of timing out.
 
 ## [5.2.2]
 

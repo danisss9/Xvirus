@@ -1,12 +1,8 @@
 import { render } from 'preact';
 import App from './App';
 import './styles/app.css';
-import { init, events } from '@neutralinojs/lib';
-import { Neutralino } from './services/neutralino';
 
-init();
-events.on('windowClose', () => Neutralino.app.exit());
-
+// Closing the window exits the installer (Tauri quits when its last window closes).
 const root = document.getElementById('root');
 if (root) {
   render(<App />, root);

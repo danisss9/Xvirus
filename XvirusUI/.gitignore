@@ -1,9 +1,13 @@
 # Developer tools' files
 .lite_workspace.lua
 
-# Neutralinojs binaries and builds
-/bin
+# Build output
+/browser
 /dist
 /build
-/browser
+/src-tauri/target
+/src-tauri/gen
 node_modules
+
+# The root .gitignore pattern `Icon?` would otherwise exclude the Tauri icons folder
+!/src-tauri/icons/

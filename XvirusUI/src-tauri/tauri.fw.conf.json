@@ -1,0 +1,10 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Xvirus Firewall",
+  "version": "5.0.0",
+  "identifier": "net.xvirus.firewall",
+  "build": {
+    "beforeDevCommand": "npm run web:dev:fw",
+    "beforeBuildCommand": "npm run web:build:fw"
+  }
+}

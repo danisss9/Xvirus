@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'preact/hooks';
-import { onServerEvent } from '../services/neutralino';
+import { onServerEvent } from '../services/native';
 import { SERVICE_BASE_URL } from '../services/env';
 
 export default function ScanningView({ onComplete, scanPath = 'C:\\' }: {

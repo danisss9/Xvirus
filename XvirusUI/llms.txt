@@ -1,45 +1,50 @@
-# Neutralinojs Project
+# Tauri Project
 
-This is a Neutralinojs desktop application that replaced the previous
-Electrobun-based launcher. the UI runs in the system browser engine and
-communicates with the native side through the global `Neutralino` object.
+This is a Tauri 2 desktop application (it replaced the earlier Neutralinojs and
+Electrobun versions). The Preact UI runs in the system WebView2 and talks to
+the native Rust side through `@tauri-apps/api` and Tauri plugins.
 
-IMPORTANT: do **not** use Electron/Electrobun APIs or patterns; all native
-functionality is available via methods documented below.
+IMPORTANT: do **not** use Electron, Electrobun or Neutralinojs APIs or patterns.
+All native functionality goes through the wrappers in `src/services/native.ts`,
+which call the Tauri APIs and the Rust commands in `src-tauri/src/main.rs`.
 
 ## Documentation
 
-- API reference: https://neutralino.js.org/docs/
-- Getting started / configuration: https://neutralino.js.org/docs/started
+- Tauri 2 guides: https://v2.tauri.app/start/
+- JavaScript API reference: https://v2.tauri.app/reference/javascript/api/
+- Permissions / capabilities: https://v2.tauri.app/security/capabilities/
+
+## Layout
+
+- `src/` — Preact frontend (built by Vite into `browser/`)
+- `src-tauri/src/main.rs` — window placement, hide-on-close, system tray,
+  notification AppUserModelID registration, and the `launch_args` /
+  `show_window` commands
+- `src-tauri/capabilities/default.json` — permissions granted to the webview.
+  Add the matching permission here when calling a new window/plugin API.
+- `src-tauri/tauri.conf.json` — antimalware build; `tauri.fw.conf.json`
+  overrides it for the firewall build
 
 ## Quick Reference
 
 Common tasks you will need while maintaining XvirusUI:
 
-- Show open file dialog
+- Show open file dialog (`@tauri-apps/plugin-dialog`, permission `dialog:allow-open`)
   ```ts
-  const files = await Neutralino.os.showOpenDialog('Title', { filters: [...] });
+  const file = await open({ title: 'Select file', multiple: false });
   ```
-- Window controls
+- Window controls (`@tauri-apps/api/window`, permissions `core:window:allow-*`)
   ```ts
-  Neutralino.window.minimize();
-  Neutralino.window.hide();
-  Neutralino.window.setTitle('My app');
+  await getCurrentWindow().minimize();
+  await getCurrentWindow().hide();
   ```
-- Notifications
+- Notifications (`@tauri-apps/plugin-notification`, permission `notification:default`)
   ```ts
-  Neutralino.notifications.create('Hello', { body: 'world' });
+  sendNotification({ title: 'Hello', body: 'world' });
   ```
-- System tray
+- Call a Rust command (`@tauri-apps/api/core`)
   ```ts
-  Neutralino.os.setTray();
-  Neutralino.os.setTrayMenu([{ id:'open',text:'Open' }, ...]);
-  Neutralino.events.on('trayMenuItemClicked', handler);
+  const args = await invoke<string[]>('launch_args');
   ```
-
-## About
-
-Neutralinojs is a lightweight cross-platform framework that uses the
-operating system's native webview instead of bundling Chromium. Binaries
-are small and start quickly; many of the features previously implemented
-with Electrobun's bun process are now executed directly in the renderer.
+- System tray: built in Rust (`TrayIconBuilder` in `src-tauri/src/main.rs`).
+- Draggable title bar: add `data-tauri-drag-region` to the element.

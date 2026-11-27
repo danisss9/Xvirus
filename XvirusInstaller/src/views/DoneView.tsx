@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'preact';
 import { PRODUCT_INFO } from '../services/installer';
-import { Neutralino } from '../services/neutralino';
+import { exitApp, launchApp } from '../services/native';
 
 interface DoneViewProps {
   success: boolean;
@@ -12,15 +12,15 @@ const DoneView: FunctionComponent<DoneViewProps> = ({ success, error, installPat
   const handleLaunch = async () => {
     try {
       const targetDir = (installPath || `C:\\Program Files\\${PRODUCT_INFO.installFolder}`).replace(/[\\\/]+$/, '');
-      await Neutralino.os.execCommand(`cmd /c timeout /t 3 /nobreak >nul && start "" "${targetDir}\\${PRODUCT_INFO.uiExeName}"`, { background: true });
+      await launchApp(`${targetDir}\\${PRODUCT_INFO.uiExeName}`, 3);
     } catch (e) {
       console.error('Failed to launch app:', e);
     }
-    await Neutralino.app.exit();
+    await exitApp();
   };
 
   const handleClose = async () => {
-    await Neutralino.app.exit();
+    await exitApp();
   };
 
   return (

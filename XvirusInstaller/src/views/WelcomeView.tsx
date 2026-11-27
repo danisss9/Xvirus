@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'preact';
 import { PRODUCT_INFO } from '../services/installer';
-import { Neutralino } from '../services/neutralino';
+import { exitApp } from '../services/native';
 
 interface WelcomeViewProps {
   onNext: () => void;
@@ -25,7 +25,7 @@ const WelcomeView: FunctionComponent<WelcomeViewProps> = ({ onNext }) => {
       </div>
 
       <div class="installer-footer">
-        <button class="btn btn-secondary" onClick={() => Neutralino.app.exit()}>
+        <button class="btn btn-secondary" onClick={() => exitApp()}>
           Cancel
         </button>
         <button class="btn btn-primary" onClick={onNext}>

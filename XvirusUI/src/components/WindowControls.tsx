@@ -1,4 +1,4 @@
-import { minimizeWindow, closeWindow } from '../services/neutralino';
+import { minimizeWindow, closeWindow } from '../services/native';
 
 export default function WindowControls() {
   const handleMinimize = async () => {

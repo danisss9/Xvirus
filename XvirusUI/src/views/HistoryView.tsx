@@ -5,7 +5,7 @@ import { QuarantineEntry } from '../model/QuarantineEntry';
 import { fetchHistory, clearHistory as apiClearHistory } from '../api/historyApi';
 import { fetchRules, addAllowRule, addBlockRule, createRule, removeRule } from '../api/rulesApi';
 import { fetchQuarantine, deleteQuarantine as apiDeleteQuarantine, restoreQuarantine as apiRestoreQuarantine } from '../api/quarantineApi';
-import { getFilePath } from '../services/neutralino';
+import { getFilePath } from '../services/native';
 import { isFirewall } from '../services/env';
 
 const IconTrash = () => (

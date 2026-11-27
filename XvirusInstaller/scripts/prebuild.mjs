@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { copyFileSync, mkdirSync, existsSync, readdirSync, rmSync } from 'fs';
+import { copyFileSync, mkdirSync, existsSync, rmSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import rcedit from 'rcedit';
@@ -47,26 +47,16 @@ if (existsSync(resourcesDir)) {
 }
 mkdirSync(resourcesDir, { recursive: true });
 
-// XvirusUI binary + resources
-// neu build outputs to dist/<binaryName>/ — pick the folder matching this build mode
-const distRoot = join(sdkRoot, 'XvirusUI', 'dist');
-const distFolders = readdirSync(distRoot);
-if (distFolders.length === 0) {
-  console.error('Error: XvirusUI/dist/ is empty after build.');
-  process.exit(1);
-}
-const expectedDistFolder = mode === 'fw' ? 'xvirus-firewall' : 'xvirus-antimalware';
-const chosenDistFolder = distFolders.includes(expectedDistFolder) ? expectedDistFolder : distFolders[0];
-const distDir = join(distRoot, chosenDistFolder);
-
-const neuBinaryFiles = readdirSync(distDir).filter((f) => f.endsWith('-win_x64.exe'));
-if (neuBinaryFiles.length === 0) {
-  console.error(`Error: No *-win_x64.exe found in ${distDir}`);
+// XvirusUI binary (frontend assets are embedded in the exe by Tauri)
+// `tauri build --no-bundle` writes the binary to src-tauri/target/release/
+const builtUiExe = join(sdkRoot, 'XvirusUI', 'src-tauri', 'target', 'release', 'xvirus-ui.exe');
+if (!existsSync(builtUiExe)) {
+  console.error(`Error: ${builtUiExe} not found after XvirusUI build.`);
   process.exit(1);
 }
 const uiExePath = join(resourcesDir, uiExeName);
-copyFileSync(join(distDir, neuBinaryFiles[0]), uiExePath);
-console.log(`  ${neuBinaryFiles[0]} → resources/${uiExeName}`);
+copyFileSync(builtUiExe, uiExePath);
+console.log(`  xvirus-ui.exe → resources/${uiExeName}`);
 
 // ── 5. Patch XvirusUI exe metadata ───────────────────────────────────────────
 console.log('\n── Patching XvirusUI exe metadata ──');

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 import { fetchLastUpdateCheck, checkUpdates } from '../api/updateApi';
-import { showNotification, onServerEvent } from '../services/neutralino';
+import { showNotification, onServerEvent } from '../services/native';
 import { fetchSettings, saveSettings } from '../api/settingsApi';
 import { isFirewall } from '../services/env';
 

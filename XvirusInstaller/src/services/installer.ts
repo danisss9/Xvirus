@@ -1,39 +1,25 @@
 import { InstallConfig, InstallProgress } from '../model/InstallConfig';
-import { Neutralino } from './neutralino';
-import { RESOURCES_B64, PRODUCT_INFO } from '../generated/resources';
+import {
+  getTempDir,
+  readTextFile,
+  removeFiles,
+  runElevatedScript,
+  writePayload,
+  writeTextFile,
+} from './native';
+import { PRODUCT_INFO } from '../generated/resources';
 import type { ProductInfo } from '../generated/resources';
-
-/**
- * Convert base64 string to ArrayBuffer
- */
-function base64ToArrayBuffer(b64: string): ArrayBuffer {
-  const binaryStr = atob(b64);
-  const bytes = new Uint8Array(binaryStr.length);
-  for (let i = 0; i < binaryStr.length; i++) {
-    bytes[i] = binaryStr.charCodeAt(i);
-  }
-  return bytes.buffer;
-}
 
 /**
  * Parse progress JSON file
  */
 async function readProgress(progressFile: string): Promise<InstallProgress | null> {
   try {
-    const content = await Neutralino.filesystem.readFile(progressFile);
+    const content = await readTextFile(progressFile);
     return JSON.parse(content) as InstallProgress;
   } catch {
     return null;
   }
-}
-
-/**
- * Get temp directory path
- */
-async function getTempPath(): Promise<string> {
-  // On Windows, use %TEMP% environment variable
-  const result = await Neutralino.os.execCommand('powershell -Command "$env:TEMP"');
-  return result.stdOut.trim();
 }
 
 /**
@@ -99,12 +85,6 @@ try {
     New-Item -Path $installPath -ItemType Directory -Force | Out-Null
     Expand-Archive -Path $zipPath -DestinationPath $installPath -Force
 
-    # Rename Neutralino binary to product-specific name
-    $neuBinary = Get-ChildItem $installPath -Name -Filter "xvirus-*-win_x64.exe"
-    if ($neuBinary) {
-        Rename-Item -Path "$installPath\\$neuBinary" -NewName $uiExeName -Force
-    }
-
     Write-Progress-Step "Registering service..." 45
     if ($existingSvc) {
         & sc.exe config $serviceName binPath= "\`"$installPath\\XvirusService.exe\`"" start= auto DisplayName= "\`"$serviceDisplayName\`""
@@ -165,27 +145,31 @@ export async function executeInstall(
   onProgressUpdate: (progress: InstallProgress) => void
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const tempPath = await getTempPath();
+    const tempPath = await getTempDir();
     const timestamp = Date.now();
     const zipFile = `${tempPath}\\xvirus_install_${timestamp}.zip`;
     const psFile = `${tempPath}\\xvirus_install_${timestamp}.ps1`;
     const progressFile = `${tempPath}\\xvirus_progress_${timestamp}.json`;
 
-    // 1. Decode and write zip file
+    // 1. Write the resources zip embedded in the installer binary
     onProgressUpdate({ step: 'Preparing installation...', progress: 5, done: false });
 
-    const zipBuffer = base64ToArrayBuffer(RESOURCES_B64);
-    await Neutralino.filesystem.writeBinaryFile(zipFile, zipBuffer);
+    await writePayload(zipFile);
 
-    // 2. Generate and write PowerShell script
+    // 2. Generate and write PowerShell script. The UTF-8 BOM makes Windows PowerShell 5.1
+    //    read it as UTF-8, so install paths with non-ASCII characters survive.
     const psScript = generatePowerShellScript(config, zipFile, progressFile, PRODUCT_INFO);
-    await Neutralino.filesystem.writeFile(psFile, psScript);
+    await writeTextFile(psFile, '﻿' + psScript);
 
     onProgressUpdate({ step: 'Launching installer...', progress: 10, done: false });
 
-    // 3. Launch elevated PowerShell (fire and forget, no wait)
-    const psCommand = `powershell -Command "Start-Process powershell -ArgumentList '-ExecutionPolicy Bypass -WindowStyle Hidden -File \\"${psFile}\\"' -Verb RunAs"`;
-    await Neutralino.os.execCommand(psCommand);
+    // 3. Launch elevated PowerShell (returns once it has started; progress is polled below)
+    try {
+      await runElevatedScript(psFile);
+    } catch (error) {
+      await removeFiles([zipFile, psFile]);
+      throw new Error(String(error));
+    }
 
     // 4. Poll progress file
     let maxAttempts = 120; // ~60 seconds with 500ms intervals
@@ -206,7 +190,7 @@ export async function executeInstall(
 
               // Cleanup temp files
               try {
-                await Neutralino.os.execCommand(`powershell -Command "Remove-Item '${psFile}','${progressFile}' -Force -ErrorAction SilentlyContinue"`);
+                await removeFiles([psFile, progressFile]);
               } catch {
                 // Ignore cleanup errors
               }

@@ -3,20 +3,27 @@
   "version": "1.0.0",
   "description": "Xvirus User Interface",
   "scripts": {
-    "dev:am": "node scripts/set-mode.mjs am && vite build && neu run",
-    "dev:fw": "node scripts/set-mode.mjs fw && vite build && neu run",
-    "prod:am": "node scripts/set-mode.mjs am && vite build && neu build --release --embed-resources",
-    "prod:fw": "node scripts/set-mode.mjs fw && vite build && neu build --release --embed-resources",
-    "start": "neu run",
+    "web:dev:am": "vite --mode am",
+    "web:dev:fw": "vite --mode fw",
+    "web:build:am": "vite build --mode am",
+    "web:build:fw": "vite build --mode fw",
+    "dev:am": "tauri dev",
+    "dev:fw": "tauri dev --config src-tauri/tauri.fw.conf.json",
+    "prod:am": "tauri build --no-bundle",
+    "prod:fw": "tauri build --no-bundle --config src-tauri/tauri.fw.conf.json",
+    "tauri": "tauri",
     "prod:service:am": "dotnet publish ../XvirusService/XvirusService.csproj /p:PublishProfile=Windows /p:ProductMode=antimalware",
     "prod:service:fw": "dotnet publish ../XvirusService/XvirusService.csproj /p:PublishProfile=Windows /p:ProductMode=firewall"
   },
   "dependencies": {
-    "@neutralinojs/lib": "^6.10.0",
+    "@tauri-apps/api": "^2.12.5",
+    "@tauri-apps/plugin-dialog": "^2.8.4",
+    "@tauri-apps/plugin-notification": "^2.8.1",
     "preact": "^10.28.4"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.3",
+    "@tauri-apps/cli": "^2.12.6",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
   }

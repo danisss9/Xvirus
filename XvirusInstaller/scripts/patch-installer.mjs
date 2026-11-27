@@ -1,4 +1,4 @@
-import { readdirSync } from 'fs';
+import { copyFileSync, existsSync, mkdirSync, rmSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import rcedit from 'rcedit';
@@ -11,23 +11,21 @@ const mode = process.argv[2];
 const product = getProduct(mode);
 const info = { description: product.setupDescription, version: fourPartVersion(product.version) };
 
-const distRoot = join(installerRoot, 'dist');
-const distFolders = readdirSync(distRoot);
-if (distFolders.length === 0) {
-  console.error('Error: dist/ is empty after neu build.');
+// `tauri build --no-bundle` writes the binary to src-tauri/target/release/
+const builtExe = join(installerRoot, 'src-tauri', 'target', 'release', 'xvirus-installer.exe');
+if (!existsSync(builtExe)) {
+  console.error(`Error: ${builtExe} not found. Did \`tauri build\` succeed?`);
   process.exit(1);
 }
-const distDir = join(distRoot, distFolders[0]);
 
-const exeFiles = readdirSync(distDir).filter((f) => f.endsWith('-win_x64.exe'));
-if (exeFiles.length === 0) {
-  console.error(`Error: No *-win_x64.exe found in ${distDir}`);
-  process.exit(1);
-}
-const exePath = join(distDir, exeFiles[0]);
+const distDir = join(installerRoot, 'dist');
+rmSync(distDir, { recursive: true, force: true });
+mkdirSync(distDir, { recursive: true });
+const exePath = join(distDir, 'xvirus-installer.exe');
+copyFileSync(builtExe, exePath);
 
 console.log('\n── Patching installer exe metadata ──');
-console.log(`  ${exeFiles[0]}`);
+console.log(`  ${exePath}`);
 await rcedit(exePath, {
   'version-string': {
     FileDescription: info.description,

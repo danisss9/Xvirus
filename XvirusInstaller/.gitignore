@@ -1,0 +1,11 @@
+# Build output
+/browser
+/dist
+/resources
+/src-tauri/target
+/src-tauri/gen
+/src-tauri/payload.zip
+node_modules
+
+# The root .gitignore pattern `Icon?` would otherwise exclude the Tauri icons folder
+!/src-tauri/icons/

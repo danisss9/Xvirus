@@ -7,7 +7,7 @@ import NetworkMonitorView from './views/NetworkMonitorView';
 import AlertView from './views/AlertView';
 import BottomNav from './components/BottomNav';
 import WindowControls from './components/WindowControls';
-import { initializeWindow, onServerEvent, getLaunchScanPath } from './services/neutralino';
+import { initializeWindow, onServerEvent, getLaunchScanPath } from './services/native';
 import { ThreatPayload } from './model/ThreatPayload';
 import './styles/app.css';
 import { isFirewall } from './services/env';
@@ -35,12 +35,13 @@ export default function App() {
     }).catch(() => {});
 
     // Launched from the "Scan with Xvirus" context menu? Scan the passed path.
-    const launchScan = getLaunchScanPath();
-    if (launchScan) {
-      setScanPath(launchScan);
-      setIsScanning(true);
-      setCurrentView('scanning');
-    }
+    getLaunchScanPath().then(launchScan => {
+      if (launchScan) {
+        setScanPath(launchScan);
+        setIsScanning(true);
+        setCurrentView('scanning');
+      }
+    });
 
     // Load any alerts that arrived before the UI opened
     getPendingAlerts().then(pending => {
@@ -81,8 +82,8 @@ export default function App() {
 
   return (
     <div class="app-container">
-      <div id="app-header" class="app-header">
-        <h1 class="app-title">{isFirewall ? 'Xvirus Firewall' : 'Xvirus Anti-Malware'}</h1>
+      <div id="app-header" class="app-header" data-tauri-drag-region>
+        <h1 class="app-title" data-tauri-drag-region>{isFirewall ? 'Xvirus Firewall' : 'Xvirus Anti-Malware'}</h1>
         <WindowControls />
       </div>
       <div class="app-content">

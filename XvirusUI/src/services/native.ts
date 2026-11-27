@@ -1,25 +1,24 @@
-import Neutralino from '@neutralinojs/lib';
+import { invoke } from '@tauri-apps/api/core';
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import { sendNotification } from '@tauri-apps/plugin-notification';
+import { open } from '@tauri-apps/plugin-dialog';
 import { ThreatPayload } from '../model/ThreatPayload';
 import { SERVICE_BASE_URL } from './env';
-
-// Neutralino injects these globals before the app JS runs
-declare const NL_PATH: string;
-declare const NL_ARGS: string[];
 
 /**
  * Path passed via the "Scan with Xvirus" context-menu entry (`--scan "<path>"`),
  * or null when the app was launched normally.
  */
-export function getLaunchScanPath(): string | null {
+export async function getLaunchScanPath(): Promise<string | null> {
   try {
-    const args = Array.isArray(NL_ARGS) ? NL_ARGS : [];
+    const args = await invoke<string[]>('launch_args');
     const i = args.indexOf('--scan');
     if (i !== -1 && i + 1 < args.length) {
       const p = args[i + 1];
       if (p && !p.startsWith('--')) return p;
     }
   } catch {
-    /* NL_ARGS not available */
+    /* not running inside Tauri */
   }
   return null;
 }
@@ -56,23 +55,30 @@ function dispatchServerEvent(event: ServerEventType) {
 // ---------------------------------------------------------------------------
 
 export async function minimizeWindow() {
-  await Neutralino.window.minimize();
+  await getCurrentWindow().minimize();
 }
 
 /** Hide the window — keeps the app alive in the system tray. */
 export async function closeWindow() {
-  await Neutralino.window.hide();
+  await getCurrentWindow().hide();
+}
+
+/** Show, restore and focus the window. */
+export async function showWindow() {
+  await invoke('show_window');
 }
 
 export async function showNotification(title: string, body: string) {
-  await Neutralino.os.showNotification(title, body);
+  sendNotification({ title, body });
 }
 
 export async function getFilePath(): Promise<string | undefined> {
-  const files = await Neutralino.os.showOpenDialog('Select file', {
-    multiSelections: false,
+  const file = await open({
+    title: 'Select file',
+    multiple: false,
+    directory: false,
   });
-  return files?.[0];
+  return file ?? undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -127,13 +133,13 @@ async function subscribeToServiceEvents(): Promise<void> {
               cancelled: (payload.cancelled as boolean) ?? false,
             });
           } else if (eventType === 'updating') {
-            Neutralino.os.showNotification(
+            showNotification(
               'Xvirus',
               (payload.message as string) || 'Checking for updates…',
             );
             dispatchServerEvent({ type: 'updating', message: (payload.message as string) ?? '' });
           } else if (eventType === 'update-complete') {
-            Neutralino.os.showNotification(
+            showNotification(
               'Xvirus',
               (payload.message as string) || 'Update check complete.',
             );
@@ -151,7 +157,7 @@ async function subscribeToServiceEvents(): Promise<void> {
                   payload.action === 'quarantine-pending-reboot'
                     ? 'will be quarantined on next reboot'
                     : 'has been quarantined';
-                Neutralino.os.showNotification(
+                showNotification(
                   'Xvirus – Threat Removed',
                   `${(payload.fileName as string) ?? 'A threat'} ${status}.`,
                 );
@@ -164,13 +170,12 @@ async function subscribeToServiceEvents(): Promise<void> {
                 payload: payload as unknown as ThreatPayload,
               });
               if (payload.showNotification) {
-                Neutralino.os.showNotification(
+                showNotification(
                   'Xvirus – Threat Detected',
                   `${(payload.fileName as string) ?? 'A suspicious file'} requires your action.`,
                 );
               }
-              await Neutralino.window.show();
-              await Neutralino.window.focus();
+              await showWindow();
             }
           }
         }
@@ -184,58 +189,12 @@ async function subscribeToServiceEvents(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// System tray
-// ---------------------------------------------------------------------------
-
-function setupTray(appTitle: string) {
-  // NL_PATH is the application root; the icon lives in the dist output folder
-  Neutralino.os.setTray({
-    icon: '/browser/icon.png',
-    menuItems: [
-      { id: 'open', text: `Open ${appTitle}` },
-      { id: '__sep', text: '-' },
-      { id: 'quit', text: 'Quit' },
-    ],
-  });
-
-  Neutralino.events.on('trayMenuItemClicked', async (event: CustomEvent) => {
-    const id = (event.detail as { id?: string })?.id ?? '';
-    if (id === 'open' || id === '') {
-      await Neutralino.window.show();
-      await Neutralino.window.focus();
-    } else if (id === 'quit') {
-      await Neutralino.app.exit();
-    }
-  });
-}
-
-// ---------------------------------------------------------------------------
 // Initialization — called once from App.tsx on mount
 // ---------------------------------------------------------------------------
 
+// Window placement (bottom-right), hide-on-close, and the system tray are set up natively in
+// src-tauri/src/main.rs. The header is draggable via `data-tauri-drag-region` in App.tsx.
 export async function initializeWindow() {
-  // Position at bottom-right of the primary display (mirrors old bun/index.ts)
-  const win = await Neutralino.window.getSize();
-  const monitor = (await Neutralino.computer.getDisplays())[0];
-  const x = monitor.resolution.width - win.width!;
-  const y = monitor.resolution.height - win.height! - 60; // 60px up from the bottom edge to avoid the taskbar
-  await Neutralino.window.move(x, y);
-
-  // Clicking the OS close button hides the window rather than quitting
-  Neutralino.events.on('windowClose', async () => {
-    await Neutralino.window.hide();
-  });
-
-  // Make the header bar draggable, excluding the window control buttons
-  await Neutralino.window.setDraggableRegion('app-header', {
-    exclude: ['window-controls'],
-  });
-
-  // Read the app title from the build config and set up the tray
-  const config = (await Neutralino.app.getConfig()) as { modes?: { window?: { title?: string } } };
-  const appTitle = config?.modes?.window?.title ?? 'Xvirus';
-  setupTray(appTitle);
-
   // Start the SSE loop in the background (never awaited)
   subscribeToServiceEvents();
 }

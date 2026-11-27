@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Xvirus Installer",
+  "version": "5.0.0",
+  "identifier": "net.xvirus.installer",
+  "build": {
+    "beforeDevCommand": "npm run web:dev",
+    "beforeBuildCommand": "npm run web:build",
+    "devUrl": "http://localhost:3000",
+    "frontendDist": "../browser"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Xvirus Installer",
+        "width": 1000,
+        "height": 650,
+        "center": true,
+        "fullscreen": false,
+        "alwaysOnTop": true,
+        "decorations": true,
+        "maximizable": false,
+        "resizable": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": false,
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/icon.png", "icons/icon.ico"]
+  }
+}

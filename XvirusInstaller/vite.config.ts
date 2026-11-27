@@ -5,6 +5,7 @@ export default defineConfig({
   plugins: [preact()],
   root: 'src',
   publicDir: 'assets',
+  clearScreen: false,
   build: {
     outDir: '../browser',
     emptyOutDir: true,
@@ -13,5 +14,6 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    strictPort: true,
   },
 });

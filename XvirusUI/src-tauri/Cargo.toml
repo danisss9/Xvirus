@@ -1,0 +1,24 @@
+[package]
+name = "xvirus-ui"
+version = "1.0.0"
+description = "Xvirus User Interface"
+edition = "2021"
+publish = false
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-notification = "2"
+tauri-plugin-dialog = "2"
+
+[target.'cfg(windows)'.dependencies]
+winreg = "0.56"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

@@ -1,22 +1,26 @@
 {
   "name": "xvirus-installer",
   "version": "5.0.0",
-  "description": "Xvirus Installer - Preact + Neutralino.js",
+  "description": "Xvirus Installer - Preact + Tauri",
   "scripts": {
+    "web:dev": "vite",
+    "web:build": "vite build",
     "prepare:am": "node scripts/prebuild.mjs am",
     "prepare:fw": "node scripts/prebuild.mjs fw",
-    "build:am": "node scripts/build-resources.mjs am && vite build && neu build --release --embed-resources && node scripts/patch-installer.mjs am",
-    "build:fw": "node scripts/build-resources.mjs fw && vite build && neu build --release --embed-resources && node scripts/patch-installer.mjs fw",
+    "build:am": "node scripts/build-resources.mjs am && tauri build --no-bundle && node scripts/patch-installer.mjs am",
+    "build:fw": "node scripts/build-resources.mjs fw && tauri build --no-bundle && node scripts/patch-installer.mjs fw",
     "release:am": "npm run prepare:am && npm run build:am",
     "release:fw": "npm run prepare:fw && npm run build:fw",
-    "dev": "vite build && neu build && neu run"
+    "dev": "tauri dev",
+    "tauri": "tauri"
   },
   "dependencies": {
-    "@neutralinojs/lib": "^6.10.0",
+    "@tauri-apps/api": "^2.12.5",
     "preact": "^10.28.4"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.3",
+    "@tauri-apps/cli": "^2.12.6",
     "rcedit": "^2.0.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"

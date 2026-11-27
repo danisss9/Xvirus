@@ -78,7 +78,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
 });
 
-// Allow cross-origin requests from Neutralino local webview
+// Allow cross-origin requests from the XvirusUI (Tauri) webview
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>

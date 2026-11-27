@@ -31,8 +31,15 @@ jobs:
         with:
           node-version: '26'
 
-      - name: Install Neutralino CLI
-        run: npm install -g @neutralinojs/neu
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            XvirusUI/src-tauri -> target
+            XvirusInstaller/src-tauri -> target
 
       - name: Extract version from tag
         id: version
@@ -43,17 +50,9 @@ jobs:
         working-directory: XvirusUI
         run: npm install
 
-      - name: Update XvirusUI Neutralino Bin
-        working-directory: XvirusUI
-        run: neu update
-
       - name: Install XvirusInstaller dependencies
         working-directory: XvirusInstaller
         run: npm install
-
-      - name: Update XvirusInstaller Neutralino Bin
-        working-directory: XvirusInstaller
-        run: neu update
 
       - name: Build installer (FW)
         working-directory: XvirusInstaller
@@ -63,7 +62,7 @@ jobs:
         shell: pwsh
         run: >
           Copy-Item
-          "XvirusInstaller\dist\xvirus-installer\xvirus-installer-win_x64.exe"
+          "XvirusInstaller\dist\xvirus-installer.exe"
           "XvirusFW-Installer-${{ steps.version.outputs.VERSION }}.exe"
 
       - name: Create GitHub Release

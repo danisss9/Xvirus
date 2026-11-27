@@ -21,12 +21,15 @@ Xvirus User Interface 5.1.2
 To develop or build XvirusUI you need:
 
 - Node.js 26+ (current LTS) - [download](https://nodejs.org/)
-- Neutralino CLI - [install](https://neutralino.js.org/docs/getting-started/installation)
+- Rust (stable, MSVC toolchain) - [install](https://www.rust-lang.org/tools/install)
+- Tauri prerequisites for Windows (Microsoft C++ Build Tools, WebView2) - [guide](https://v2.tauri.app/start/prerequisites/)
+
+The Tauri CLI is installed locally by `npm install` (`@tauri-apps/cli`).
 
 To run XvirusUI you need:
 
-- XvirusService running on `http://localhost:5236`
-- Windows 10 1607 or later
+- XvirusService running on `http://localhost:5236` (Anti-Malware) or `http://localhost:5237` (Firewall)
+- Windows 10 1607 or later with the Microsoft Edge WebView2 Runtime (preinstalled on Windows 11)
 
 ## Get Started
 
@@ -34,49 +37,43 @@ Install dependencies and build the UI:
 
 ```bash
 npm install
-npm run dev:am   # Antimalware mode — build, package, and run
+npm run dev:am   # Antimalware mode — Vite dev server + Tauri window with hot reload
 ```
 
-Or to run an already-built package:
+To build a release binary (`src-tauri/target/release/xvirus-ui.exe`):
 
 ```bash
-npm start
+npm run prod:am
 ```
 
-To build the XvirusService in the same step:
+To publish the XvirusService for a mode:
 
 ```bash
-npm run prod:service
+npm run prod:service:am
 ```
 
 ## App Modes
 
-XvirusUI ships a single codebase that renders in one of two modes, configured via `neutralino.config.json → globalVariables`:
+XvirusUI ships a single codebase that renders in one of two modes, chosen at build time:
 
-| Variable          | Mode             | Description                                              |
-|-------------------|------------------|----------------------------------------------------------|
-| `IS_FIREWALL`     | Firewall mode    | Shows network-focused views; hides scan, behavior, and some settings options. |
-| `IS_ANTIMALWARE`  | Antimalware mode | Shows the full feature set including scan, history, and all settings.         |
+| Mode | Vite mode   | Tauri config                                          | Description |
+|------|-------------|-------------------------------------------------------|-------------|
+| `am` | `--mode am` | `src-tauri/tauri.conf.json` (default)                 | Antimalware: full feature set including scan, history, and all settings. Talks to port 5236. |
+| `fw` | `--mode fw` | `src-tauri/tauri.conf.json` + `tauri.fw.conf.json`    | Firewall: network-focused views; hides scan, behavior, and some settings options. Talks to port 5237. |
 
-Change the active mode by editing `neutralino.config.json`:
-
-```json
-"globalVariables": {
-  "IS_FIREWALL": false,
-  "IS_ANTIMALWARE": true
-}
-```
+The Vite mode is injected as `__XVIRUS_MODE__` (see `vite.config.ts`) and read by `src/services/env.ts`.
+The Tauri config sets the product name (window title, tray tooltip), version, and identifier.
 
 ## Build Scripts
 
 | Script            | Description                                                                  |
 |-------------------|------------------------------------------------------------------------------|
-| `dev:am`          | Builds the frontend with Vite, packages with `neu build`, and runs in antimalware mode. |
-| `dev:fw`          | Builds the frontend with Vite, packages with `neu build`, and runs in firewall mode. |
-| `prod:am`         | Builds a release binary in antimalware mode.                                 |
+| `dev:am`          | Runs the Vite dev server and the Tauri app in antimalware mode (`tauri dev`). |
+| `dev:fw`          | Runs the Vite dev server and the Tauri app in firewall mode.                 |
+| `prod:am`         | Builds a release binary in antimalware mode (`tauri build --no-bundle`).     |
 | `prod:fw`         | Builds a release binary in firewall mode.                                    |
-| `start`           | Runs the already-built Neutralino package without rebuilding.                |
-| `prod:service`    | Publishes XvirusService using its Windows publish profile.                   |
+| `web:build:am` / `web:build:fw` | Builds only the frontend into `browser/`.                      |
+| `prod:service:am` / `prod:service:fw` | Publishes XvirusService using its Windows publish profile. |
 
 ## Project Structure
 
@@ -85,19 +82,23 @@ XvirusUI/
 ├── src/
 │   ├── index.html          # App entry point
 │   ├── main.tsx            # Preact root mount
-│   ├── App.tsx             # Root component, initialises Neutralino on mount
+│   ├── App.tsx             # Root component, starts the SSE subscription on mount
 │   ├── api/                # Typed fetch wrappers for each XvirusService endpoint
 │   ├── components/         # Shared UI components (BottomNav, WindowControls)
 │   ├── model/              # TypeScript interfaces mirroring C# DTOs
 │   ├── services/
 │   │   ├── env.ts          # Mode detection (isFirewall / isAntimalware)
-│   │   └── neutralino.ts   # Neutralino API wrappers, SSE subscription, tray setup
+│   │   └── native.ts       # Tauri API wrappers (window, notifications, dialogs), SSE subscription
 │   ├── styles/
 │   │   └── app.css         # Global CSS
 │   └── views/              # One component per screen
-├── browser/                # Vite build output (served by Neutralino)
-├── bin/                    # Neutralino runtime binaries (all platforms)
-├── neutralino.config.json  # Neutralino window and build configuration
+├── src-tauri/
+│   ├── src/main.rs         # Native shell: window placement, hide-on-close, system tray, commands
+│   ├── capabilities/       # Permissions granted to the webview
+│   ├── icons/              # App / tray icons
+│   ├── tauri.conf.json     # Window and build configuration (antimalware mode)
+│   └── tauri.fw.conf.json  # Overrides for firewall mode
+├── browser/                # Vite build output (embedded into the exe by Tauri)
 ├── vite.config.ts          # Vite configuration (root: src, outDir: browser)
 └── package.json
 ```
@@ -134,10 +135,15 @@ Each module in `src/api/` wraps the corresponding XvirusService REST endpoint:
 - **Borderless:** Custom title bar with draggable header. Minimize and close buttons are rendered by `WindowControls`.
 - **Close behaviour:** Clicking the OS close button hides the window rather than quitting. The app stays alive in the system tray.
 - **System tray:** Provides _Open_ and _Quit_ menu items. Clicking the tray icon shows and focuses the window.
+- **Startup:** The window starts hidden; it is shown from the tray or when a threat needs a decision.
+- **Notifications:** On startup the app registers its AppUserModelID (the Tauri `identifier`) under `HKCU\Software\Classes\AppUserModelId` so Windows shows its toast notifications.
+
+Window placement, hide-on-close, and the tray are implemented natively in `src-tauri/src/main.rs`.
+The header is draggable through the `data-tauri-drag-region` attribute.
 
 ## SSE Integration
 
-XvirusUI subscribes to `http://localhost:5236/events` at startup and maintains a persistent connection that auto-reconnects every 5 seconds on failure.
+XvirusUI subscribes to `<service>/events` (port 5236 or 5237 depending on mode) at startup and maintains a persistent connection that auto-reconnects every 5 seconds on failure.
 
 Incoming events are dispatched to view components via `onServerEvent()`:
 

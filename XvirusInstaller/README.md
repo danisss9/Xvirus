@@ -1,6 +1,6 @@
 # XvirusInstaller - Setup Wizard
 
-Preact + Neutralino.js installer for Xvirus Anti-Malware and Xvirus Firewall.
+Preact + Tauri installer for Xvirus Anti-Malware and Xvirus Firewall.
 
 ## Build Modes
 
@@ -11,24 +11,26 @@ Preact + Neutralino.js installer for Xvirus Anti-Malware and Xvirus Firewall.
 
 ## Resources Preparation
 
-Before building, populate `resources/` with the files to be installed. The UI binary must already be renamed to the product-specific name for the target mode:
+`npm run prepare:am` / `prepare:fw` (`scripts/prebuild.mjs`) builds XvirusUI, XvirusService and XvirusUnin and stages them in `resources/`:
 
 ```
 XvirusInstaller/resources/
-├── XvirusAM.exe            (AM: renamed from xvirus-*-win_x64.exe)
-│   XvirusFW.exe            (FW: renamed from xvirus-*-win_x64.exe)
-├── resources.neu           (from XvirusUI/dist/ after `neu build`)
+├── XvirusAM.exe            (AM: XvirusUI/src-tauri/target/release/xvirus-ui.exe, renamed)
+│   XvirusFW.exe            (FW: same binary built in firewall mode)
 ├── XvirusService.exe       (published C# service binary)
+├── onnxruntime.dll
+├── onnxruntime_providers_shared.dll
 └── unin.exe                (published XvirusUnin binary)
 ```
 
-> The Neutralino build script will still auto-rename any `xvirus-*-win_x64.exe` it finds during install if the file is not pre-renamed.
+The XvirusUI frontend is embedded in its exe by Tauri, so no separate resource file is needed.
 
 ## Building
 
 ### Prerequisites
 - Node.js 26+ (current LTS) with npm
-- Neutralino CLI (`neu`)
+- Rust (stable, MSVC toolchain) and the [Tauri prerequisites for Windows](https://v2.tauri.app/start/prerequisites/)
+- .NET 8 SDK (for `prepare:*`, which publishes XvirusService and XvirusUnin)
 
 ### Build Commands
 
@@ -38,28 +40,34 @@ cd XvirusInstaller
 # Install dependencies (first time only)
 npm install
 
-# Production build - Anti-Malware mode
-npm run build:am
-# Output: dist/xvirus-installer-win_x64.exe
+# Stage resources and build - Anti-Malware mode
+npm run release:am
+# Output: dist/xvirus-installer.exe
 
-# Production build - Firewall mode
-npm run build:fw
-# Output: dist/xvirus-installer-win_x64.exe
+# Stage resources and build - Firewall mode
+npm run release:fw
+# Output: dist/xvirus-installer.exe
+
+# Run the wizard in development (Vite dev server + Tauri window)
+npm run dev
 ```
+
+`build:am` / `build:fw` skip the staging step and reuse whatever is already in `resources/`.
 
 ## Build Process
 
 1. **Resource Embedding** (`scripts/build-resources.mjs`):
    - Reads product info for the selected mode (name, `uiExeName`, `serviceName`, version, …)
-   - Zips all files in `resources/`
-   - Base64-encodes the zip
-   - Generates `src/generated/resources.ts` with the embedded data and `PRODUCT_INFO` constant
+   - Zips all files in `resources/` into `src-tauri/payload.zip`
+   - Generates `src/generated/resources.ts` with the `PRODUCT_INFO` constant
 
-2. **Frontend Build** (Vite):
-   - Bundles TypeScript/TSX and CSS into `browser/`
+2. **App Build** (`tauri build --no-bundle`):
+   - Vite bundles TypeScript/TSX and CSS into `browser/`
+   - `src-tauri/build.rs` embeds `payload.zip` in the binary (`include_bytes!`)
+   - Produces a single self-contained `src-tauri/target/release/xvirus-installer.exe`
 
-3. **App Build** (Neutralino):
-   - Packages everything into a portable single-file binary
+3. **Patch** (`scripts/patch-installer.mjs`):
+   - Copies the binary to `dist/xvirus-installer.exe` and sets its version metadata with rcedit
 
 ## Installation Flow
 
@@ -74,28 +82,25 @@ npm run build:fw
 ```
 resources/
   ↓ (zip via PowerShell Compress-Archive)
-resources.zip
-  ↓ (base64 encode)
-RESOURCES_B64 constant in resources.ts
-  ↓ (Vite + neu build)
-xvirus-installer-win_x64.exe  (single self-contained binary)
+src-tauri/payload.zip
+  ↓ (include_bytes! via build.rs + tauri build)
+xvirus-installer.exe  (single self-contained binary)
 ```
 
 ### At Installation Time
 ```
-1. Decode RESOURCES_B64 → ArrayBuffer
+1. (Rust write_payload command) Read the zip embedded in the binary
 2. Write to %TEMP%\xvirus_install_<ts>.zip
 3. Generate PowerShell script with mode-specific parameters
 4. Launch PowerShell elevated (Start-Process -Verb RunAs)
 5. PowerShell script:
    a. Expands archive to install path
-   b. Renames xvirus-*-win_x64.exe → XvirusAM.exe / XvirusFW.exe (if not pre-renamed)
-   c. Registers Windows Service (auto-start)
-   d. Creates registry entries under:
+   b. Registers Windows Service (auto-start)
+   c. Creates registry entries under:
       HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\<ProductName>
-   e. Sets UninstallString to: <installPath>\unin.exe am|fw
-   f. Creates shortcuts if selected (desktop + Start Menu)
-6. Installer polls %TEMP%\xvirus_progress.json every 500 ms
+   d. Sets UninstallString to: <installPath>\unin.exe am|fw
+   e. Creates shortcuts if selected (desktop + Start Menu)
+6. Installer polls %TEMP%\xvirus_progress_<ts>.json every 500 ms
 7. Shows progress and completion status
 ```
 
@@ -123,11 +128,11 @@ Generated into `src/generated/resources.ts` by `build-resources.mjs`:
 → Ensure PowerShell 5.1+ is installed (included with Windows 10/11)
 
 **Installation fails: "Access Denied"**
-→ The PowerShell script requests elevation automatically — confirm the UAC prompt
+→ The PowerShell script requests elevation automatically — confirm the UAC prompt. If the prompt is declined, the wizard shows an error.
 
 **Service not registered**
 → Check `services.msc` for `XvirusAntiMalwareService` / `XvirusFirewallService`
-→ Check `%TEMP%\xvirus_progress.json` for error details
+→ Check `%TEMP%\xvirus_progress_<ts>.json` for error details
 
 ## Uninstallation
 
