@@ -249,6 +249,14 @@ button, input, select, textarea {
 }
 .btn--sm { padding: 10px 24px; font-size: .85rem; }
 .btn--block { width: 100%; justify-content: center; }
+.btn--disabled,
+.btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none;
+  transform: none;
+}
 
 /* ══════════════════════════════════════════════════════════
    PRODUCT CARDS (Homepage)
