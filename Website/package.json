@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "powershell -File ../deploy.ps1 -AppName www"
+    "deploy": "powershell -File ../deploy.ps1 -AppName www",
+    "import-keys": "node scripts/import-license-keys.mjs"
   },
   "author": "",
   "license": "ISC",

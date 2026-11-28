@@ -8,6 +8,7 @@ import crypto from 'node:crypto';
 import multer from 'multer';
 import fs from 'node:fs';
 import { MongoClient, GridFSBucket, ObjectId } from 'mongodb';
+import { registerLicenseRoutes } from './licenses.js';
 
 // ── ALTCHA HMAC key (generate a unique key for your deployment) ──
 const ALTCHA_HMAC_KEY = process.env.ALTCHA_HMAC_KEY || crypto.randomBytes(32).toString('hex');
@@ -338,6 +339,9 @@ app.get('/submission/file/:id/delete', async (req, res) => {
     res.status(400).json({ error: 'Invalid file ID.' });
   }
 });
+
+// ── POST /license/claim ── Polar purchase → license key email (see licenses.js) ──
+await registerLicenseRoutes(app, { db, transporter, esc });
 
 // ── 404 catch‑all ──
 app.use((_req, res) => {

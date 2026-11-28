@@ -1133,3 +1133,67 @@ altcha-widget {
   0%   { transform: translate(0, 0) rotate(0deg);       opacity: 1; }
   100% { transform: translate(var(--x), var(--y)) rotate(var(--r)); opacity: 0; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   THANK-YOU PAGE (license delivery)
+   ═══════════════════════════════════════════════════════════ */
+.license-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.license-card [hidden] { display: none; }
+.license-card__lead {
+  color: var(--text-heading);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.license-card__lead--error { color: var(--danger); }
+.license-card__note {
+  margin-top: 14px;
+  color: var(--text-muted);
+  font-size: .92rem;
+}
+.license-card a { color: var(--accent); }
+.license-loader {
+  width: 36px; height: 36px;
+  margin: 0 auto 18px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+.license-keys {
+  list-style: none;
+  margin: 20px 0 6px;
+  display: grid;
+  gap: 10px;
+}
+.license-keys li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-sm);
+}
+.license-keys code {
+  font-family: Consolas, 'SFMono-Regular', Menlo, monospace;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-heading);
+  letter-spacing: .5px;
+  overflow-wrap: anywhere;
+  text-align: left;
+  user-select: all;
+}
+.license-keys__copy { flex-shrink: 0; padding: 6px 16px; }
+@media (max-width: 480px) {
+  .license-card { padding: 24px 18px; }
+  .license-keys code { font-size: .92rem; }
+}
