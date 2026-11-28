@@ -44,7 +44,7 @@ Deploys to CapRover under the app name `www`.
 | `SITE_URL`        | Public base URL (e.g. `https://xvirus.net`) — used in download links in emails |
 | `SUBMISSION_AUTH` | Secret token required to download or delete submitted files via the API        |
 | `POLAR_ACCESS_TOKEN` | Polar organization access token with `checkouts:read` (license delivery)    |
-| `POLAR_PRODUCTS`  | JSON map of Polar product ID → key pool and keys per purchase, e.g. `{"<uuid>":{"product":"fw","seats":3}}`. `product` is `fw` or `am`. A seat count on the checkout (seat-based pricing) overrides `seats`. |
+| `POLAR_PRODUCTS`  | JSON map of Polar product ID → key pool, e.g. `{"<am-uuid>":{"product":"am"},"<fw-uuid>":{"product":"fw"}}`. One key is issued per seat on the checkout. Optional `"seats"` is a fallback for products without seat pricing. |
 | `POLAR_API_URL`   | Polar API base URL (default `https://api.polar.sh/v1`; sandbox: `https://sandbox-api.polar.sh/v1`) |
 | `POLAR_API_VERSION` | Value of the `Polar-Version` header (default `2026-10`)                      |
 
@@ -71,6 +71,8 @@ Each checkout ID is processed once. Later requests for a processed checkout do n
    ```
 
    It reads the `licenses` (Firewall) and `amLicenses` (Anti-Malware) arrays. Re-running only adds new keys. `--exclude` takes a file with one key per line that were already sold, so they're never handed out again. Use `--dry-run` to check the counts first.
+
+   Without direct database access, run `npm run import-keys -- --out license-keys.jsonl` instead (no `MONGODB_URI` needed). It writes one document per line, which you can import into the `licenseKeys` collection with Mongo Express or `mongoimport`.
 
 MongoDB collections: `licenseKeys` (`_id` = key, `product`, `checkoutId` once assigned) and `licenseCheckouts` (one document per processed checkout, with its status, email and keys).
 

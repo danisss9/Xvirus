@@ -24,9 +24,9 @@ const STALE_LOCK_MS = 5 * 60 * 1000;
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-// POLAR_PRODUCTS maps Polar product IDs to the key pool and the number of keys a purchase
-// grants, e.g. {"<product-uuid>": {"product": "fw", "seats": 3}}. When Polar reports a seat
-// count on the checkout (seat-based pricing) that number wins over `seats`.
+// POLAR_PRODUCTS maps Polar product IDs to their key pool, e.g. {"<product-uuid>": {"product": "fw"}}.
+// One key is issued per seat on the checkout (seat-based pricing). `seats` is only a fallback
+// for products without seat pricing, e.g. {"product": "fw", "seats": 3} for a fixed 3-PC pack.
 function loadProductMap() {
   const raw = process.env.POLAR_PRODUCTS;
   if (!raw) {
@@ -253,6 +253,20 @@ export async function registerLicenseRoutes(app, { db, transporter, esc }) {
           error: 'We could not issue your license automatically. Our team has been notified and will email your key shortly.',
         });
       }
+      // Seat-based products report the purchased seats on the checkout. Never guess a count:
+      // under-delivering a 5-PC purchase is worse than asking support to step in.
+      const seats = positiveInt(checkout.seats) ?? positiveInt(cfg.seats);
+      if (!seats) {
+        console.error(`Checkout ${checkoutId} has no seat count and POLAR_PRODUCTS sets no "seats".`);
+        await notifyAdmin('Unknown seat count', [
+          `Checkout ${checkoutId} (product ${checkout.product_id}) has no seat count.`,
+          `Customer: ${checkout.customer_email}`,
+        ]);
+        return res.status(500).json({
+          status: 'error',
+          error: 'We could not issue your license automatically. Our team has been notified and will email your key shortly.',
+        });
+      }
       if (!checkout.customer_email) {
         console.error(`Checkout ${checkoutId} has no customer email.`);
         return res.status(500).json({ status: 'error', error: 'Your purchase has no email address. Please contact support.' });
@@ -263,7 +277,7 @@ export async function registerLicenseRoutes(app, { db, transporter, esc }) {
         status: 'processing',
         product: cfg.product,
         productId: checkout.product_id,
-        seats: positiveInt(checkout.seats) ?? positiveInt(cfg.seats) ?? 1,
+        seats,
         email: checkout.customer_email,
         keys: [],
         createdAt: new Date(),

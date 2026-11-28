@@ -11,6 +11,8 @@
 //   --exclude  Text file with one key per line that were already sold elsewhere. They are
 //              marked as used (checkoutId "legacy") so they are never handed out again.
 //   --dry-run  Print what would be imported without touching the database.
+//   --out      Write the documents to a file (one JSON document per line) instead of the
+//              database, for importing with Mongo Express / mongoimport. No MONGODB_URI needed.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -31,6 +33,7 @@ function readArray(source, name) {
 const loginPath = path.resolve(arg('--login') ?? '../../Login/main.js');
 const excludePath = arg('--exclude');
 const dryRun = process.argv.includes('--dry-run');
+const outPath = arg('--out');
 
 const source = fs.readFileSync(loginPath, 'utf8');
 const pools = { fw: readArray(source, 'licenses'), am: readArray(source, 'amLicenses') };
@@ -57,6 +60,16 @@ if (excludePath) console.log(`Exclude:  ${excluded.length} keys (${unknownExclud
 
 if (dryRun) {
   console.log('Dry run: nothing written.');
+  process.exit(0);
+}
+
+if (outPath) {
+  const excludedSet = new Set(excluded);
+  const lines = [...seen].map(([key, product]) =>
+    JSON.stringify({ _id: key, product, checkoutId: excludedSet.has(key) ? 'legacy' : null }),
+  );
+  fs.writeFileSync(outPath, lines.join('\n') + '\n');
+  console.log(`Wrote ${lines.length} documents to ${path.resolve(outPath)}`);
   process.exit(0);
 }
 
